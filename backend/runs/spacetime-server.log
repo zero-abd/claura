@@ -2984,3 +2984,15 @@ database running in data directory /Users/abd/.local/share/spacetime/data
 2026-11-08T15:47:33.751903Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
 2026-11-08T15:47:41.451170Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
 2026-11-08T15:47:48.059464Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 164 unexpired views to collect and delete a batch of 54 expired views
+2026-11-08T15:52:41.450243Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T15:57:41.454169Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T15:57:48.071234Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 164 expired views
+2026-11-08T16:02:41.460033Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T16:07:41.459035Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T16:07:48.074874Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T16:12:41.451880Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T16:17:41.454808Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T16:17:48.079965Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T16:22:41.456241Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T16:27:41.453182Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T16:27:48.079719Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views

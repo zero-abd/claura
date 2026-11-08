@@ -83,14 +83,14 @@
   return timed(p.focus || []).map((f, i) => {
     const z = __zAt(keys, f.t + 0.01), pad = 10 / z;
     const x = sx(f.u0) - pad, y = sy(f.v0) - pad, w = (f.u1 - f.u0) * L.w + 2 * pad, h = (f.v1 - f.v0) * L.sh + 2 * pad;
-    const col = f.hot ? '255,122,69' : '255,255,255';
+    const col = f.hot ? '255,69,58' : '255,255,255';
     return `          <div id="${P}fo${i}" class="focus" style="left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; width:${w.toFixed(1)}px; height:${h.toFixed(1)}px; border-radius:${(14 / z).toFixed(1)}px; box-shadow: 0 0 0 ${(3 / z).toFixed(2)}px rgba(${col},0.95), 0 0 0 ${(10 / z).toFixed(2)}px rgba(${col},0.16), 0 ${(10 / z).toFixed(1)}px ${(40 / z).toFixed(1)}px rgba(0,0,0,0.4);" data-layout-ignore></div>`;
   }).join('\n') + '\n' + timed(p.flash || []).map((f, i) => {
     const x = sx(f.u0), y = sy(f.v0), w = (f.u1 - f.u0) * L.w, h = (f.v1 - f.v0) * L.sh;
     return `          <div id="${P}fl${i}" style="position:absolute; left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; width:${w.toFixed(1)}px; height:${h.toFixed(1)}px; border-radius:${(h / 2).toFixed(1)}px; background:#fff; opacity:0; z-index:28" data-layout-ignore></div>`;
   }).join('\n');
 })() }}
-{{ timed(p.callouts || []).map((c, i) => `          <div id="${P}co${i}" class="callout" data-layout-allow-overflow><i id="${P}co${i}-dot" class="co-dot"></i><i id="${P}co${i}-line" class="co-line" style="${c.side === 'left' ? 'left:auto;right:0;transform-origin:100% 50%;' : ''}width:${c.len ?? 90}px"></i><div id="${P}co${i}-pill" class="co-pill glass${c.tone ? ' ' + c.tone : ''}" style="${c.side === 'left' ? 'right:' + ((c.len ?? 90) + 4) + 'px' : 'left:' + ((c.len ?? 90) + 4) + 'px'}">${c.tone === 'hot' ? '<i style="width:14px;height:14px;border-radius:50%;background:#ff5a1f;flex:none"></i>' : c.tone === 'safe' ? '<i style="width:14px;height:14px;border-radius:50%;background:#2fbf71;flex:none"></i>' : ''}${esc(c.text)}</div></div>`).join('\n') }}
+{{ timed(p.callouts || []).map((c, i) => `          <div id="${P}co${i}" class="callout" data-layout-allow-overflow><i id="${P}co${i}-dot" class="co-dot"></i><i id="${P}co${i}-line" class="co-line" style="${c.side === 'left' ? 'left:auto;right:0;transform-origin:100% 50%;' : ''}width:${c.len ?? 90}px"></i><div id="${P}co${i}-pill" class="co-pill glass${c.tone ? ' ' + c.tone : ''}" style="${c.side === 'left' ? 'right:' + ((c.len ?? 90) + 4) + 'px' : 'left:' + ((c.len ?? 90) + 4) + 'px'}">${c.tone === 'hot' ? '<i style="width:14px;height:14px;border-radius:50%;background:#ff3b30;flex:none"></i>' : c.tone === 'safe' ? '<i style="width:14px;height:14px;border-radius:50%;background:#30d158;flex:none"></i>' : ''}${esc(c.text)}</div></div>`).join('\n') }}
           <!--KIT:cursor-->
         </div>
         <div id="{{P}}over">

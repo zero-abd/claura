@@ -5,14 +5,19 @@ OUTPUT:  HyperFrames, 1920x1080, 30 fps, 118.0 s (VO 0.05-113.95 s, end card hel
 TIME:    the voice is the clock (assets/vo/vo.json, phrase-cued scenes in film.config.mjs). Music 120 BPM, bars at 0.485 + 2k s:
          drop 22.485 ("This is Claura"), payoff hit 60.485 (the Command-Enter press), hit 76.485 (the break-glass code), final bar
          110.485 (the app icon lands). Music volume 0.5, ducked -7 dB under the voice (-3 dB for 0.9 s after each hit).
-LOOK:    Liquid Glass, matched to the product (bulkhead/src/style.css): a deep wallpaper (#05070d with blue #2642D6, violet #7434DE,
-         teal #109CBA and magenta blobs that drift in film time, 8% grain, vignette), glass panes = backdrop blur 34 px + saturate 1.9,
-         a specular top edge, a 1.5 px inner rim and a layered shadow; radius 28-40 px. Ink white 97% / 74% / 54%.
+LOOK:    MONO (approved 2026-11-08), Liquid Glass matched to the product's mono theme (/tmp/claura-mono/src/theme-mono.css):
+         a near-black wallpaper (#050506 to #111113) with soft neutral grey lights that drift in film time, 8% grain,
+         vignette; glass panes = neutral graphite (white 4-8 %, backdrop blur 30 px + saturate 1.15), a crisp white specular
+         top edge (16 %), a hairline rim and a layered black shadow; radius 28-40 px. Ink #F5F5F7 / #A1A1A6 / #6E6E73.
          Type: Inter 500/600 as the SF stand-in, tight tracking (-0.02 to -0.05 em); reading text >= 28 px; captions 46 px on a
-         dark scrim sized to the line. Signal orange #FF5A1F = brand and breach (one accent per frame, the hot word, stamps,
-         the breach rack); sealed green #2FBF71 only for contained (the orb, the counter, the contained tone). The ground's tone
-         follows the incident: nominal (blue), breach (an ember light top right), contained (a green light), as a 1 s colour flood.
-         The logo is never given a glow: the light is on the ground behind it.
+         dark scrim sized to the line. RED #FF3B30 (pressed #D70015) = breach, critical, denied, high-impact, the hot word,
+         stamps, the breach rack, hot focus rings; ORANGE #FF9F0A sparingly = warnings (the signal-chip dots) and "needs a
+         human"; GREEN #30D158 only as small success marks (the sealed orb, the Contained dot) - never a green fill or wash.
+         No blue, purple, teal or pink anywhere; window traffic lights and avatars are graphite. The ground's tone follows
+         the incident: nominal (grey), breach (a faint red ember top right), contained (calm, a faint neutral light), as a
+         1 s flood. The mark (claura-brand/BRAND.md, mono): light-grey C #E5E5EA, red orb, green orb once sealed (the 3D
+         cradle ring is #D1D1D6), all-grey when all clear (the vision nodes). The logo is never given a glow: the light is
+         on the ground behind it. The colour original of this film: renders/claura-v1-color.mp4, sources .backup-v1-color/.
 OBJECTS: the product's own screens in a macOS window with glass chrome (real screen recordings, time-mapped; 16:10, >= 79% of the
          frame width, pushed in 1.6-2.4x so reading text is >= 26 px); the DFW-2 facility in 3D (bulkhead-3d, live three.js);
          glass panes for the motion-graphic beats (mail, phone, file share, six tool windows, a playbook card, the out-of-band

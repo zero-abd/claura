@@ -286,7 +286,9 @@ function still(src, t) {
   const dir = 'assets/clips/stills';
   fs.mkdirSync(dir, { recursive: true });
   const out = path.join(dir, `${path.basename(src, path.extname(src))}${src.includes('/proxy/') ? '-proxy' : ''}-${(+t).toFixed(3)}.png`);
-  if (!fs.existsSync(out)) {
+  // re-extract when the clip is newer than the cached frame (a re-recorded clip must never show an old freeze frame)
+  const stale = fs.existsSync(out) && fs.existsSync(src) && fs.statSync(out).mtimeMs < fs.statSync(src).mtimeMs;
+  if (!fs.existsSync(out) || stale) {
     if (!fs.existsSync(src)) throw new Error(`still: ${src} missing`);
     execFileSync(FFMPEG, ['-v', 'error', '-ss', (+t).toFixed(3), '-i', src, '-frames:v', '1', '-y', out], { stdio: ['ignore', 'pipe', 'pipe'] });
   }

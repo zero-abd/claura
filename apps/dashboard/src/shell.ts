@@ -190,7 +190,7 @@ export function renderShell(ph: Phase) {
   setText($("#tbSub"), SUB[S.view](ph));
 
   // the tab icon and title follow the incident, so a stakeholder switching tabs sees the state
-  const orb = t === "contained" ? "#2FBF71" : "#FF5A1F";
+  const orb = t === "contained" ? "#30D158" : "#FF3B30"; // mono: brand red orb, green once sealed
   if (lastOrb !== orb) {
     lastOrb = orb;
     (document.getElementById("favicon") as HTMLLinkElement | null)?.setAttribute("href", faviconURL(orb));

@@ -12,7 +12,7 @@
     #{{P}}stage .tile .row { display: flex; align-items: center; gap: 18px; }
     #{{P}}stage .tile .ib { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2); }
     #{{P}}stage .tile .n { font: 600 32px/1 var(--font); letter-spacing: -0.02em; }
-    #{{P}}stage .tile .s { margin-top: 10px; font: 500 28px/1 var(--font); color: #ff7a45; }
+    #{{P}}stage .tile .s { margin-top: 10px; font: 500 28px/1 var(--font); color: #ff453a; }
     #{{P}}agents { position: absolute; left: 26px; top: 132px; height: 58px; padding: 0 24px 0 16px; border-radius: 29px; display: inline-flex; align-items: center; gap: 12px; font: 600 28px/1 var(--font); color: var(--ink); white-space: nowrap; }
     #{{P}}cmd { left: 1220px; top: 170px; width: 590px; height: 620px; }
     #{{P}}cmd .hd { position: absolute; left: 150px; top: 46px; }
@@ -34,15 +34,15 @@
           <div id="{{P}}t1" class="tile" style="left:500px; top:126px"><div class="row"><div class="ib"><!--KIT:icon name="phone" size=34 stroke=1.8--></div><div><div class="n">Phones</div><div class="s">Down</div></div></div></div>
           <div id="{{P}}t2" class="tile" style="left:40px; top:366px"><div class="row"><div class="ib"><!--KIT:icon name="share" size=34 stroke=1.8--></div><div><div class="n">File share</div><div class="s">Encrypted</div></div></div></div>
           <div id="{{P}}t3" class="tile" style="left:500px; top:366px"><div class="row"><div class="ib"><!--KIT:icon name="server" size=34 stroke=1.8--></div><div><div class="n">Data center</div><div class="s">Breach in Hall B</div></div></div>
-            <div id="{{P}}agents" class="glass clear pill"><svg viewBox="24 17 209 222" width="30" height="32" aria-hidden="true"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>Claura agents · on-prem</div>
+            <div id="{{P}}agents" class="glass clear pill"><svg viewBox="24 17 209 222" width="30" height="32" aria-hidden="true"><path fill="#E5E5EA" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF3B30" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>Claura agents · on-prem</div>
           </div>
         </div>
         <div id="{{P}}cmd" class="glass thick">
           <div class="hd"><div id="{{P}}ct" class="t">{{ words('Command center') }}</div><div id="{{P}}cs" class="s">Outside your network</div></div>
           <div id="{{P}}oobl" class="chip glass clear pill" style="left:44px; top:168px"><!--KIT:icon name="signal" size=30 stroke=1.8-->Out-of-band · not on your network</div>
-{{ [['RK', 'Incident Commander', '#4f5dff'], ['JT', 'Legal counsel', '#14a9a4'], ['AL', 'CISO', '#8e4ff0']].map(([a, n, c], i) => `          <div id="${P}id${i}" class="id" style="top:${262 + i * 112}px"><div class="av" style="background:${c}">${a}</div><div><div class="who">${n}</div><div class="ver"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="3.6"/><path d="M11.4 12H20.4M17.4 12v3M20.4 12v2"/></svg>verified out-of-band</div></div></div>`).join('\n') }}
+{{ [['RK', 'Incident Commander', '#48484a'], ['JT', 'Legal counsel', '#3a3a3c'], ['AL', 'CISO', '#545458']].map(([a, n, c], i) => `          <div id="${P}id${i}" class="id" style="top:${262 + i * 112}px"><div class="av" style="background:${c}">${a}</div><div><div class="who">${n}</div><div class="ver"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="3.6"/><path d="M11.4 12H20.4M17.4 12v3M20.4 12v2"/></svg>verified out-of-band</div></div></div>`).join('\n') }}
         </div>
-        <svg id="{{P}}mk" viewBox="24 17 209 222" aria-label="Claura"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>
+        <svg id="{{P}}mk" viewBox="24 17 209 222" aria-label="Claura"><path fill="#E5E5EA" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF3B30" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>
       </div></div></div>
       <!--KIT:fx-->
     </div>

@@ -3,7 +3,14 @@
        Apple-style: bottom, inside title-safe, one line of <= 6 words on a dark glass scrim sized to the text; each word lights as it is spoken. -->
   <style>
     /* Claura film kit: Liquid Glass, matched to the product (bulkhead/src/style.css: tokens -> wallpaper -> glass).
-   Inlined into every scene by tools/build.mjs at the COMMON marker. Scene-only rules go under #<id>-stage. */
+   Inlined into every scene by tools/build.mjs at the COMMON marker. Scene-only rules go under #<id>-stage.
+   MONO (the approved product theme, /tmp/claura-mono/src/theme-mono.css): black ground, soft grey lights, neutral
+   graphite glass, white type. Colour only where it means something:
+     red    #FF3B30 (pressed #D70015)  breach, critical, denied, high-impact, the brand (the Cradle C and orb)
+     orange #FF9F0A                    sparingly: warnings, needs a human
+     green  #30D158                    tiny success marks only (the sealed orb, a dot, a check), never a large fill
+   Literal colours were rewritten by tools/mono-remap.mjs (re-runnable, idempotent); the colour original of every
+   source file is in .backup-v1-color/. */
 @font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
 @font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-500.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: block; }
 @font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: block; }
@@ -11,18 +18,22 @@
 
 :root {
   --font: 'Inter Film', 'Inter', sans-serif;
-  --ink: rgba(247, 249, 255, 0.97);
-  --ink-2: rgba(226, 232, 250, 0.74);
-  --ink-3: rgba(214, 222, 246, 0.54);
-  --ink-4: rgba(214, 222, 246, 0.26);
-  --hair: rgba(255, 255, 255, 0.1);
-  --fill-1: rgba(255, 255, 255, 0.06);
-  --fill-2: rgba(255, 255, 255, 0.1);
-  --accent: var(--color-accent, #ff5a1f);
-  --accent-rgb: 255, 90, 31;
-  --safe: var(--color-sealed, #2fbf71);
-  --safe-rgb: 47, 191, 113;
-  --bg: #05070d;
+  --ink: #f5f5f7;
+  --ink-2: #a1a1a6;
+  --ink-3: #6e6e73;
+  --ink-4: rgba(245, 245, 247, 0.24);
+  --hair: rgba(255, 255, 255, 0.09);
+  --fill-1: rgba(255, 255, 255, 0.05);
+  --fill-2: rgba(255, 255, 255, 0.09);
+  --accent: var(--color-accent, #ff3b30);
+  --accent-rgb: 255, 59, 48;
+  --accent-press: #d70015;
+  --hot-ink: #ff453a;
+  --warn: #ff9f0a;
+  --warn-rgb: 255, 159, 10;
+  --safe: var(--color-sealed, #30d158);
+  --safe-rgb: 48, 209, 88;
+  --bg: #050506;
 }
 #root { position: absolute; inset: 0; overflow: hidden; background: transparent; font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
 #root * { box-sizing: border-box; }
@@ -37,16 +48,16 @@
 .fx-rim { position: absolute; left: 0; top: 0; width: 10px; height: 10px; opacity: 0; pointer-events: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.42), 0 24px 70px rgba(0, 0, 0, 0.32); }
 
 /* ------------------------------------------------------------ wallpaper (deep, never a flat void) */
-.wall { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(120% 100% at 50% -10%, #0e1531 0%, #080b19 55%, #04060b 100%); }
+.wall { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(120% 100% at 50% -10%, #111113 0%, #09090a 52%, #050506 100%); }
 .wp { position: absolute; border-radius: 50%; }
-.wp.b1 { width: 1320px; height: 1100px; left: -420px; top: -430px; background: radial-gradient(closest-side, rgba(38, 66, 214, 0.74), rgba(38, 66, 214, 0.28) 55%, transparent); }
-.wp.b2 { width: 1220px; height: 1220px; right: -360px; top: -90px; background: radial-gradient(closest-side, rgba(116, 52, 222, 0.6), rgba(116, 52, 222, 0.2) 58%, transparent); }
-.wp.b3 { width: 1540px; height: 980px; left: 16%; bottom: -580px; background: radial-gradient(closest-side, rgba(16, 156, 186, 0.48), rgba(16, 156, 186, 0.16) 60%, transparent); }
-.wp.b4 { width: 900px; height: 900px; left: -230px; bottom: -300px; background: radial-gradient(closest-side, rgba(200, 56, 132, 0.34), transparent); }
+.wp.b1 { width: 1320px; height: 1100px; left: -420px; top: -430px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045) 55%, transparent); }
+.wp.b2 { width: 1220px; height: 1220px; right: -360px; top: -90px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03) 58%, transparent); }
+.wp.b3 { width: 1540px; height: 980px; left: 16%; bottom: -580px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.024) 60%, transparent); }
+.wp.b4 { width: 900px; height: 900px; left: -230px; bottom: -300px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.04), transparent); }
 .wp.ember, .wp.green { width: 1240px; height: 920px; right: 0; top: -300px; opacity: 0; }
-.wp.ember { background: radial-gradient(closest-side, rgba(255, 90, 31, 0.56), rgba(255, 90, 31, 0.17) 55%, transparent); }
-.wp.green { background: radial-gradient(closest-side, rgba(47, 191, 113, 0.44), rgba(47, 191, 113, 0.14) 55%, transparent); }
-.wp.spot { width: 900px; height: 900px; left: 510px; top: 90px; opacity: 0; background: radial-gradient(closest-side, rgba(255, 90, 31, 0.5), rgba(255, 90, 31, 0.12) 60%, transparent); }
+.wp.ember { background: radial-gradient(closest-side, rgba(255, 59, 48, 0.22), rgba(255, 59, 48, 0.07) 55%, transparent); }
+.wp.green { background: radial-gradient(closest-side, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02) 55%, transparent); }
+.wp.spot { width: 900px; height: 900px; left: 510px; top: 90px; opacity: 0; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.055) 60%, transparent); }
 .grain { position: absolute; inset: 0; opacity: 0.08; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .vig { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 75% at 50% 42%, transparent 45%, rgba(0, 0, 0, 0.5) 100%); }
 
@@ -56,18 +67,18 @@
   border-radius: 36px;
   color: var(--ink);
   background:
-    linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 36%, rgba(255, 255, 255, 0.025) 100%),
-    rgba(16, 22, 46, 0.38);
-  -webkit-backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
-  backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(255, 255, 255, 0.025) 100%),
+    rgba(20, 20, 22, 0.42);
+  -webkit-backdrop-filter: blur(30px) saturate(1.15);
+  backdrop-filter: blur(30px) saturate(1.15);
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-    inset 0 24px 36px -24px rgba(255, 255, 255, 0.14),
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 22px 48px -16px rgba(0, 0, 0, 0.55),
-    0 48px 96px -36px rgba(0, 0, 0, 0.5);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    inset 0 24px 36px -24px rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 22px 48px -16px rgba(0, 0, 0, 0.7),
+    0 48px 96px -36px rgba(0, 0, 0, 0.6);
 }
 .glass::before {
   content: '';
@@ -76,29 +87,30 @@
   border-radius: inherit;
   padding: 1.5px;
   pointer-events: none;
-  background: linear-gradient(155deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.12) 22%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.26) 100%);
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.09) 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-.glass.thick { background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)), rgba(9, 13, 30, 0.56); -webkit-backdrop-filter: blur(46px) saturate(1.8); backdrop-filter: blur(46px) saturate(1.8); }
-.glass.clear { background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.09)); -webkit-backdrop-filter: blur(20px) saturate(1.7); backdrop-filter: blur(20px) saturate(1.7); }
+.glass.thick { background: linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02)), rgba(12, 12, 14, 0.6); -webkit-backdrop-filter: blur(40px) saturate(1.1); backdrop-filter: blur(40px) saturate(1.1); }
+.glass.clear { background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(20px) saturate(1.15); backdrop-filter: blur(20px) saturate(1.15); }
 .glass.pill { border-radius: 999px; }
 .glass.hot {
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
-    inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.42),
-    inset 0 0 90px -20px rgba(var(--accent-rgb), 0.3),
-    0 22px 48px -16px rgba(0, 0, 0, 0.55),
-    0 48px 96px -36px rgba(var(--accent-rgb), 0.38);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.4),
+    inset 0 0 90px -24px rgba(var(--accent-rgb), 0.18),
+    0 22px 48px -16px rgba(0, 0, 0, 0.7),
+    0 48px 96px -36px rgba(var(--accent-rgb), 0.24);
 }
+/* contained: the room stays calm; the green is only the small mark inside (never a green rim or wash) */
 .glass.safe {
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
-    inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.4),
-    inset 0 0 90px -20px rgba(var(--safe-rgb), 0.26),
-    0 22px 48px -16px rgba(0, 0, 0, 0.55),
-    0 48px 96px -36px rgba(var(--safe-rgb), 0.32);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 22px 48px -16px rgba(0, 0, 0, 0.7),
+    0 48px 96px -36px rgba(0, 0, 0, 0.6);
 }
 /* a lit control: the product's primary button */
 .btn-primary {
@@ -106,9 +118,9 @@
   display: flex; align-items: center; justify-content: center; gap: 18px;
   height: 88px; padding: 0 48px; border-radius: 44px;
   font: 600 34px/1 var(--font); letter-spacing: -0.016em; color: #fff; white-space: nowrap;
-  background: linear-gradient(180deg, #ff7f4d 0%, #ff5a1f 52%, #f24a0d 100%);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.3), 0 22px 44px -12px rgba(var(--accent-rgb), 0.7);
-  text-shadow: 0 1px 1px rgba(120, 30, 0, 0.35);
+  background: linear-gradient(180deg, #ff4f45 0%, #ff3b30 50%, #e5281e 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.38), inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 4px rgba(0, 0, 0, 0.35), 0 22px 44px -12px rgba(var(--accent-rgb), 0.55);
+  text-shadow: 0 1px 1px rgba(90, 0, 0, 0.3);
 }
 
 /* ------------------------------------------------------------ type: Inter as the SF stand-in, Apple hierarchy */
@@ -136,17 +148,20 @@
   box-shadow: inset 0 0 0 1.5px var(--hair), inset 0 1.5px 0 rgba(255, 255, 255, 0.14);
 }
 .chip i { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-4); flex: none; }
-.chip.hot { color: #ff7a45; background: rgba(var(--accent-rgb), 0.15); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.36), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
-.chip.hot i { background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.9); }
-.chip.safe { color: #4fd68c; background: rgba(var(--safe-rgb), 0.14); box-shadow: inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
-.chip.safe i { background: var(--safe); }
+.chip.hot { color: var(--hot-ink); background: rgba(var(--accent-rgb), 0.15); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.36), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
+.chip.hot i { background: var(--accent); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7); }
+.chip.safe { color: var(--ink-2); background: var(--fill-1); box-shadow: inset 0 0 0 1.5px var(--hair), inset 0 1.5px 0 rgba(255, 255, 255, 0.12); }
+.chip.safe i { background: var(--safe); box-shadow: 0 0 8px rgba(var(--safe-rgb), 0.6); }
+/* needs a human: orange, sparingly */
+.chip.warn { color: var(--warn); background: rgba(var(--warn-rgb), 0.13); box-shadow: inset 0 0 0 1.5px rgba(var(--warn-rgb), 0.38), inset 0 1.5px 0 rgba(255, 255, 255, 0.12); }
+.chip.warn i { background: var(--warn); }
 
 /* ------------------------------------------------------------ device frame for real UI footage */
 .device {
   position: absolute;
   border-radius: 28px;
   overflow: hidden;
-  background: #05070d;
+  background: #070707;
   box-shadow:
     0 0 0 1.5px rgba(255, 255, 255, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.35),
@@ -154,13 +169,11 @@
     0 80px 150px -50px rgba(0, 0, 0, 0.62);
 }
 .device::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 6; box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
-.dev-bar { position: absolute; left: 0; right: 0; top: 0; height: 38px; z-index: 4; background: linear-gradient(180deg, rgba(36, 42, 68, 0.98), rgba(20, 24, 42, 0.98)); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.55); }
+.dev-bar { position: absolute; left: 0; right: 0; top: 0; height: 38px; z-index: 4; background: linear-gradient(180deg, rgba(43, 43, 43, 0.98), rgba(25, 25, 25, 0.98)); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.55); }
 .dev-lights { position: absolute; left: 20px; top: 13px; display: flex; gap: 9px; }
 .dev-lights i { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 0.75px rgba(0, 0, 0, 0.25); }
-.dev-lights i:nth-child(1) { background: #ff5f57; }
-.dev-lights i:nth-child(2) { background: #febc2e; }
-.dev-lights i:nth-child(3) { background: #28c840; }
-.dev-screen { position: absolute; left: 0; right: 0; bottom: 0; top: 38px; overflow: hidden; background: #05070d; }
+.dev-lights i { background: rgba(255, 255, 255, 0.2); }
+.dev-screen { position: absolute; left: 0; right: 0; bottom: 0; top: 38px; overflow: hidden; background: #070707; }
 .device.bare .dev-bar { display: none; }
 .device.bare .dev-screen { top: 0; }
 .dev-screen > img, .dev-screen > video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -176,11 +189,11 @@
 
 /* ------------------------------------------------------------ v3 (Liquid Glass film): device chrome in glass, app windows, focus, keys, stamp, tag */
 /* the device's title bar is glass over the wallpaper (not a solid strip) */
-.device { background: rgba(6, 9, 20, 0.9); }
-.dev-bar { height: 40px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), inset 0 1.5px 0 rgba(255, 255, 255, 0.22); }
+.device { background: rgba(9, 9, 9, 0.9); }
+.dev-bar { height: 40px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(30px) saturate(1.1); backdrop-filter: blur(30px) saturate(1.1); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.07), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
 .dev-lights { left: 18px; top: 14px; gap: 8px; }
 .dev-lights i { width: 12px; height: 12px; }
-.dev-title { position: absolute; left: 0; right: 0; top: 0; height: 40px; text-align: center; font: 600 16px/40px var(--font); letter-spacing: -0.005em; color: rgba(236, 240, 255, 0.62); }
+.dev-title { position: absolute; left: 0; right: 0; top: 0; height: 40px; text-align: center; font: 600 16px/40px var(--font); letter-spacing: -0.005em; color: rgba(245, 245, 247, 0.6); }
 .dev-screen { top: 40px; }
 
 /* an app window drawn for the motion-graphic beats (mail, file share, tools): glass body, glass title bar */
@@ -188,46 +201,46 @@
 .win .wbar { position: absolute; left: 0; right: 0; top: 0; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 22px; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08); }
 .win .wbar .lights { display: flex; gap: 8px; flex: none; }
 .win .wbar .lights i { width: 13px; height: 13px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); }
-.win .wbar .lights i.r { background: #ff5f57; } .win .wbar .lights i.y { background: #febc2e; } .win .wbar .lights i.g { background: #28c840; }
+.win .wbar .lights i.r, .win .wbar .lights i.y, .win .wbar .lights i.g { background: rgba(255, 255, 255, 0.2); }
 .win .wbar .wt { font: 600 24px/1 var(--font); letter-spacing: -0.012em; color: var(--ink-2); white-space: nowrap; }
 .win .wbody { position: absolute; left: 0; right: 0; top: 52px; bottom: 0; }
 
 /* a focus ring around the UI element the line names (footage coordinates, drawn inside the camera) */
 .focus { position: absolute; z-index: 30; border-radius: 14px; opacity: 0; pointer-events: none;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.92), 0 0 0 9px rgba(255, 255, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.35); }
-.focus.hot { box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.98), 0 0 0 9px rgba(var(--accent-rgb), 0.2), 0 10px 40px rgba(0, 0, 0, 0.35); }
+.focus.hot { box-shadow: 0 0 0 3px rgba(255, 69, 58, 0.98), 0 0 0 9px rgba(var(--accent-rgb), 0.2), 0 10px 40px rgba(0, 0, 0, 0.35); }
 
 /* keycaps (Command-Enter): thick glass keys with a lit symbol */
 .keycap { position: absolute; width: 176px; height: 176px; border-radius: 40px; display: grid; place-items: center;
   font: 600 92px/1 var(--font); color: #fff; letter-spacing: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.04)), rgba(22, 28, 56, 0.55);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.28), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14), 0 14px 0 -4px rgba(8, 10, 24, 0.55), 0 30px 60px -16px rgba(0, 0, 0, 0.7); }
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07) 60%, rgba(255, 255, 255, 0.035)), rgba(28, 28, 30, 0.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.1); backdrop-filter: blur(28px) saturate(1.1);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.28), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14), 0 14px 0 -4px rgba(11, 11, 11, 0.55), 0 30px 60px -16px rgba(0, 0, 0, 0.7); }
 .keycap .kshadow { position: absolute; inset: 0; border-radius: inherit; }
 
 /* a stamp (NO MATCH, DENIED): an outlined lozenge that slams in, never a glow */
 .stamp { position: absolute; display: flex; align-items: center; gap: 18px; height: 112px; padding: 0 40px; border-radius: 26px;
-  font: 700 64px/1 var(--font); letter-spacing: 0.04em; color: #ff6a33; white-space: nowrap; text-transform: uppercase;
-  border: 6px solid #ff5a1f; background: rgba(40, 10, 4, 0.55); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+  font: 700 64px/1 var(--font); letter-spacing: 0.04em; color: var(--hot-ink); white-space: nowrap; text-transform: uppercase;
+  border: 6px solid var(--accent); background: rgba(30, 6, 5, 0.6); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 
 /* a small honest label ("Demo data", "Roadmap"): glass pill, fixed in the frame, never in the camera */
 .tag { position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 24px 0 18px; border-radius: 27px;
   font: 600 28px/1 var(--font); letter-spacing: -0.008em; color: var(--ink-2); white-space: nowrap; }
-.tag i { width: 12px; height: 12px; border-radius: 50%; background: rgba(226, 232, 250, 0.7); flex: none; }
+.tag i { width: 12px; height: 12px; border-radius: 50%; background: rgba(245, 245, 247, 0.7); flex: none; }
 .tag.hot i { background: var(--accent); }
 
-/* a signal chip (the warnings): glass pill, orange dot, one line */
+/* a signal chip (the warnings): glass pill, a small orange dot (a warning nobody has connected yet), white key, grey value */
 .sig { position: absolute; display: inline-flex; align-items: center; gap: 16px; height: 76px; padding: 0 32px 0 24px; border-radius: 38px; white-space: nowrap;
   font: 600 30px/1 var(--font); letter-spacing: -0.012em; color: var(--ink); }
-.sig i { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.18); }
-.sig .k { color: #ff7a45; }
+.sig i { width: 16px; height: 16px; border-radius: 50%; background: var(--warn); flex: none; box-shadow: 0 0 0 5px rgba(var(--warn-rgb), 0.16); }
+.sig .k { color: var(--ink); }
 .sig .v { color: var(--ink-2); font-weight: 500; }
 
     #cap-band { position: absolute; left: 192px; right: 192px; bottom: 96px; height: 76px; }
     .cap-g { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; white-space: nowrap; opacity: 0; }
-    .cap-in { display: inline-block; padding: 0 26px; border-radius: 20px; word-spacing: 0.14em; background: rgba(6, 8, 18, 0.58);
+    .cap-in { display: inline-block; padding: 0 26px; border-radius: 20px; word-spacing: 0.14em; background: rgba(8, 8, 8, 0.58);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.25); }
-    .cap-w { display: inline-block; font: 600 46px/76px var(--font); letter-spacing: -0.014em; color: rgba(247, 249, 255, 0.6); }
+    .cap-w { display: inline-block; font: 600 46px/76px var(--font); letter-spacing: -0.014em; color: rgba(249, 249, 249, 0.6); }
   </style>
   <div id="root" data-composition-id="captions" data-width="1920" data-height="1080" style="background: transparent">
     <div id="cap-band">
@@ -300,7 +313,7 @@
     (function () {
       const G = [[0.12,1.694,[[0.046,0.114],[0.114,0.583],[0.583,0.768],[0.768,1.057],[1.057,1.25],[1.25,1.694]]],[1.694,3.039,[[1.783,2.182],[2.182,2.454],[2.454,2.583],[2.583,3.039]]],[3.039,5.398,[[3.139,4.046],[4.046,4.25],[4.25,4.42],[4.42,4.731],[4.731,5.398]]],[5.398,6.583,[[5.472,5.65],[5.65,5.828],[5.828,6.118],[6.118,6.583]]],[6.583,8.139,[[6.632,6.831],[6.831,7.077],[7.077,7.521],[7.521,7.661],[7.661,8.028],[8.028,8.139]]],[8.139,9.298,[[8.164,8.25],[8.25,8.407],[8.407,8.787],[8.787,9.298]]],[9.298,11.546,[[9.398,9.843],[9.843,10.929],[10.929,11.546]]],[11.546,13.298,[[11.583,11.732],[11.732,12.414],[12.414,12.793],[12.793,13.298]]],[13.298,14.287,[[13.398,13.694],[13.694,14.102],[14.102,14.287]]],[14.287,15.946,[[14.386,14.645],[14.645,14.985],[14.985,15.299],[15.299,15.946]]],[15.946,18.113,[[16.046,16.493],[16.493,17.028],[17.028,17.268],[17.268,17.62],[17.62,18.113]]],[18.113,19.785,[[18.213,18.558],[18.558,18.991],[18.991,19.146],[19.146,19.377],[19.377,19.785]]],[19.785,22.365,[[19.885,20.639],[20.639,20.824],[20.824,20.942],[20.942,21.306],[21.306,22.215]]],[25.856,27.4,[[25.956,26.335],[26.335,26.712],[26.712,27.104],[27.104,27.4]]],[27.4,28.511,[[27.456,27.874],[27.874,28.039],[28.039,28.511]]],[28.511,29.622,[[28.526,28.641],[28.641,28.844],[28.844,29.009],[29.009,29.622]]],[29.622,30.733,[[29.715,30.067],[30.067,30.567],[30.567,30.733]]],[30.733,32.733,[[30.797,31.252],[31.252,31.919],[31.919,32.733]]],[32.733,34.464,[[32.78,33.19],[33.19,33.667],[33.667,33.894],[33.894,34.067],[34.067,34.464]]],[34.464,36.289,[[34.564,35.367],[35.367,35.715],[35.715,35.835],[35.835,36.289]]],[36.289,37.689,[[36.326,36.499],[36.499,36.826],[36.826,36.939],[36.939,37.689]]],[37.689,39.252,[[37.789,38.331],[38.331,38.652],[38.652,39.252]]],[39.252,40.511,[[39.289,39.449],[39.449,40.511]]],[40.511,42.522,[[40.548,40.748],[40.748,41.379],[41.379,41.748],[41.748,42.522]]],[42.522,44.437,[[42.622,43.153],[43.153,43.604],[43.604,44.437]]],[44.437,46.252,[[44.497,45.166],[45.166,45.548],[45.548,46.252]]],[46.252,48.844,[[46.307,46.659],[46.659,47.311],[47.311,47.585],[47.585,47.686],[47.686,48.141],[48.141,48.844]]],[48.844,51.326,[[48.903,49.419],[49.419,49.715],[49.715,49.832],[49.832,50.437],[50.437,51.326]]],[51.326,52.807,[[51.382,51.622],[51.622,52.141],[52.141,52.56],[52.56,52.807]]],[52.807,54.009,[[52.856,53.005],[53.005,53.419],[53.419,53.563],[53.563,54.009]]],[54.009,54.882,[[54.109,54.882]]],[54.882,56.882,[[54.97,55.745],[55.745,56.03],[56.03,56.141],[56.141,56.882]]],[56.882,59.882,[[56.922,57.412],[57.412,58.124],[58.124,58.882],[58.882,59.178],[59.178,59.882]]],[59.882,61.367,[[59.932,61.217]]],[61.41,62.258,[[61.51,62.258]]],[62.258,63.703,[[62.31,62.58],[62.58,62.903],[62.903,63.036],[63.036,63.703]]],[63.703,64.962,[[63.728,63.814],[63.814,63.985],[63.985,64.962]]],[64.962,66.295,[[65.036,65.388],[65.388,65.629],[65.629,66.295]]],[66.295,67.925,[[66.351,66.592],[66.592,66.888],[66.888,67.229],[67.229,67.481],[67.481,67.925]]],[67.925,69.406,[[67.985,68.629],[68.629,68.806],[68.806,69.406]]],[69.406,70.899,[[69.456,69.629],[69.629,69.91],[69.91,70.203],[70.203,70.899]]],[70.899,72.999,[[70.999,71.543],[71.543,72.014],[72.014,72.418],[72.418,72.577],[72.577,72.999]]],[72.999,74.518,[[73.045,73.214],[73.214,73.382],[73.382,73.518],[73.518,73.732],[73.732,73.925],[73.925,74.518]]],[74.518,75.925,[[74.582,75.092],[75.092,75.555],[75.555,75.925]]],[75.925,78.147,[[75.94,76.036],[76.036,76.137],[76.137,76.863],[76.863,77.555],[77.555,78.147]]],[78.147,78.985,[[78.246,78.518],[78.518,78.985]]],[78.985,80.121,[[79.085,79.444],[79.444,80.121]]],[80.121,83.406,[[80.221,80.863],[80.863,81.163],[81.163,81.543],[81.543,81.937],[81.937,82.676],[82.676,83.406]]],[83.406,85.851,[[83.456,84.27],[84.27,84.422],[84.422,84.789],[84.789,84.952],[84.952,85.851]]],[85.851,88.147,[[85.906,86.147],[86.147,86.638],[86.638,87.073],[87.073,88.147]]],[88.147,89.332,[[88.162,88.295],[88.295,88.641],[88.641,88.952],[88.952,89.332]]],[89.332,91.332,[[89.388,89.592],[89.592,89.693],[89.693,90.122],[90.122,90.418],[90.418,90.582],[90.582,91.332]]],[91.332,92.666,[[91.406,91.752],[91.752,92.048],[92.048,92.184],[92.184,92.295],[92.295,92.666]]],[92.666,93.418,[[92.74,93.159],[93.159,93.418]]],[93.418,95.999,[[93.518,93.752],[93.752,94.27],[94.27,95.159],[95.159,95.555],[95.555,95.999]]],[95.999,97.332,[[96.036,96.126],[96.126,96.481],[96.481,97.332]]],[97.332,98.814,[[97.394,97.768],[97.768,98.279],[98.279,98.814]]],[98.814,100.888,[[98.888,99.147],[99.147,99.406],[99.406,99.906],[99.906,100.384],[100.384,100.888]]],[100.888,103.555,[[100.916,101.159],[101.159,102.354],[102.354,103.555]]],[103.555,105.036,[[103.644,104.172],[104.172,104.274],[104.274,104.656],[104.656,105.036]]],[105.036,106.74,[[105.073,105.27],[105.27,105.826],[105.826,106.147],[106.147,106.74]]],[106.74,108.295,[[106.786,107.153],[107.153,107.457],[107.457,108.295]]],[108.295,109.929,[[108.369,108.804],[108.804,109.258],[109.258,109.779]]]];
       const tl = gsap.timeline({ paused: true });
-      const DIM = 'rgba(247,249,255,0.62)', LIT = 'rgba(247,249,255,1)';
+      const DIM = 'rgba(249,249,249,0.62)', LIT = 'rgba(249,249,249,1)';
       G.forEach(([s, e, ws], i) => {
         const g = '#cap-g' + i;
         tl.fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: 'power1.out' }, s);

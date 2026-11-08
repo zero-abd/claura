@@ -6,15 +6,15 @@
     <path id="ring" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z"/>
     <path id="orb" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z"/>
     <clipPath id="clipGlyph"><use href="#ring"/><use href="#orb"/></clipPath>
-    <linearGradient id="bg" gradientUnits="userSpaceOnUse" x1="170" y1="100" x2="860" y2="930"><stop offset="0" stop-color="#262C54"/><stop offset=".55" stop-color="#12142A"/><stop offset="1" stop-color="#0B0C0E"/></linearGradient>
+    <linearGradient id="bg" gradientUnits="userSpaceOnUse" x1="170" y1="100" x2="860" y2="930"><stop offset="0" stop-color="#2C2C2E"/><stop offset=".55" stop-color="#161618"/><stop offset="1" stop-color="#0B0C0E"/></linearGradient>
     <radialGradient id="bloom" gradientUnits="userSpaceOnUse" cx="330" cy="215" r="600"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
-    <radialGradient id="shade" gradientUnits="userSpaceOnUse" cx="790" cy="930" r="560"><stop offset="0" stop-color="#FF5A1F" stop-opacity="0.38"/><stop offset="1" stop-color="#FF5A1F" stop-opacity="0"/></radialGradient>
+    <radialGradient id="shade" gradientUnits="userSpaceOnUse" cx="790" cy="930" r="560"><stop offset="0" stop-color="#3A3A3C" stop-opacity="0.38"/><stop offset="1" stop-color="#3A3A3C" stop-opacity="0"/></radialGradient>
     <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".9"/><stop offset=".35" stop-color="#FFFFFF" stop-opacity=".12"/><stop offset=".7" stop-color="#FFFFFF" stop-opacity=".04"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/></linearGradient>
     <linearGradient id="pane" gradientUnits="userSpaceOnUse" x1="300" y1="190" x2="740" y2="840"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.03"/></linearGradient>
     <linearGradient id="paneEdge" gradientUnits="userSpaceOnUse" x1="260" y1="170" x2="780" y2="860"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".85"/><stop offset=".4" stop-color="#FFFFFF" stop-opacity=".1"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".3"/></linearGradient>
-    <linearGradient id="glyphf" gradientUnits="userSpaceOnUse" x1="40" y1="20" x2="220" y2="240"><stop offset="0" stop-color="#FF8A57"/><stop offset=".6" stop-color="#FF5A1F"/><stop offset="1" stop-color="#E8470F"/></linearGradient>
+    <linearGradient id="glyphf" gradientUnits="userSpaceOnUse" x1="40" y1="20" x2="220" y2="240"><stop offset="0" stop-color="#F5F5F7"/><stop offset=".6" stop-color="#D1D1D6"/><stop offset="1" stop-color="#8E8E93"/></linearGradient>
     <linearGradient id="edge" gradientUnits="userSpaceOnUse" x1="40" y1="17" x2="220" y2="239"><stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity=".25"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".7"/></linearGradient>
-    <radialGradient id="orbf" gradientUnits="userSpaceOnUse" cx="142" cy="110" r="60"><stop offset="0" stop-color="#FFD2B8"/><stop offset=".35" stop-color="#FF7A45"/><stop offset="1" stop-color="#E8470F"/></radialGradient>
+    <radialGradient id="orbf" gradientUnits="userSpaceOnUse" cx="142" cy="110" r="60"><stop offset="0" stop-color="#FF8A80"/><stop offset=".35" stop-color="#FF3B30"/><stop offset="1" stop-color="#D70015"/></radialGradient>
     <filter id="blurXL" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="30"/></filter>
     <filter id="blurM" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
     <filter id="blurS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>

@@ -22,7 +22,7 @@ const MARK_TO = { x: 1270, y: 214, h: 76 };
 
 const S = (name) => `assets/shots/${name}.png`;
 const C = (name) => `assets/clips/${name}.mp4`; // masters (3456x2160); FILM_CLIPS=proxy node tools/build.mjs uses assets/clips/proxy/
-const DARK = 'rgba(10, 14, 32, 1)';
+const DARK = 'rgba(11, 11, 12, 1)'; // mono: the zoom-through fill (near-black)
 
 export default {
   vo: { json: 'assets/vo/vo.json', audio: 'assets/audio/vo.mp3', volume: 1 },
@@ -101,7 +101,7 @@ export default {
         title: 'Claura · Agents',
         // agents.mp4: the page holds while the line names NVIDIA Nemotron; Sentry's "Show reasoning" click (1.93) lands just
         // before "calling", its tool calls are open by "tools", then ringed step by step
-        clip: { src: C('agents'), map: [[0, 0.75], [3.0, 1.93], [3.45, 2.35], ['end', 2.95]] },
+        clip: { src: C('agents'), map: [[0, 0.73], [3.0, 1.915], [3.45, 2.335], ['end', 2.935]] },
         cam: [
           { t: 0, u: 0.42, v: 0.2, z: 1.6, fy: 365 },
           { t: { phrase: 'NVIDIA', offset: -0.45 }, u: 0.42, v: 0.155, z: 1.95, fy: 360, d: 0.8 },
@@ -109,7 +109,7 @@ export default {
           { t: { phrase: 'tools', offset: 0.05 }, u: 0.39, v: 0.66, z: 2.3, fy: 500, d: 0.6 },
         ],
         focus: [
-          { t: 'NVIDIA', until: { phrase: 'on-prem', offset: 0.3 }, u0: 0.322, v0: 0.141, u1: 0.469, v1: 0.165 },
+          { t: 'NVIDIA', until: { phrase: 'on-prem', offset: 0.3 }, u0: 0.3264, v0: 0.141, u1: 0.4725, v1: 0.165 },
           { t: { phrase: 'tools', offset: 0.1 }, until: 'step by step', u0: 0.222, v0: 0.558, u1: 0.565, v1: 0.58 },
           { t: 'step by step', until: 'by step', u0: 0.222, v0: 0.59, u1: 0.53, v1: 0.632 },
           { t: 'by step', until: { phrase: 'step', n: 1 }, u0: 0.222, v0: 0.636, u1: 0.53, v1: 0.678 },
@@ -121,7 +121,7 @@ export default {
       params: {
         title: 'Claura · Incident INC-0419',
         // play() at 0.90: Sentry goes from Watching to Correlating and types the signals; then the incident header
-        clip: { src: C('incident-run'), map: [[0, 0.86], [0.6, 1.0], [1.9, 1.62], [2.2, 1.86], ['end', 2.12]] },
+        clip: { src: C('incident-run'), map: [[0, 0.87], [0.6, 1.01], [1.9, 1.63], [2.2, 1.87], ['end', 2.13]] },
         cam: [
           { t: 0, u: 0.40, v: 0.815, z: 2.05, fy: 722 },
           { t: { phrase: 'opens', offset: -0.4 }, u: 0.36, v: 0.26, z: 2.2, fy: 470, d: 0.6 },
@@ -135,7 +135,7 @@ export default {
       params: {
         title: 'Claura · Incident INC-0419',
         // the page glides down at real speed (2.12-3.62), then holds on 3.79 while the line lands
-        clip: { src: C('incident-run'), map: [[0, 2.12], [1.5, 3.62], [2.4, 3.79], ['end', 3.79]] },
+        clip: { src: C('incident-run'), map: [[0, 2.13], [1.5, 3.63], [2.4, 3.8], ['end', 3.8]] },
         cam: [
           { t: 0, u: 0.36, v: 0.26, z: 2.2, fy: 470 },
           { t: 0.05, u: 0.52, v: 0.45, z: 1.55, fy: 520, d: 1.1 },
@@ -152,7 +152,7 @@ export default {
       params: {
         title: 'Claura · Incident INC-0419',
         // Warden types its plan while the containment steps tick (3 to 5 of 7 done)
-        clip: { src: C('incident-run'), map: [[0, 3.79], [1.9, 4.18], ['end', 4.18]] },
+        clip: { src: C('incident-run'), map: [[0, 3.8], [1.9, 4.19], ['end', 4.19]] },
         cam: [
           { t: 0, u: 0.68, v: 0.64, z: 2.1, fy: 520 },
           { t: 0.1, u: 0.52, v: 0.64, z: 2.0, fy: 520, d: 0.9 },
@@ -167,7 +167,7 @@ export default {
       params: {
         title: 'Claura · Policy',
         // policy.mp4 at 0.85x: the cursor rests on the auto column, then Needs a human, then Reimage host (on "decides")
-        clip: { src: C('policy'), map: [[0, 0.45], ['end', 4.75]] },
+        clip: { src: C('policy'), map: [[0, 0.44], ['end', 4.68]] },
         cam: [
           { t: 0, u: 0.44, v: 0.23, z: 1.45, fy: 370 },
           { t: { phrase: 'policy gate', offset: -0.3 }, u: 0.44, v: 0.272, z: 2.05, d: 0.6 },
@@ -186,8 +186,8 @@ export default {
       params: {
         title: 'Claura · Incident INC-0419',
         // incident-run.mp4: the Quarantine sheet arrives with the morph, holds while the card is read, the cursor glides in
-        // and the press on "Approve quarantine" (mouse down at clip 8.433) lands on the payoff hit 60.485
-        clip: { src: C('incident-run'), map: [[0, 6.48], [0.7, 6.97], [4.55, 6.97], [5.45, 8.05], [{ abs: HIT.payoff }, 8.433], ['end', 8.85]] },
+        // and the press on "Approve quarantine" (first pressed frame, clip 8.417 in the mono take) lands on the payoff hit 60.485
+        clip: { src: C('incident-run'), map: [[0, 6.467], [0.7, 6.967], [4.55, 6.967], [5.45, 8.02], [{ abs: HIT.payoff }, 8.417], ['end', 8.8]] },
         cam: [
           { t: 0, u: 0.5, v: 0.5, z: 1.3 },
           { t: { phrase: 'needs a human', offset: -0.45 }, u: 0.5, v: 0.45, z: 1.9, d: 0.9 },
@@ -222,7 +222,7 @@ export default {
       params: {
         title: 'Claura · War Room',
         // warroom.mp4 at ~0.55x: Scribe's "Report INC-0419 filed" lands in #command around "one live channel"
-        clip: { src: C('warroom'), map: [[0, 0.8], [5.0, 3.4], ['end', 6.0]] },
+        clip: { src: C('warroom'), map: [[0, 0.78], [5.0, 3.38], ['end', 5.98]] },
         cam: [
           { t: 0, u: 0.5, v: 0.45, z: 1.15 },
           { t: 0.1, u: 0.5, v: 0.45, z: 1.25, d: 1.5, ease: 'power1.inOut' },
@@ -246,10 +246,10 @@ export default {
     { id: 'access', template: 'footage', starts: 'Outside counsel joins', tone: 'nominal', in: { type: 'whip', dir: 1 },
       params: {
         title: 'Claura · People & Access',
-        // access.mp4: the name types, Legal counsel, Issue; the code card lands on the hit 76.485 (codeShown 6.083 is where its
-        // crossfade starts; 6.22 on the hit puts the code readable on the beat, crisp 0.1 s later);
+        // access.mp4 (mono take): "Outside counsel" types, Legal counsel, Issue; the code card lands on the hit 76.485 (codeShown
+        // 6.133 is where its crossfade starts; 6.27 on the hit puts the code readable on the beat, crisp 0.1 s later);
         // then a cut to the isolation popover (isolation.mp4) for "No email. No SSO."
-        clip: { src: C('access'), map: [[0, 3.05], [0.95, 3.85], [1.5, 4.88], [1.95, 5.92], [{ abs: HIT.hit2 }, 6.22], [3.55, 6.95], [3.55, 2.55, C('isolation')], ['end', 3.7]] },
+        clip: { src: C('access'), map: [[0, 3.12], [0.95, 3.94], [1.5, 4.99], [1.95, 5.99], [{ abs: HIT.hit2 }, 6.27], [3.55, 7.0], [3.55, 2.55, C('isolation')], ['end', 3.7]] },
         cam: [
           { t: 0, u: 0.5, v: 0.4, z: 2.05, fy: 480 },
           { t: { phrase: 'single-use', offset: -0.4 }, u: 0.5, v: 0.55, z: 1.85, d: 0.5 },
@@ -269,7 +269,7 @@ export default {
         title: 'Claura · Data scope',
         // scope.mp4 at ~0.9x: the click that opens "Corporate file share FIN-02" (4.28) lands at the end of "exfiltrated",
         // then the camera pushes onto its "Locked (ransomware)" status for "locked by ransomware"
-        clip: { src: C('scope'), map: [[0, 0.75], [3.95, 4.3], ['end', 5.25]] },
+        clip: { src: C('scope'), map: [[0, 0.7], [3.95, 4.26], ['end', 5.21]] },
         cam: [
           { t: 0, u: 0.55, v: 0.3, z: 1.5, fy: 460 },
           { t: 0.1, u: 0.55, v: 0.3, z: 1.62, fy: 460, d: 1.4, ease: 'power1.inOut' },
@@ -288,21 +288,23 @@ export default {
       params: {
         title: 'Claura · Reports',
         // reports.mp4: hold on the NIST header, glide to the response phases, then a cut to the evidence chain of custody
-        clip: { src: C('reports'), map: [[0, 0.15], [2.2, 0.69], [2.75, 1.75], [3.85, 2.12], [3.85, 5.95], ['end', 6.55]] },
+        // (mono take: the report title wraps to two lines next to "Anchor evidence on Solana devnet", so everything below it
+        // sits 0.0278 lower than in the colour take; the rings and camera keys below the title are shifted by that)
+        clip: { src: C('reports'), map: [[0, 0.15], [2.2, 0.69], [2.75, 1.73], [3.85, 2.1], [3.85, 5.945], ['end', 6.545]] },
         cam: [
           { t: 0, u: 0.42, v: 0.2, z: 1.75, fy: 400 },
           { t: 0.1, u: 0.42, v: 0.2, z: 1.85, fy: 400, d: 1.4, ease: 'power1.inOut' },
-          { t: { phrase: 'live phase status', offset: -0.45 }, u: 0.48, v: 0.47, z: 2.2, fy: 520, d: 0.6 },
-          { t: 3.85, u: 0.42, v: 0.27, z: 2.45, fy: 470, d: 0 },
-          { t: 3.86, u: 0.42, v: 0.27, z: 2.38, fy: 470, d: 0.45, ease: 'expo.out' },
-          { t: { phrase: 'custody', offset: -0.25 }, u: 0.6, v: 0.29, z: 2.38, fy: 470, d: 0.55 },
+          { t: { phrase: 'live phase status', offset: -0.45 }, u: 0.48, v: 0.498, z: 2.2, fy: 520, d: 0.6 },
+          { t: 3.85, u: 0.42, v: 0.298, z: 2.45, fy: 470, d: 0 },
+          { t: 3.86, u: 0.42, v: 0.298, z: 2.38, fy: 470, d: 0.45, ease: 'expo.out' },
+          { t: { phrase: 'custody', offset: -0.25 }, u: 0.6, v: 0.318, z: 2.38, fy: 470, d: 0.55 },
         ],
         focus: [
-          { t: { phrase: 'follows', offset: 0.1 }, until: { phrase: 'live phase status', offset: -0.45 }, u0: 0.338, v0: 0.14, u1: 0.468, v1: 0.168 },
-          { t: 'phase status', until: 3.6, u0: 0.508, v0: 0.398, u1: 0.648, v1: 0.57, hot: true },
-          { t: 'hashed', until: { phrase: 'chain', offset: -0.05 }, u0: 0.245, v0: 0.232, u1: 0.595, v1: 0.258 },
-          { t: 'chain', until: { phrase: 'custody', offset: -0.1 }, u0: 0.255, v0: 0.31, u1: 0.56, v1: 0.365 },
-          { t: { phrase: 'custody', offset: -0.05 }, u0: 0.565, v0: 0.31, u1: 0.86, v1: 0.365 },
+          { t: { phrase: 'follows', offset: 0.1 }, until: { phrase: 'live phase status', offset: -0.45 }, u0: 0.3413, v0: 0.14, u1: 0.4617, v1: 0.168 },
+          { t: 'phase status', until: 3.6, u0: 0.508, v0: 0.4258, u1: 0.648, v1: 0.5978, hot: true },
+          { t: 'hashed', until: { phrase: 'chain', offset: -0.05 }, u0: 0.245, v0: 0.2598, u1: 0.595, v1: 0.2858 },
+          { t: 'chain', until: { phrase: 'custody', offset: -0.1 }, u0: 0.255, v0: 0.3378, u1: 0.56, v1: 0.3928 },
+          { t: { phrase: 'custody', offset: -0.05 }, u0: 0.565, v0: 0.3378, u1: 0.86, v1: 0.3928 },
         ],
       } },
     // 18 ----------------------------------------------------------------- hands on a host (the product's own 3D overview)
@@ -311,7 +313,7 @@ export default {
         title: 'Claura · Overview',
         // overview-3d.mp4: the cursor finds b14-gpu-07 in the 3D campus and clicks it on "Click it"; the frame holds on the
         // click and the Secure Shell opens from that point (iris)
-        clip: { src: C('overview-3d'), map: [[0, 2.0], [{ phrase: 'Click it', offset: 0.12 }, 3.8], ['end', 3.8]] },
+        clip: { src: C('overview-3d'), map: [[0, 2.0], [{ phrase: 'Click it', offset: 0.12 }, 3.775], ['end', 3.775]] },
         cam: [
           { t: 0, u: 0.57, v: 0.45, z: 2.3, fy: 520 },
           { t: 0.05, u: 0.6, v: 0.47, z: 2.5, fy: 520, d: 1.6, ease: 'power1.inOut' },
@@ -323,12 +325,12 @@ export default {
         title: 'Claura Secure Shell',
         // shell.mp4 (real gateway + sshd): request sheet, Request access, passkey (Touch ID), Waiting for an approver,
         // Approve as Incident Commander, the recorded read-only terminal
-        clip: { src: C('shell'), map: [[0, 2.45], [1.55, 4.45], [1.75, 4.7], [2.55, 6.05], [3.55, 8.4], [4.1, 8.75], ['end', 10.6]] },
+        clip: { src: C('shell'), map: [[0, 1.62], [1.55, 2.708], [1.75, 2.946], [2.55, 3.804], [3.55, 5.224], [4.1, 5.578], ['end', 7.45]] },
         cam: [
           { t: 0, u: 0.5, v: 0.47, z: 1.8 },
           { t: { phrase: 'short-lived', offset: -0.2 }, u: 0.52, v: 0.47, z: 2.3, d: 0.6 },
           { t: { phrase: 'Touch ID', offset: -0.3 }, u: 0.5, v: 0.47, z: 2.1, d: 0.45 },
-          { t: { phrase: 'a second approver', offset: -0.3 }, u: 0.5, v: 0.55, z: 2.05, d: 0.45 },
+          { t: { phrase: 'a second approver', offset: -0.45 }, u: 0.5, v: 0.6, z: 2.05, d: 0.45 }, // mono: keeps the white Approve button above the captions
           { t: { phrase: 'Every session', offset: -0.3 }, u: 0.42, v: 0.26, z: 2.2, fy: 470, d: 0.5 },
         ],
         focus: [
@@ -340,10 +342,10 @@ export default {
       } },
     { id: 'sync', starts: 'And every screen updates', tone: 'nominal', toneTo: 'contained',
       in: { type: 'morph', from: [-444, -161, 3344, 2178, 56], dur: 0.6 },
-      params: { a: S('incident-breach'), b: S('incident-contained'), who: [['RK', 'Incident Commander', '#4f5dff'], ['JT', 'Legal counsel', '#14a9a4']] } },
+      params: { a: S('mono/incident-breach'), b: S('mono/incident-contained'), who: [['RK', 'Incident Commander', '#48484a'], ['JT', 'Legal counsel', '#3a3a3c']] } },
     // 27 ----------------------------------------------------------------- next, and the end card
     { id: 'vision', starts: 'Next: an immune system', tone: 'nominal',
-      in: { type: 'zoom', rect: [730, 850, 460, 86, 43], color: 'rgba(10, 14, 32, 0.5)', fadeDur: 0.24 },
+      in: { type: 'zoom', rect: [730, 850, 460, 86, 43], color: 'rgba(15, 15, 15, 0.5)', fadeDur: 0.24 },
       // the sealed rack pulls back to the whole facility, which then shrinks into one node of the network
       params: { track: [{ t: 0, state: 'contained', progress: 1, cam: { preset: 'rack14', az: 30 } }, { t: 0.06, cam: { preset: 'orbit' }, fly: 1.35 }] } },
     { id: 'endcard', starts: 'Claura. Your network is compromised', tone: 'nominal',

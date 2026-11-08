@@ -1,11 +1,12 @@
-/* The brand mark is a single file (public/brand/logo.svg). The hero tile inlines it so it can
-   animate the seal. The mark is being redesigned, so nothing here assumes its shape:
-   - if the SVG has an element with id "seal", that element slides closed and turns the
-     "contained" green;
+/* The brand mark (Cradle) is a single file (public/brand/logo.svg, copied from claura-brand): a light-grey C
+   and an orb in its socket. The orb carries the state: red during a breach, green once sealed.
+   The hero tile inlines the SVG so it can animate the seal. Nothing here assumes the exact shape:
+   - if the SVG has an element with id "seal" (the orb), it settles into the C and turns the
+     "contained" green, while the C stays grey;
    - otherwise (or if the file cannot be inlined) the whole mark simply fades in. */
 
-const SIGNAL = "#FF5A1F";
-const CONTAINED = "#2FBF71";
+const SIGNAL = "#FF3B30";
+const CONTAINED = "#30D158";
 
 export async function initMark(reduced: boolean): Promise<void> {
   const tile = document.querySelector<HTMLElement>("[data-mark]");

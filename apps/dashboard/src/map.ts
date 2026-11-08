@@ -5,9 +5,9 @@ import { HALL_LETTERS, guestsFor, hostId } from "./hosts";
 // 2D facility drawing. It is the fallback inside #facility3d: it draws until (and unless)
 // the optional 3D module mounts. Glass look: soft rack cells, one glowing hot rack.
 
-const TONE = [255, 90, 31];
-const SAFE = [47, 191, 113];
-const INK = [196, 210, 255];
+const TONE = [255, 59, 48]; // mono: system red
+const SAFE = [48, 209, 88]; // mono: system green
+const INK = [205, 205, 210]; // mono: neutral
 const rgba = (c: number[], a: number) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 const FONT = `-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif`;
 
@@ -202,7 +202,7 @@ export class FacilityMap {
           if (destGlow > 0) a = Math.max(a, 0.35 + destGlow * 0.6);
           if (isHot && inc) {
             if (sl === Math.min(NS - 1, Math.floor((HOT_HOST / 8) * NS))) {
-              col = contained ? [140, 160, 150] : TONE;
+              col = contained ? [150, 150, 154] : TONE;
               a = contained ? 0.55 : 1;
             } else a = contained ? load : load * 0.75;
           }
@@ -256,7 +256,7 @@ export class FacilityMap {
         rr(ctx, tx, ty, tw, 17, 8.5);
         ctx.fillStyle = rgba(tone, 1);
         ctx.fill();
-        ctx.fillStyle = "#07090F";
+        ctx.fillStyle = "#090909";
         ctx.fillText(tag, tx + 7, ty + 12.5);
       }
     }
@@ -320,7 +320,7 @@ export class FacilityMap {
     const tx = Math.min(Math.max(cx - tw / 2, 6), this.w - tw - 6);
     const ty = bottom - 22;
     rr(ctx, tx, ty, tw, 22, 11);
-    ctx.fillStyle = "rgba(14,18,36,0.94)";
+    ctx.fillStyle = "rgba(19,19,19,0.94)";
     ctx.fill();
     ctx.strokeStyle = "rgba(255,255,255,0.24)";
     ctx.lineWidth = 1;
@@ -426,7 +426,7 @@ export class FacilityMap {
         let col = INK;
         if (isHot) {
           if (j === 0) {
-            col = contained ? [150, 165, 160] : TONE;
+            col = contained ? [158, 158, 162] : TONE;
             a = 1;
             if (s.r >= 3.8) {
               ctx.strokeStyle = rgba(col, 1);

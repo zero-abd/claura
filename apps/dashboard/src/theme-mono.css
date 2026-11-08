@@ -1,0 +1,493 @@
+/* Claura · Mono. Black glass, white type, colour only where it means something.
+     red    #FF3B30 (pressed #D70015)  breach, critical, destructive or high-impact actions, denied rows
+     orange #FF9F0A                    needs a human: pending approval, warnings, exfil suspected
+     green  #30D158                    tiny success marks only: sealed dot, checks, verified badges, done steps
+   Everything that was blue / purple / teal / pink is grey or white.
+
+   Load after style.css (main.ts: import "./style.css"; import "./theme-mono.css";). Pairs with
+   tools/mono-remap.mjs (rewrites the literal colours inside style.css) and the TS constants listed in THEME-MONO.md.
+   Same layout, spacing, type, motion and glass recipe as the stock theme: only colour and material change.
+   Brand note (real console): the Cradle mark keeps a RED C (see the mark block); the reference copy used a grey C. */
+
+/* ------------------------------------------------------------ tokens (screen only: print keeps its paper theme) */
+@media screen {
+  :root {
+    --bg: #050506;
+    --ink: #f5f5f7;
+    --ink-2: #a1a1a6;
+    --ink-3: #6e6e73;
+    --ink-4: rgba(245, 245, 247, 0.22);
+    --hair: rgba(255, 255, 255, 0.09);
+    --fill-1: rgba(255, 255, 255, 0.045);
+    --fill-2: rgba(255, 255, 255, 0.08);
+    --fill-3: rgba(255, 255, 255, 0.13);
+    --accent: #ff3b30;
+    --accent-rgb: 255, 59, 48;
+    --accent-press: #d70015;
+    --warn: #ff9f0a;
+    --warn-rgb: 255, 159, 10;
+    --safe: #30d158;
+    --safe-rgb: 48, 209, 88;
+    --tone: var(--safe);
+    --tone-rgb: var(--safe-rgb);
+    /* data scope: red = harm done, orange = harm possible, grey = nothing to do, green = fixed */
+    --st-confirmed: 255, 59, 48;
+    --st-locked: 255, 59, 48;
+    --st-suspected: 255, 159, 10;
+    --st-accessed: 255, 184, 92;
+    --st-evidence: 174, 174, 178;
+    --st-intact: 124, 124, 129;
+    --st-restored: 48, 209, 88;
+  }
+  body[data-tone="breach"] {
+    --tone: var(--accent);
+    --tone-rgb: var(--accent-rgb);
+  }
+  body[data-tone="contained"] {
+    --tone: var(--safe);
+    --tone-rgb: var(--safe-rgb);
+  }
+}
+@media screen and (prefers-contrast: more) {
+  :root {
+    --ink-2: #d1d1d6;
+    --ink-3: #aeaeb2;
+  }
+}
+/* screen-only overrides */
+@media screen {
+  html,
+  body {
+    background: var(--bg);
+  }
+
+  /* ------------------------------------------------------------ wallpaper: black, a few soft grey lights */
+  .wallpaper {
+    background: radial-gradient(120% 100% at 50% -10%, #111113 0%, #09090a 52%, #050506 100%);
+  }
+  .wp.b1 {
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04) 55%, transparent);
+  }
+  .wp.b2 {
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.026) 58%, transparent);
+  }
+  .wp.b3 {
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02) 60%, transparent);
+  }
+  .wp.b4 {
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.035), transparent);
+  }
+  /* breach: one faint ember, top-right corner only. Sealed: no green wash, the room just stays calm. */
+  .wp.ember {
+    width: 900px;
+    height: 700px;
+    right: -380px;
+    top: -400px;
+    animation: none;
+    background: radial-gradient(closest-side, rgba(255, 59, 48, 0.2), rgba(255, 59, 48, 0.06) 55%, transparent);
+  }
+  .wp.green {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------ glass: neutral graphite, low saturation */
+  .glass,
+  .sidebar,
+  .toolbar,
+  .sheet,
+  .devdock {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.035) 40%, rgba(255, 255, 255, 0.022) 100%),
+      rgba(20, 20, 22, 0.4);
+    -webkit-backdrop-filter: blur(30px) saturate(1.15);
+    backdrop-filter: blur(30px) saturate(1.15);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.055),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 18px 40px -16px rgba(0, 0, 0, 0.7),
+      0 44px 90px -34px rgba(0, 0, 0, 0.6);
+  }
+  /* hairline rim: brightest along the top edge, where light catches the material */
+  .glass::before,
+  .sidebar::before,
+  .toolbar::before,
+  .sheet::before,
+  .devdock::before {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.07) 18%, rgba(255, 255, 255, 0.025) 55%, rgba(255, 255, 255, 0.07) 100%);
+  }
+  .glass::after,
+  .sidebar::after,
+  .sheet::after {
+    background: radial-gradient(120% 60% at 20% -8%, rgba(255, 255, 255, 0.06), transparent 60%);
+  }
+  /* heavier, darker material for structure */
+  .sidebar {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+      rgba(12, 12, 14, 0.58);
+    -webkit-backdrop-filter: blur(40px) saturate(1.1);
+    backdrop-filter: blur(40px) saturate(1.1);
+  }
+  /* elevated sheets and popovers: a lighter grey glass, deeper shadow */
+  .sheet,
+  .iso-pop {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(255, 255, 255, 0.035) 100%),
+      rgba(34, 34, 37, 0.62);
+    -webkit-backdrop-filter: blur(40px) saturate(1.12);
+    backdrop-filter: blur(40px) saturate(1.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+      0 2px 4px rgba(0, 0, 0, 0.4),
+      0 40px 90px -20px rgba(0, 0, 0, 0.85);
+  }
+  .toast {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04)),
+      rgba(30, 30, 33, 0.72);
+    -webkit-backdrop-filter: blur(30px) saturate(1.12);
+    backdrop-filter: blur(30px) saturate(1.12);
+  }
+  .scrim {
+    -webkit-backdrop-filter: blur(20px) saturate(1);
+    backdrop-filter: blur(20px) saturate(1);
+  }
+  .icon-btn,
+  .wr-chip {
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    backdrop-filter: blur(16px) saturate(1.1);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass,
+    .sidebar,
+    .toolbar,
+    .sheet,
+    .devdock,
+    .iso-pop,
+    .toast {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: #1c1c1e;
+    }
+  }
+
+  /* ------------------------------------------------------------ the Cradle mark: light-grey C, the orb carries the state
+     Brand rule (claura-brand/BRAND.md, mono): the C (ring) is light grey; the orb (seal) is red while a breach is live
+     and system green once sealed. The C colour is one variable, --mark-c. */
+  :root {
+    --mark-c: #e5e5ea;
+  }
+  .mark [data-part="ring"] {
+    fill: var(--mark-c);
+  }
+  .mark [data-part="seal"] {
+    fill: var(--accent);
+    transition: fill 0.9s ease;
+  }
+  body[data-tone="contained"] .mark [data-part="seal"] {
+    fill: var(--safe);
+  }
+  .brand .mark {
+    filter: drop-shadow(0 0 12px rgba(255, 59, 48, 0.3));
+  }
+  body[data-tone="contained"] .brand .mark {
+    filter: drop-shadow(0 0 10px rgba(48, 209, 88, 0.18));
+  }
+  /* inside the state pill the whole mark takes the pill's colour */
+  .pill-mark [data-part="ring"],
+  .pill-mark [data-part="seal"] {
+    fill: currentColor;
+  }
+
+  /* ------------------------------------------------------------ overview badge: a hairline circle, the glyph is the signal */
+  .o-badge {
+    background: rgba(255, 255, 255, 0.045);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 14px 30px -14px rgba(0, 0, 0, 0.7);
+  }
+  body[data-tone="breach"] .o-badge {
+    background: rgba(var(--accent-rgb), 0.1);
+    box-shadow:
+      inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 0 40px -6px rgba(var(--accent-rgb), 0.3);
+  }
+
+  /* ------------------------------------------------------------ incident hero */
+  .hero[data-tone="breach"] {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 0 0 1px rgba(var(--accent-rgb), 0.3),
+      inset 0 0 90px -24px rgba(var(--accent-rgb), 0.16),
+      0 20px 44px -16px rgba(0, 0, 0, 0.7),
+      0 44px 90px -34px rgba(var(--accent-rgb), 0.2);
+  }
+  .hero[data-tone="contained"] {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 20px 44px -16px rgba(0, 0, 0, 0.7),
+      0 44px 90px -34px rgba(0, 0, 0, 0.6);
+  }
+  .ttc-num {
+    text-shadow: none;
+  }
+  body[data-tone="breach"] .ttc-num {
+    text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.18);
+  }
+  .hero[data-tone="contained"] .ttc-num {
+    color: var(--ink);
+  }
+  .hero[data-tone="contained"] .ttc-num .u {
+    color: var(--ink-3);
+  }
+  /* phase rail: done = small green check, connector lines stay neutral, the current phase is white once sealed */
+  .ph[data-s="done"]::after {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  body[data-tone="contained"] .ph[data-s="current"] i {
+    color: #0b0b0c;
+    background: var(--ink);
+    box-shadow:
+      0 0 0 4px rgba(255, 255, 255, 0.12),
+      0 0 16px rgba(255, 255, 255, 0.25);
+  }
+  .phase-full li[data-s="current"] {
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.22);
+  }
+  body[data-tone="breach"] .phase-full li[data-s="current"] {
+    background: rgba(var(--accent-rgb), 0.08);
+    box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.45);
+  }
+
+  /* ------------------------------------------------------------ attack path: red while open, white once sealed (the seal itself stays green) */
+  .p-hot[data-s="safe"] {
+    background: rgba(245, 245, 247, 0.85);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.28);
+  }
+  .p-tip[data-s="safe"] {
+    box-shadow:
+      0 0 0 4px rgba(255, 255, 255, 0.16),
+      0 0 12px rgba(255, 255, 255, 0.6);
+  }
+  .path[data-c="1"] .p-wall[data-s="breached"] {
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.3) 75%, transparent);
+  }
+  .p-seal[data-s="safe"] {
+    box-shadow:
+      0 0 14px rgba(var(--safe-rgb), 0.45),
+      0 8px 18px rgba(0, 0, 0, 0.45);
+  }
+  .p-node[data-s="frozen-safe"] .p-ico,
+  .p-node[data-s="spent"] .p-ico {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.3);
+  }
+  .p-node[data-s="safe"] .p-ico {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.75),
+      0 0 24px rgba(255, 255, 255, 0.12);
+  }
+  .p-ico {
+    background: rgba(30, 30, 33, 0.8);
+  }
+
+  /* ------------------------------------------------------------ chips: done / safe are grey with a green dot */
+  .chip[data-tone="safe"],
+  .chip[data-tone="done"] {
+    color: var(--ink-2);
+    background: var(--fill-1);
+    box-shadow: inset 0 0 0 1px var(--hair);
+  }
+  .chip[data-tone="safe"] i,
+  .chip[data-tone="done"] i {
+    background: var(--safe);
+    box-shadow: 0 0 6px rgba(var(--safe-rgb), 0.6);
+  }
+  [data-tone="safe"] > .a-ico,
+  [data-tone="safe"] .a-ico,
+  [data-tone="done"] > .a-ico,
+  [data-tone="done"] .a-ico {
+    color: var(--ink-2);
+    background: var(--fill-1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      inset 0 0 0 1px var(--hair);
+  }
+
+  /* ------------------------------------------------------------ buttons
+     primary = white; the one high-impact action (Approve quarantine) = red; review / approve calls = orange tint */
+  .btn-primary {
+    color: #0b0b0c;
+    text-shadow: none;
+    background: linear-gradient(180deg, #ffffff 0%, #f2f2f4 55%, #dedee3 100%);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      inset 0 -1.5px 0 rgba(0, 0, 0, 0.12),
+      0 2px 4px rgba(0, 0, 0, 0.4),
+      0 16px 34px -12px rgba(0, 0, 0, 0.7);
+  }
+  .btn-primary kbd {
+    background: rgba(0, 0, 0, 0.07);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    color: #3a3a3c;
+  }
+  #approveBtn.btn-primary {
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(90, 0, 0, 0.3);
+    background: linear-gradient(180deg, #ff4f45 0%, #ff3b30 50%, #e5281e 100%);
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.38),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.16),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.35),
+      0 18px 38px -14px rgba(var(--accent-rgb), 0.55);
+  }
+  #approveBtn.btn-primary:active {
+    background: var(--accent-press);
+  }
+  #approveBtn.btn-primary kbd {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  }
+  .btn-chip.accent {
+    color: #0b0b0c;
+    background: linear-gradient(180deg, #ffffff, #e6e6eb);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 6px 16px -6px rgba(0, 0, 0, 0.7);
+  }
+  .btn-chip.accent:hover {
+    background: #fff;
+  }
+  .btn-chip.accent[data-act="review"] {
+    color: var(--warn);
+    background: rgba(var(--warn-rgb), 0.15);
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--warn-rgb), 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .btn-chip.accent[data-act="review"]:hover {
+    background: rgba(var(--warn-rgb), 0.24);
+  }
+  .send,
+  .tb-btn[aria-pressed="true"] {
+    color: #0b0b0c;
+    background: linear-gradient(180deg, #ffffff, #e6e6eb);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 6px 16px -6px rgba(0, 0, 0, 0.7);
+  }
+  /* switches: Apple green for "on" (automatic), a small mark */
+  .switch[aria-checked="true"] {
+    background: var(--safe);
+  }
+
+  /* ------------------------------------------------------------ badges, avatars, roles */
+  .nav-badge {
+    color: #fff;
+    background: var(--accent);
+  }
+  .av[data-s="looking"] {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 0 0 2px rgba(19, 19, 21, 0.9),
+      0 0 0 4px rgba(255, 255, 255, 0.85);
+  }
+  .av,
+  .av.more {
+    color: #fff;
+  }
+  .av.more {
+    background: rgba(72, 72, 74, 0.9);
+  }
+  .role-opt[data-role="admin"][aria-checked="true"] {
+    background: linear-gradient(180deg, rgba(var(--warn-rgb), 0.3), rgba(var(--warn-rgb), 0.18));
+  }
+
+  /* ------------------------------------------------------------ data-scope status system (default re-asserted, then each status) */
+  .st-pill,
+  .as-ico,
+  .sc-seg,
+  .f-chip,
+  .attn,
+  .sc-bar {
+    --c: 174, 174, 178;
+  }
+  [data-st="intact"] {
+    --c: var(--st-intact);
+  }
+  [data-st="restored"] {
+    --c: var(--st-restored);
+  }
+  [data-st="evidence_preserved"] {
+    --c: var(--st-evidence);
+  }
+  [data-st="accessed"] {
+    --c: var(--st-accessed);
+  }
+  [data-st="exfil_suspected"] {
+    --c: var(--st-suspected);
+  }
+  [data-st="locked_ransomware"] {
+    --c: var(--st-locked);
+  }
+  [data-st="exfil_confirmed"] {
+    --c: var(--st-confirmed);
+  }
+
+  /* ------------------------------------------------------------ data-scope attention cards: neutral glass; the icon tile and pill carry the status */
+  .attn {
+    background: rgba(255, 255, 255, 0.035);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  }
+
+  /* ------------------------------------------------------------ fewer colours in the rest of the console */
+  /* the last-incident row icon follows the state (red while a breach is live) */
+  .last .r-ico {
+    color: var(--tone);
+  }
+  /* data classification is a label, not an alarm */
+  .as-class[data-c="restricted"] {
+    color: var(--ink-2);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  }
+  /* admin is the one elevated privilege: orange, sparingly */
+  .role-chip[data-role="admin"] {
+    color: var(--warn);
+    background: rgba(var(--warn-rgb), 0.13);
+    box-shadow: inset 0 0 0 1px rgba(var(--warn-rgb), 0.34);
+  }
+  /* verified out-of-band: the seal glyph is the green mark, the words stay grey */
+  .v-badge {
+    color: var(--ink-2);
+  }
+  .v-badge .ico {
+    color: var(--safe);
+  }
+  /* report phases: green check only, white for the current phase once sealed */
+  .phase-full li[data-s="done"] em {
+    color: var(--ink-2);
+  }
+  body[data-tone="contained"] .phase-full li[data-s="current"] .pf-i {
+    color: #0b0b0c;
+    background: var(--ink);
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.22);
+  }
+}

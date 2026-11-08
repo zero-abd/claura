@@ -3,8 +3,9 @@
 - Name: **Claura** (was "Bulkhead"; rename everything). Domain: **claura.tech**. Tagline: "Seal the breach before it spreads."
 - Agents keep their names: Sentry, Triage, Warden, Scribe. The product metaphor (sealing a breach like a ship's bulkhead) can stay in copy.
 - Colours
-  - Signal orange `#FF5A1F`: the brand colour and the breach. Primary accent.
-  - Sealed green `#2FBF71`: only for the sealed/contained state. Never a brand colour.
+  - Signal red `#FF3B30` (pressed `#D70015`): the brand accent (the orb) and the breach. Primary accent. (Was signal orange `#FF5A1F`; see `orange/`.)
+  - Sealed green `#30D158`: only for the sealed/contained state, as a small mark. Never a brand colour. (Was `#2FBF71`.)
+  - Ground black `#050506` to `#0D0E10`, graphite glass, text `#F5F5F7` / `#A1A1A6` / `#6E6E73`. See "Mono palette" below.
   - Ink `#0B0C0E` and white `#FFFFFF`.
 
 ## The mark: Cradle
@@ -43,11 +44,11 @@ seal  M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z
 
 ### Sealed state (UI)
 
-`#seal` is the orb. Tint only the orb green when the incident is contained; the C stays orange.
+`#seal` is the orb. Tint only the orb green when the incident is contained; the C stays light grey (`#E5E5EA` on dark, `#3A3A3C` on light).
 
 ```css
-#seal { fill: #FF5A1F; transition: fill .35s ease-out; }
-.contained #seal { fill: #2FBF71; }
+#seal { fill: #FF3B30; transition: fill .35s ease-out; }
+.contained #seal { fill: #30D158; }
 @media (prefers-reduced-motion: reduce) { #seal { transition: none; } }
 ```
 
@@ -69,14 +70,14 @@ Inline the SVG (or use `<use>`) so the id is reachable from CSS; an `<img>` cann
 
 Do
 - Use the colour mark on white, ink, or the deep glass backgrounds of the product.
-- Use `logo-mono.svg` (ink or white) on photos, on orange, and anywhere only one colour is available.
-- Keep the orb concentric with the C. Keep the C and the orb in the same orange unless the state is sealed.
+- Use `logo-mono.svg` (ink or white) on photos, on red, and anywhere only one colour is available.
+- Keep the orb concentric with the C. Keep the C grey and the orb red unless the state is sealed (green) or all clear (grey).
 
 Do not
-- Colour the C green, or the orb anything but orange or sealed green.
+- Colour the C green or red, or the orb anything but red, sealed green or all-clear grey.
 - Add shadows, glows, gradients, outlines, or glass effects to the logo. The app icon is the one place the glass treatment lives.
 - Rotate, skew, stretch, or mirror it. Do not close the mouth of the C or move the orb off-centre.
-- Put the orange mark on red, green or saturated pink, or on orange. Switch to mono.
+- Put the red orb on red, green, orange or saturated pink. Switch to mono.
 - Retype the wordmark. Use the outlined paths in `lockup*.svg`.
 
 ## Why Cradle (concept notes)
@@ -107,3 +108,15 @@ node recommendation.mjs          # tools/recommendation.html
 ```
 
 `app-icon-1024.png`, `favicon-32.png`, `contact-sheet.png` and `recommendation.png` are headless Chrome screenshots of the HTML or SVG (see `tools/shot.sh`); the 1024 icon and the favicon are rendered with a transparent background.
+
+## Mono palette (approved 2026-11-08)
+- **Ground and UI:** black and graphite with neutral grey glass.
+- **Red (#FF3B30, pressed #D70015):** only for danger: breach, critical states and high-impact actions.
+- **Orange (#FF9F0A):** only for pending, needs-approval and warning states.
+- **Green (#30D158):** only for small success marks.
+- **Mark:**
+  - The C (#ring) is light grey (#E5E5EA) on dark grounds and dark grey (#3A3A3C) on light grounds.
+  - The orb (#seal) is red (#FF3B30) during a breach, green (#30D158) once sealed, and grey when all is clear.
+  - The favicon uses a mid-grey C (#8E8E93) and a red orb.
+- **App icon:** graphite squircle, light-grey glass C, red glass orb.
+- **Originals:** the orange originals are kept in `orange/`.

@@ -2,7 +2,7 @@
 // To swap the mark, replace that file. Nothing else needs to change.
 //
 // Every `id="x"` inside the file becomes `data-part="x"` (+ a unique id per copy), so the UI can tint a part
-// without duplicate ids. Brand rule: the C (`ring`) stays orange; only the orb (`seal`) changes, orange while a
+// without duplicate ids. Brand rule: the C (`ring`) is light grey; only the orb (`seal`) changes, red while a
 // breach is live and green once contained. CSS does that through `[data-part="seal"]` (see style.css, .mark).
 import raw from "../public/logo.svg?raw";
 

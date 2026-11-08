@@ -14,12 +14,12 @@
     #{{P}}ov { position: absolute; inset: 0; pointer-events: none; }
     #{{P}}tag { left: 48px; top: 30px; }
     #{{P}}cnt { left: 110px; top: 470px; width: 640px; height: 380px; padding: 40px 48px 0; }
-    #{{P}}cnt .cst { display: flex; align-items: center; gap: 16px; font: 600 38px/1 var(--font); letter-spacing: -0.02em; color: #4fd68c; }
-    #{{P}}cnt .cst i { width: 20px; height: 20px; border-radius: 50%; background: var(--safe); }
+    #{{P}}cnt .cst { display: flex; align-items: center; gap: 16px; font: 600 38px/1 var(--font); letter-spacing: -0.02em; color: var(--ink); }
+    #{{P}}cnt .cst i { width: 20px; height: 20px; border-radius: 50%; background: var(--safe); box-shadow: 0 0 10px rgba(var(--safe-rgb), 0.55); }
     #{{P}}cnt .cnum { margin-top: 18px; display: flex; align-items: baseline; gap: 8px; font: 600 168px/0.9 var(--font); letter-spacing: -0.05em; color: var(--ink); }
     #{{P}}cnt .cnum .cs { font-size: 84px; color: var(--ink-2); letter-spacing: -0.02em; }
     #{{P}}cnt .clab { margin-top: 16px; font: 600 34px/1.2 var(--font); letter-spacing: -0.014em; color: var(--ink-2); }
-    #{{P}}cnt .cnote { position: absolute; left: 48px; bottom: 34px; font: 500 30px/1 var(--font); letter-spacing: -0.008em; color: var(--ink-3); }
+    #{{P}}cnt .cnote { position: absolute; left: 48px; bottom: 34px; font: 500 30px/1 var(--font); letter-spacing: -0.008em; color: var(--ink-2); }
     #{{P}}pointer { position: absolute; left: 0; top: 0; }
   </style>
   <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
@@ -36,7 +36,7 @@
             <div id="${P}cnote" class="cnote">${esc(p.counter.note || 'in our simulation')}</div>
           </div>` : '' }}
 {{ p.tag ? `          <div id="${P}tag" class="tag glass pill${p.tagHot ? ' hot' : ''}"><i></i>${esc(p.tag)}</div>` : '' }}
-{{ p.pick ? `          <div id="${P}pointer"><svg id="${P}cur" class="cursor" viewBox="0 0 28 28" width="56" height="56" aria-hidden="true" style="opacity:1"><path d="M6.2 3.6 21.4 15.2l-6.6.9 3.8 7.6-3 1.5-3.8-7.6-4.7 4.7z" fill="#0B0C0E" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg></div>` : '' }}
+{{ p.pick ? `          <div id="${P}pointer"><svg id="${P}cur" class="cursor" viewBox="0 0 28 28" width="56" height="56" aria-hidden="true" style="opacity:1"><path d="M6.2 3.6 21.4 15.2l-6.6.9 3.8 7.6-3 1.5-3.8-7.6-4.7 4.7z" fill="#0C0C0C" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg></div>` : '' }}
         </div>
       </div></div>
       <!--KIT:fx-->

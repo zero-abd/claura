@@ -5,9 +5,9 @@
     /*COMMON*/
     #cap-band { position: absolute; left: 192px; right: 192px; bottom: 96px; height: 76px; }
     .cap-g { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; white-space: nowrap; opacity: 0; }
-    .cap-in { display: inline-block; padding: 0 26px; border-radius: 20px; word-spacing: 0.14em; background: rgba(6, 8, 18, 0.58);
+    .cap-in { display: inline-block; padding: 0 26px; border-radius: 20px; word-spacing: 0.14em; background: rgba(8, 8, 8, 0.58);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.25); }
-    .cap-w { display: inline-block; font: 600 46px/76px var(--font); letter-spacing: -0.014em; color: rgba(247, 249, 255, 0.6); }
+    .cap-w { display: inline-block; font: 600 46px/76px var(--font); letter-spacing: -0.014em; color: rgba(249, 249, 249, 0.6); }
   </style>
   <div id="root" data-composition-id="captions" data-width="1920" data-height="1080" style="background: transparent">
     <div id="cap-band">
@@ -18,7 +18,7 @@
     (function () {
       const G = {{ json(CAPS.map((g) => [g.start, g.end, g.words.map((w) => [w.s, w.e])])) }};
       const tl = gsap.timeline({ paused: true });
-      const DIM = 'rgba(247,249,255,0.62)', LIT = 'rgba(247,249,255,1)';
+      const DIM = 'rgba(249,249,249,0.62)', LIT = 'rgba(249,249,249,1)';
       G.forEach(([s, e, ws], i) => {
         const g = '#cap-g' + i;
         tl.fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: 'power1.out' }, s);

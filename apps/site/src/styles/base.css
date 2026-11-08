@@ -1,18 +1,27 @@
-/* Tokens, wallpaper, type. System font only (SF Pro on Apple devices). */
+/* Tokens, wallpaper, type. System font only (SF Pro on Apple devices).
+
+   Claura · Mono. Black glass, white type, colour only where it means something.
+     red    #FF3B30 (pressed #D70015)  the brand accent and the breach: critical, alerts, the one high-impact action
+     orange #FF9F0A                    needs a person: pending approval, warnings (used sparingly)
+     green  #30D158                    tiny success marks only: the sealed dot, checks, the sealed orb. Never a large fill.
+   Everything that used to be blue, violet or teal is grey or white. */
 
 :root {
-  /* wallpaper */
-  --abyss: #04060d;
-  --hull: #0a1530;
-  --ultra: #2456ff;
-  --violet: #6b34e6;
+  /* ground */
+  --abyss: #050506;
+  --ground: #0d0e10;
   /* ink */
   --ink: #f5f5f7;
-  --ink-2: rgba(245, 245, 247, 0.74);
-  --ink-3: rgba(245, 245, 247, 0.58);
-  /* brand: signal for the breach, green only for "contained" */
-  --signal: #ff5a1f;
-  --contained: #2fbf71;
+  --ink-2: #a1a1a6;
+  --ink-3: #6e6e73;
+  /* brand + state colours (rgb triplets for rgba(var(--x-rgb), a)) */
+  --signal: #ff3b30;
+  --signal-rgb: 255, 59, 48;
+  --signal-press: #d70015;
+  --warn: #ff9f0a;
+  --warn-rgb: 255, 159, 10;
+  --contained: #30d158;
+  --contained-rgb: 48, 209, 88;
 
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
   --wrap: 1120px;
@@ -21,6 +30,13 @@
   --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
 
   color-scheme: dark;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --ink-2: #d1d1d6;
+    --ink-3: #aeaeb2;
+  }
 }
 
 *,
@@ -44,6 +60,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
+}
+
+::selection {
+  background: rgba(var(--signal-rgb), 0.38);
 }
 
 img,
@@ -85,8 +105,8 @@ kbd {
   letter-spacing: 0.02em;
   padding: 0.05em 0.5em 0.1em;
   border-radius: 0.45em;
-  background: rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   white-space: nowrap;
 }
 
@@ -101,18 +121,18 @@ kbd {
   margin-inline: auto;
 }
 
-/* ── Wallpaper: a deep sea of blue and violet, fixed behind everything ── */
+/* ── Wallpaper: near-black, a few soft grey lights, fixed behind everything.
+   No colour in it: red only ever appears locally, where something is going wrong. ── */
 .wallpaper {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(70% 55% at 12% 6%, rgba(36, 86, 255, 0.62), transparent 62%),
-    radial-gradient(55% 46% at 94% 16%, rgba(107, 52, 230, 0.52), transparent 64%),
-    radial-gradient(64% 52% at 76% 100%, rgba(10, 150, 180, 0.34), transparent 66%),
-    radial-gradient(46% 40% at 2% 88%, rgba(255, 90, 31, 0.12), transparent 70%),
-    linear-gradient(165deg, #060b1d 0%, #091330 48%, #100a29 100%);
+    radial-gradient(70% 55% at 12% 4%, rgba(255, 255, 255, 0.1), transparent 62%),
+    radial-gradient(55% 46% at 94% 14%, rgba(255, 255, 255, 0.065), transparent 64%),
+    radial-gradient(64% 52% at 76% 100%, rgba(255, 255, 255, 0.045), transparent 66%),
+    linear-gradient(165deg, var(--ground) 0%, #08090a 48%, var(--abyss) 100%);
 }
 
 /* fine grain to kill banding in the dark gradients */
@@ -158,38 +178,62 @@ kbd {
   font-size: 0.9375rem;
 }
 
+/* primary = white. Red is kept for the one high-impact action (the approval button below). */
 .btn-primary {
-  color: #1a0a04;
-  background: linear-gradient(180deg, #ff8a5c 0%, var(--signal) 52%, #ee4a10 100%);
+  color: #0b0b0c;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f2f4 55%, #dedee3 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(120, 30, 0, 0.35),
-    0 0 0 1px rgba(255, 90, 31, 0.7),
-    0 12px 34px -8px rgba(255, 90, 31, 0.6);
+    inset 0 1px 0 #fff,
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 16px 34px -12px rgba(0, 0, 0, 0.7);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.06) saturate(1.05);
+  filter: brightness(1.04);
 }
 
 .btn-primary kbd {
-  background: rgba(26, 10, 4, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(26, 10, 4, 0.28);
+  background: rgba(0, 0, 0, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  color: #3a3a3c;
   font-size: 0.875rem;
 }
 
-.btn-glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07)), rgba(16, 24, 56, 0.3);
-  -webkit-backdrop-filter: blur(22px) saturate(1.8);
-  backdrop-filter: blur(22px) saturate(1.8);
+.btn-primary[data-approve-btn] {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(90, 0, 0, 0.3);
+  background: linear-gradient(180deg, #ff4f45 0%, var(--signal) 50%, #e5281e 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    0 10px 30px -10px rgba(0, 0, 0, 0.55);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 18px 38px -14px rgba(var(--signal-rgb), 0.55);
+}
+
+.btn-primary[data-approve-btn]:active {
+  background: var(--signal-press);
+}
+
+.btn-primary[data-approve-btn] kbd {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.btn-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04)), rgba(26, 26, 28, 0.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
+  backdrop-filter: blur(24px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 10px 30px -10px rgba(0, 0, 0, 0.6);
 }
 
 .btn-glass:hover {
-  background-color: rgba(60, 80, 160, 0.35);
+  background-color: rgba(70, 70, 74, 0.45);
 }
 
 .section-head {

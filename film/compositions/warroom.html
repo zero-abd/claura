@@ -17,7 +17,14 @@
        which is converted to the frame rect at the cut from the camera keys. -->
   <style>
     /* Claura film kit: Liquid Glass, matched to the product (bulkhead/src/style.css: tokens -> wallpaper -> glass).
-   Inlined into every scene by tools/build.mjs at the COMMON marker. Scene-only rules go under #<id>-stage. */
+   Inlined into every scene by tools/build.mjs at the COMMON marker. Scene-only rules go under #<id>-stage.
+   MONO (the approved product theme, /tmp/claura-mono/src/theme-mono.css): black ground, soft grey lights, neutral
+   graphite glass, white type. Colour only where it means something:
+     red    #FF3B30 (pressed #D70015)  breach, critical, denied, high-impact, the brand (the Cradle C and orb)
+     orange #FF9F0A                    sparingly: warnings, needs a human
+     green  #30D158                    tiny success marks only (the sealed orb, a dot, a check), never a large fill
+   Literal colours were rewritten by tools/mono-remap.mjs (re-runnable, idempotent); the colour original of every
+   source file is in .backup-v1-color/. */
 @font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
 @font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-500.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: block; }
 @font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: block; }
@@ -25,18 +32,22 @@
 
 :root {
   --font: 'Inter Film', 'Inter', sans-serif;
-  --ink: rgba(247, 249, 255, 0.97);
-  --ink-2: rgba(226, 232, 250, 0.74);
-  --ink-3: rgba(214, 222, 246, 0.54);
-  --ink-4: rgba(214, 222, 246, 0.26);
-  --hair: rgba(255, 255, 255, 0.1);
-  --fill-1: rgba(255, 255, 255, 0.06);
-  --fill-2: rgba(255, 255, 255, 0.1);
-  --accent: var(--color-accent, #ff5a1f);
-  --accent-rgb: 255, 90, 31;
-  --safe: var(--color-sealed, #2fbf71);
-  --safe-rgb: 47, 191, 113;
-  --bg: #05070d;
+  --ink: #f5f5f7;
+  --ink-2: #a1a1a6;
+  --ink-3: #6e6e73;
+  --ink-4: rgba(245, 245, 247, 0.24);
+  --hair: rgba(255, 255, 255, 0.09);
+  --fill-1: rgba(255, 255, 255, 0.05);
+  --fill-2: rgba(255, 255, 255, 0.09);
+  --accent: var(--color-accent, #ff3b30);
+  --accent-rgb: 255, 59, 48;
+  --accent-press: #d70015;
+  --hot-ink: #ff453a;
+  --warn: #ff9f0a;
+  --warn-rgb: 255, 159, 10;
+  --safe: var(--color-sealed, #30d158);
+  --safe-rgb: 48, 209, 88;
+  --bg: #050506;
 }
 #root { position: absolute; inset: 0; overflow: hidden; background: transparent; font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
 #root * { box-sizing: border-box; }
@@ -51,16 +62,16 @@
 .fx-rim { position: absolute; left: 0; top: 0; width: 10px; height: 10px; opacity: 0; pointer-events: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.42), 0 24px 70px rgba(0, 0, 0, 0.32); }
 
 /* ------------------------------------------------------------ wallpaper (deep, never a flat void) */
-.wall { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(120% 100% at 50% -10%, #0e1531 0%, #080b19 55%, #04060b 100%); }
+.wall { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(120% 100% at 50% -10%, #111113 0%, #09090a 52%, #050506 100%); }
 .wp { position: absolute; border-radius: 50%; }
-.wp.b1 { width: 1320px; height: 1100px; left: -420px; top: -430px; background: radial-gradient(closest-side, rgba(38, 66, 214, 0.74), rgba(38, 66, 214, 0.28) 55%, transparent); }
-.wp.b2 { width: 1220px; height: 1220px; right: -360px; top: -90px; background: radial-gradient(closest-side, rgba(116, 52, 222, 0.6), rgba(116, 52, 222, 0.2) 58%, transparent); }
-.wp.b3 { width: 1540px; height: 980px; left: 16%; bottom: -580px; background: radial-gradient(closest-side, rgba(16, 156, 186, 0.48), rgba(16, 156, 186, 0.16) 60%, transparent); }
-.wp.b4 { width: 900px; height: 900px; left: -230px; bottom: -300px; background: radial-gradient(closest-side, rgba(200, 56, 132, 0.34), transparent); }
+.wp.b1 { width: 1320px; height: 1100px; left: -420px; top: -430px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045) 55%, transparent); }
+.wp.b2 { width: 1220px; height: 1220px; right: -360px; top: -90px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03) 58%, transparent); }
+.wp.b3 { width: 1540px; height: 980px; left: 16%; bottom: -580px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.024) 60%, transparent); }
+.wp.b4 { width: 900px; height: 900px; left: -230px; bottom: -300px; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.04), transparent); }
 .wp.ember, .wp.green { width: 1240px; height: 920px; right: 0; top: -300px; opacity: 0; }
-.wp.ember { background: radial-gradient(closest-side, rgba(255, 90, 31, 0.56), rgba(255, 90, 31, 0.17) 55%, transparent); }
-.wp.green { background: radial-gradient(closest-side, rgba(47, 191, 113, 0.44), rgba(47, 191, 113, 0.14) 55%, transparent); }
-.wp.spot { width: 900px; height: 900px; left: 510px; top: 90px; opacity: 0; background: radial-gradient(closest-side, rgba(255, 90, 31, 0.5), rgba(255, 90, 31, 0.12) 60%, transparent); }
+.wp.ember { background: radial-gradient(closest-side, rgba(255, 59, 48, 0.22), rgba(255, 59, 48, 0.07) 55%, transparent); }
+.wp.green { background: radial-gradient(closest-side, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02) 55%, transparent); }
+.wp.spot { width: 900px; height: 900px; left: 510px; top: 90px; opacity: 0; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.055) 60%, transparent); }
 .grain { position: absolute; inset: 0; opacity: 0.08; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .vig { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 75% at 50% 42%, transparent 45%, rgba(0, 0, 0, 0.5) 100%); }
 
@@ -70,18 +81,18 @@
   border-radius: 36px;
   color: var(--ink);
   background:
-    linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 36%, rgba(255, 255, 255, 0.025) 100%),
-    rgba(16, 22, 46, 0.38);
-  -webkit-backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
-  backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(255, 255, 255, 0.025) 100%),
+    rgba(20, 20, 22, 0.42);
+  -webkit-backdrop-filter: blur(30px) saturate(1.15);
+  backdrop-filter: blur(30px) saturate(1.15);
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-    inset 0 24px 36px -24px rgba(255, 255, 255, 0.14),
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 22px 48px -16px rgba(0, 0, 0, 0.55),
-    0 48px 96px -36px rgba(0, 0, 0, 0.5);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    inset 0 24px 36px -24px rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 22px 48px -16px rgba(0, 0, 0, 0.7),
+    0 48px 96px -36px rgba(0, 0, 0, 0.6);
 }
 .glass::before {
   content: '';
@@ -90,29 +101,30 @@
   border-radius: inherit;
   padding: 1.5px;
   pointer-events: none;
-  background: linear-gradient(155deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.12) 22%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.26) 100%);
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.09) 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-.glass.thick { background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)), rgba(9, 13, 30, 0.56); -webkit-backdrop-filter: blur(46px) saturate(1.8); backdrop-filter: blur(46px) saturate(1.8); }
-.glass.clear { background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.09)); -webkit-backdrop-filter: blur(20px) saturate(1.7); backdrop-filter: blur(20px) saturate(1.7); }
+.glass.thick { background: linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02)), rgba(12, 12, 14, 0.6); -webkit-backdrop-filter: blur(40px) saturate(1.1); backdrop-filter: blur(40px) saturate(1.1); }
+.glass.clear { background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(20px) saturate(1.15); backdrop-filter: blur(20px) saturate(1.15); }
 .glass.pill { border-radius: 999px; }
 .glass.hot {
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
-    inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.42),
-    inset 0 0 90px -20px rgba(var(--accent-rgb), 0.3),
-    0 22px 48px -16px rgba(0, 0, 0, 0.55),
-    0 48px 96px -36px rgba(var(--accent-rgb), 0.38);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.4),
+    inset 0 0 90px -24px rgba(var(--accent-rgb), 0.18),
+    0 22px 48px -16px rgba(0, 0, 0, 0.7),
+    0 48px 96px -36px rgba(var(--accent-rgb), 0.24);
 }
+/* contained: the room stays calm; the green is only the small mark inside (never a green rim or wash) */
 .glass.safe {
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
-    inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.4),
-    inset 0 0 90px -20px rgba(var(--safe-rgb), 0.26),
-    0 22px 48px -16px rgba(0, 0, 0, 0.55),
-    0 48px 96px -36px rgba(var(--safe-rgb), 0.32);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 22px 48px -16px rgba(0, 0, 0, 0.7),
+    0 48px 96px -36px rgba(0, 0, 0, 0.6);
 }
 /* a lit control: the product's primary button */
 .btn-primary {
@@ -120,9 +132,9 @@
   display: flex; align-items: center; justify-content: center; gap: 18px;
   height: 88px; padding: 0 48px; border-radius: 44px;
   font: 600 34px/1 var(--font); letter-spacing: -0.016em; color: #fff; white-space: nowrap;
-  background: linear-gradient(180deg, #ff7f4d 0%, #ff5a1f 52%, #f24a0d 100%);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.3), 0 22px 44px -12px rgba(var(--accent-rgb), 0.7);
-  text-shadow: 0 1px 1px rgba(120, 30, 0, 0.35);
+  background: linear-gradient(180deg, #ff4f45 0%, #ff3b30 50%, #e5281e 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.38), inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 4px rgba(0, 0, 0, 0.35), 0 22px 44px -12px rgba(var(--accent-rgb), 0.55);
+  text-shadow: 0 1px 1px rgba(90, 0, 0, 0.3);
 }
 
 /* ------------------------------------------------------------ type: Inter as the SF stand-in, Apple hierarchy */
@@ -150,17 +162,20 @@
   box-shadow: inset 0 0 0 1.5px var(--hair), inset 0 1.5px 0 rgba(255, 255, 255, 0.14);
 }
 .chip i { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-4); flex: none; }
-.chip.hot { color: #ff7a45; background: rgba(var(--accent-rgb), 0.15); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.36), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
-.chip.hot i { background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.9); }
-.chip.safe { color: #4fd68c; background: rgba(var(--safe-rgb), 0.14); box-shadow: inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
-.chip.safe i { background: var(--safe); }
+.chip.hot { color: var(--hot-ink); background: rgba(var(--accent-rgb), 0.15); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.36), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
+.chip.hot i { background: var(--accent); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7); }
+.chip.safe { color: var(--ink-2); background: var(--fill-1); box-shadow: inset 0 0 0 1.5px var(--hair), inset 0 1.5px 0 rgba(255, 255, 255, 0.12); }
+.chip.safe i { background: var(--safe); box-shadow: 0 0 8px rgba(var(--safe-rgb), 0.6); }
+/* needs a human: orange, sparingly */
+.chip.warn { color: var(--warn); background: rgba(var(--warn-rgb), 0.13); box-shadow: inset 0 0 0 1.5px rgba(var(--warn-rgb), 0.38), inset 0 1.5px 0 rgba(255, 255, 255, 0.12); }
+.chip.warn i { background: var(--warn); }
 
 /* ------------------------------------------------------------ device frame for real UI footage */
 .device {
   position: absolute;
   border-radius: 28px;
   overflow: hidden;
-  background: #05070d;
+  background: #070707;
   box-shadow:
     0 0 0 1.5px rgba(255, 255, 255, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.35),
@@ -168,13 +183,11 @@
     0 80px 150px -50px rgba(0, 0, 0, 0.62);
 }
 .device::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 6; box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
-.dev-bar { position: absolute; left: 0; right: 0; top: 0; height: 38px; z-index: 4; background: linear-gradient(180deg, rgba(36, 42, 68, 0.98), rgba(20, 24, 42, 0.98)); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.55); }
+.dev-bar { position: absolute; left: 0; right: 0; top: 0; height: 38px; z-index: 4; background: linear-gradient(180deg, rgba(43, 43, 43, 0.98), rgba(25, 25, 25, 0.98)); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.55); }
 .dev-lights { position: absolute; left: 20px; top: 13px; display: flex; gap: 9px; }
 .dev-lights i { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 0.75px rgba(0, 0, 0, 0.25); }
-.dev-lights i:nth-child(1) { background: #ff5f57; }
-.dev-lights i:nth-child(2) { background: #febc2e; }
-.dev-lights i:nth-child(3) { background: #28c840; }
-.dev-screen { position: absolute; left: 0; right: 0; bottom: 0; top: 38px; overflow: hidden; background: #05070d; }
+.dev-lights i { background: rgba(255, 255, 255, 0.2); }
+.dev-screen { position: absolute; left: 0; right: 0; bottom: 0; top: 38px; overflow: hidden; background: #070707; }
 .device.bare .dev-bar { display: none; }
 .device.bare .dev-screen { top: 0; }
 .dev-screen > img, .dev-screen > video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -190,11 +203,11 @@
 
 /* ------------------------------------------------------------ v3 (Liquid Glass film): device chrome in glass, app windows, focus, keys, stamp, tag */
 /* the device's title bar is glass over the wallpaper (not a solid strip) */
-.device { background: rgba(6, 9, 20, 0.9); }
-.dev-bar { height: 40px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), inset 0 1.5px 0 rgba(255, 255, 255, 0.22); }
+.device { background: rgba(9, 9, 9, 0.9); }
+.dev-bar { height: 40px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(30px) saturate(1.1); backdrop-filter: blur(30px) saturate(1.1); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.07), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
 .dev-lights { left: 18px; top: 14px; gap: 8px; }
 .dev-lights i { width: 12px; height: 12px; }
-.dev-title { position: absolute; left: 0; right: 0; top: 0; height: 40px; text-align: center; font: 600 16px/40px var(--font); letter-spacing: -0.005em; color: rgba(236, 240, 255, 0.62); }
+.dev-title { position: absolute; left: 0; right: 0; top: 0; height: 40px; text-align: center; font: 600 16px/40px var(--font); letter-spacing: -0.005em; color: rgba(245, 245, 247, 0.6); }
 .dev-screen { top: 40px; }
 
 /* an app window drawn for the motion-graphic beats (mail, file share, tools): glass body, glass title bar */
@@ -202,39 +215,39 @@
 .win .wbar { position: absolute; left: 0; right: 0; top: 0; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 22px; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08); }
 .win .wbar .lights { display: flex; gap: 8px; flex: none; }
 .win .wbar .lights i { width: 13px; height: 13px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); }
-.win .wbar .lights i.r { background: #ff5f57; } .win .wbar .lights i.y { background: #febc2e; } .win .wbar .lights i.g { background: #28c840; }
+.win .wbar .lights i.r, .win .wbar .lights i.y, .win .wbar .lights i.g { background: rgba(255, 255, 255, 0.2); }
 .win .wbar .wt { font: 600 24px/1 var(--font); letter-spacing: -0.012em; color: var(--ink-2); white-space: nowrap; }
 .win .wbody { position: absolute; left: 0; right: 0; top: 52px; bottom: 0; }
 
 /* a focus ring around the UI element the line names (footage coordinates, drawn inside the camera) */
 .focus { position: absolute; z-index: 30; border-radius: 14px; opacity: 0; pointer-events: none;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.92), 0 0 0 9px rgba(255, 255, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.35); }
-.focus.hot { box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.98), 0 0 0 9px rgba(var(--accent-rgb), 0.2), 0 10px 40px rgba(0, 0, 0, 0.35); }
+.focus.hot { box-shadow: 0 0 0 3px rgba(255, 69, 58, 0.98), 0 0 0 9px rgba(var(--accent-rgb), 0.2), 0 10px 40px rgba(0, 0, 0, 0.35); }
 
 /* keycaps (Command-Enter): thick glass keys with a lit symbol */
 .keycap { position: absolute; width: 176px; height: 176px; border-radius: 40px; display: grid; place-items: center;
   font: 600 92px/1 var(--font); color: #fff; letter-spacing: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.04)), rgba(22, 28, 56, 0.55);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.28), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14), 0 14px 0 -4px rgba(8, 10, 24, 0.55), 0 30px 60px -16px rgba(0, 0, 0, 0.7); }
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07) 60%, rgba(255, 255, 255, 0.035)), rgba(28, 28, 30, 0.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.1); backdrop-filter: blur(28px) saturate(1.1);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.28), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14), 0 14px 0 -4px rgba(11, 11, 11, 0.55), 0 30px 60px -16px rgba(0, 0, 0, 0.7); }
 .keycap .kshadow { position: absolute; inset: 0; border-radius: inherit; }
 
 /* a stamp (NO MATCH, DENIED): an outlined lozenge that slams in, never a glow */
 .stamp { position: absolute; display: flex; align-items: center; gap: 18px; height: 112px; padding: 0 40px; border-radius: 26px;
-  font: 700 64px/1 var(--font); letter-spacing: 0.04em; color: #ff6a33; white-space: nowrap; text-transform: uppercase;
-  border: 6px solid #ff5a1f; background: rgba(40, 10, 4, 0.55); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+  font: 700 64px/1 var(--font); letter-spacing: 0.04em; color: var(--hot-ink); white-space: nowrap; text-transform: uppercase;
+  border: 6px solid var(--accent); background: rgba(30, 6, 5, 0.6); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 
 /* a small honest label ("Demo data", "Roadmap"): glass pill, fixed in the frame, never in the camera */
 .tag { position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 24px 0 18px; border-radius: 27px;
   font: 600 28px/1 var(--font); letter-spacing: -0.008em; color: var(--ink-2); white-space: nowrap; }
-.tag i { width: 12px; height: 12px; border-radius: 50%; background: rgba(226, 232, 250, 0.7); flex: none; }
+.tag i { width: 12px; height: 12px; border-radius: 50%; background: rgba(245, 245, 247, 0.7); flex: none; }
 .tag.hot i { background: var(--accent); }
 
-/* a signal chip (the warnings): glass pill, orange dot, one line */
+/* a signal chip (the warnings): glass pill, a small orange dot (a warning nobody has connected yet), white key, grey value */
 .sig { position: absolute; display: inline-flex; align-items: center; gap: 16px; height: 76px; padding: 0 32px 0 24px; border-radius: 38px; white-space: nowrap;
   font: 600 30px/1 var(--font); letter-spacing: -0.012em; color: var(--ink); }
-.sig i { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.18); }
-.sig .k { color: #ff7a45; }
+.sig i { width: 16px; height: 16px; border-radius: 50%; background: var(--warn); flex: none; box-shadow: 0 0 0 5px rgba(var(--warn-rgb), 0.16); }
+.sig .k { color: var(--ink); }
 .sig .v { color: var(--ink-2); font-weight: 500; }
 
     #warroom-over { position: absolute; inset: 0; pointer-events: none; }
@@ -254,8 +267,8 @@
           <div id="warroom-dev" class="device" style="left:200px; top:64px; width:1520px; height:990px;">
             <div class="dev-bar"><div class="dev-lights"><i></i><i></i><i></i></div><div class="dev-title" data-layout-ignore>Claura · War Room</div></div>
             <div id="warroom-screen" class="dev-screen">
-              <video id="warroom-v0" class="clip" src="assets/clips/warroom.mp4" data-start="0" data-duration="5" data-media-start="0.8" data-playback-rate="0.52" data-track-index="3" muted playsinline style="z-index:1"></video>
-              <video id="warroom-v1" class="clip" src="assets/clips/warroom.mp4" data-start="5" data-duration="4.546" data-media-start="3.4" data-playback-rate="0.5719" data-track-index="4" muted playsinline style="z-index:2"></video>
+              <video id="warroom-v0" class="clip" src="assets/clips/warroom.mp4" data-start="0" data-duration="5" data-media-start="0.78" data-playback-rate="0.52" data-track-index="3" muted playsinline style="z-index:1"></video>
+              <video id="warroom-v1" class="clip" src="assets/clips/warroom.mp4" data-start="5" data-duration="4.546" data-media-start="3.38" data-playback-rate="0.5719" data-track-index="4" muted playsinline style="z-index:2"></video>
             </div>
           </div>
           <div id="warroom-fo0" class="focus" style="left:538.4px; top:186.3px; width:555.9px; height:40.7px; border-radius:7.2px; box-shadow: 0 0 0 1.54px rgba(255,255,255,0.95), 0 0 0 5.13px rgba(255,255,255,0.16), 0 5.1px 20.5px rgba(0,0,0,0.4);" data-layout-ignore></div>
@@ -270,7 +283,7 @@
 
           <!-- macOS-style arrow cursor (4.8% of the frame height); used only where the footage has no drawn cursor -->
 <svg id="warroom-cursor" class="cursor" viewBox="0 0 28 28" width="52" height="52" aria-hidden="true">
-  <path d="M6.2 3.6 21.4 15.2l-6.6.9 3.8 7.6-3 1.5-3.8-7.6-4.7 4.7z" fill="#0B0C0E" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" />
+  <path d="M6.2 3.6 21.4 15.2l-6.6.9 3.8 7.6-3 1.5-3.8-7.6-4.7 4.7z" fill="#0C0C0C" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" />
 </svg>
 
         </div>
@@ -295,8 +308,9 @@
 const K = (() => {
   const $ = (s) => (typeof s === 'string' ? document.querySelector(s) : s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
-  const INK = 'rgba(247,249,255,0.97)', INK4 = 'rgba(214,222,246,0.24)';
-  const ORANGE = '#FF5A1F', GREEN = '#2FBF71';
+  // mono: white ink; RED is the brand and the breach (the name ORANGE is kept for the scenes that use it), GREEN only small marks
+  const INK = '#f5f5f7', INK4 = 'rgba(245,245,247,0.24)';
+  const ORANGE = '#FF3B30', RED = '#FF3B30', AMBER = '#FF9F0A', GREEN = '#30D158';
   const W = 1920, H = 1080;
 
   // ---------------------------------------------------------------- wallpaper
@@ -542,7 +556,7 @@ const K = (() => {
     exit(tl, P, S, o);
   }
 
-  return { $, $$, ORANGE, GREEN, INK, INK4, wall, tone, blurWords, inkWords, blurLine, letters, out, land, glassIn, pop, count,
+  return { $, $$, ORANGE, RED, AMBER, GREEN, INK, INK4, wall, tone, blurWords, inkWords, blurLine, letters, out, land, glassIn, pop, count,
     camState, cam, camScaleAt, cursor, enter, exit, zoomOut, morphIn, morphOut, scene };
 })();
 
@@ -618,7 +632,7 @@ Object.assign(K, (() => {
   return { project, PTS, facility, focus, stamp, press, lerp, clamp01, easeInOut };
 })());
 
-      const P = '#warroom-', S = {"id":"warroom","from":64.786,"to":74.332,"cut":9.546,"dur":9.546,"in":{"dir":1,"dur":0.3,"type":"whip"},"out":{"dir":1,"dur":0.3,"type":"whip","next":"access"},"tone":"contained","toneTo":"nominal","prev":"contained","next":"access"}, p = {"title":"Claura · War Room","clip":{"src":"assets/clips/warroom.mp4","map":[[0,0.8],[5,3.4],["end",6]]},"cam":[{"t":0,"u":0.5,"v":0.45,"z":1.15},{"t":0.1,"u":0.5,"v":0.45,"z":1.25,"d":1.5,"ease":"power1.inOut"},{"t":1.365,"u":0.44,"v":0.2,"z":1.95,"fy":440,"d":0.6},{"t":2.445,"u":0.33,"v":0.68,"z":2.15,"d":0.6},{"t":4.643,"u":0.56,"v":0.66,"z":2,"d":0.6},{"t":6.207,"u":0.43,"v":0.28,"z":1.85,"fy":470,"d":0.6},{"t":7.028,"u":0.68,"v":0.28,"z":2.05,"fy":470,"d":0.5}],"focus":[{"t":1.956,"until":2.445,"u0":0.226,"v0":0.092,"u1":0.585,"v1":0.124},{"t":2.695,"until":3.199,"u0":0.222,"v0":0.757,"u1":0.357,"v1":0.792},{"t":3.199,"until":4.02,"u0":0.222,"v0":0.84,"u1":0.357,"v1":0.874},{"t":4.02,"until":4.643,"u0":0.222,"v0":0.715,"u1":0.357,"v1":0.75},{"t":4.843,"until":6.207,"u0":0.378,"v0":0.455,"u1":0.748,"v1":0.505},{"t":6.657,"until":7.028,"u0":0.226,"v0":0.162,"u1":0.66,"v1":0.196},{"t":7.228,"until":8.378,"u0":0.688,"v0":0.165,"u1":0.93,"v1":0.29},{"t":8.428,"u0":0.688,"v0":0.305,"u1":0.93,"v1":0.402}]};
+      const P = '#warroom-', S = {"id":"warroom","from":64.786,"to":74.332,"cut":9.546,"dur":9.546,"in":{"dir":1,"dur":0.3,"type":"whip"},"out":{"dir":1,"dur":0.3,"type":"whip","next":"access"},"tone":"contained","toneTo":"nominal","prev":"contained","next":"access"}, p = {"title":"Claura · War Room","clip":{"src":"assets/clips/warroom.mp4","map":[[0,0.78],[5,3.38],["end",5.98]]},"cam":[{"t":0,"u":0.5,"v":0.45,"z":1.15},{"t":0.1,"u":0.5,"v":0.45,"z":1.25,"d":1.5,"ease":"power1.inOut"},{"t":1.365,"u":0.44,"v":0.2,"z":1.95,"fy":440,"d":0.6},{"t":2.445,"u":0.33,"v":0.68,"z":2.15,"d":0.6},{"t":4.643,"u":0.56,"v":0.66,"z":2,"d":0.6},{"t":6.207,"u":0.43,"v":0.28,"z":1.85,"fy":470,"d":0.6},{"t":7.028,"u":0.68,"v":0.28,"z":2.05,"fy":470,"d":0.5}],"focus":[{"t":1.956,"until":2.445,"u0":0.226,"v0":0.092,"u1":0.585,"v1":0.124},{"t":2.695,"until":3.199,"u0":0.222,"v0":0.757,"u1":0.357,"v1":0.792},{"t":3.199,"until":4.02,"u0":0.222,"v0":0.84,"u1":0.357,"v1":0.874},{"t":4.02,"until":4.643,"u0":0.222,"v0":0.715,"u1":0.357,"v1":0.75},{"t":4.843,"until":6.207,"u0":0.378,"v0":0.455,"u1":0.748,"v1":0.505},{"t":6.657,"until":7.028,"u0":0.226,"v0":0.162,"u1":0.66,"v1":0.196},{"t":7.228,"until":8.378,"u0":0.688,"v0":0.165,"u1":0.93,"v1":0.29},{"t":8.428,"u0":0.688,"v0":0.305,"u1":0.93,"v1":0.402}]};
       const L = {"x":200,"y":64,"w":1520,"bar":40,"sh":950,"h":990};
       const ctx = { screen: { x: L.x, y: L.y + L.bar, w: L.w, h: L.sh } };
       const tl = gsap.timeline({ paused: true });

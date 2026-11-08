@@ -1,4 +1,5 @@
 import "./style.css";
+import "./theme-mono.css"; // Mono theme: black glass, white type, red/orange/green only for state
 
 import {
   APPROVAL_AT,

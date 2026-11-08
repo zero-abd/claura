@@ -12,14 +12,19 @@ import { initGlass } from "./glass";
 /* ───────────────────────── Edit these when assets change ─────────────────────────
    Everything in public/ is served relative to the page.
    - PROTOTYPE_URL: where "Open the prototype" points.
-   - SHOTS: product screenshots in public/shots/ (the dashboard agent refreshes these).
+   - SHOTS: product screenshots in public/shots/ (WebP, 2400 x 1500, from the mono console).
    - VIDEO_SRC: the demo video. If the file is missing, the page shows a "coming soon" state.
    - The logo is one file: public/brand/logo.svg (favicon: public/brand/favicon.svg).
 ─────────────────────────────────────────────────────────────────────────────────── */
 const PROTOTYPE_URL = "http://localhost:4317/?demo=1";
 const SHOTS = {
-  hero: "shots/approval.png", // large frame under the hero
-  poster: "media/claura-poster.png", // video poster
+  hero: "shots/console-breach.webp", // large frame under the hero: a breach in progress
+  poster: "media/claura-poster.png", // video poster: the console once the incident is contained (9.4 s)
+  // more console views, ready to use (not placed on the page yet)
+  contained: "shots/console-contained.webp",
+  approval: "shots/console-approval.webp",
+  warroom: "shots/console-warroom.webp",
+  scope: "shots/console-scope.webp",
 } as const;
 const VIDEO_SRC = "media/claura-demo.mp4";
 /* ─────────────────────────────────────────────────────────────────────────────── */

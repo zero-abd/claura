@@ -50,8 +50,8 @@
 /* a firmer tint than other glass, so content passing under the bar never fights its labels */
 .nav.glass {
   background:
-    linear-gradient(155deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 60%),
-    rgba(8, 14, 38, 0.58);
+    linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 60%),
+    rgba(14, 14, 16, 0.62);
 }
 
 @media (max-width: 760px) {
@@ -83,7 +83,7 @@
 
 .doors rect {
   fill: none;
-  stroke: rgb(160, 188, 255);
+  stroke: rgb(189, 189, 189);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
@@ -135,7 +135,7 @@
 }
 
 .mark-tile.sealed svg {
-  filter: drop-shadow(0 0 20px rgba(47, 191, 113, 0.42));
+  filter: drop-shadow(0 0 18px rgba(var(--contained-rgb), 0.26));
 }
 
 .mark-tile:active {
@@ -148,7 +148,7 @@
   width: 56px;
   height: 56px;
   overflow: visible;
-  filter: drop-shadow(0 0 18px rgba(255, 90, 31, 0.35));
+  filter: drop-shadow(0 0 18px rgba(var(--signal-rgb), 0.3));
 }
 
 .hero h1 {
@@ -158,7 +158,7 @@
   letter-spacing: -0.048em;
   font-weight: 700;
   padding-bottom: 0.08em;
-  background: linear-gradient(180deg, #ffffff 28%, #a9b6e4 100%);
+  background: linear-gradient(180deg, #ffffff 28%, #a1a1a6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -217,7 +217,7 @@
   right: 4%;
   bottom: 4%;
   height: 60%;
-  background: radial-gradient(closest-side, rgba(255, 90, 31, 0.24), transparent);
+  background: radial-gradient(closest-side, rgba(var(--signal-rgb), 0.15), transparent);
   pointer-events: none;
 }
 
@@ -226,11 +226,11 @@
   padding: clamp(6px, 1vw, 12px);
   transform-origin: 50% 0;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
     0 2px 2px rgba(0, 0, 0, 0.3),
-    0 50px 110px -20px rgba(0, 0, 0, 0.75),
-    0 0 90px -20px rgba(70, 110, 255, 0.4);
+    0 50px 110px -20px rgba(0, 0, 0, 0.8),
+    0 0 90px -20px rgba(255, 255, 255, 0.06);
 }
 
 .frame img {
@@ -238,18 +238,18 @@
   width: 100%;
   height: auto;
   border-radius: calc(var(--r) - clamp(6px, 1vw, 12px));
-  background: #06080f;
+  background: #080808;
 }
 
 @media (max-width: 720px) {
   .frame {
     --r: 24px;
   }
-  /* on a phone, crop to the incident column so the text stays readable */
+  /* on a phone, crop to the incident column (past the sidebar) so the text stays readable */
   .frame img {
     aspect-ratio: 4 / 5;
     object-fit: cover;
-    object-position: 42% 0%;
+    object-position: 32% 0%;
   }
 }
 
@@ -334,7 +334,7 @@
   height: 20px;
   border-radius: 50%;
   background: var(--signal);
-  box-shadow: 0 0 0 7px rgba(255, 90, 31, 0.2), 0 0 36px 8px rgba(255, 90, 31, 0.65);
+  box-shadow: 0 0 0 7px rgba(var(--signal-rgb), 0.2), 0 0 36px 8px rgba(var(--signal-rgb), 0.65);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -368,7 +368,7 @@
   position: relative;
 }
 
-/* the spine: fills with signal orange as you read down */
+/* the spine: fills with the brand red as you read down */
 .crew::before,
 .crew::after {
   content: "";
@@ -385,10 +385,10 @@
 }
 
 .crew::after {
-  background: linear-gradient(180deg, var(--signal), #ff9a70);
+  background: linear-gradient(180deg, var(--signal), #ff6a60);
   transform-origin: top;
   transform: scaleY(var(--p, 1));
-  box-shadow: 0 0 14px rgba(255, 90, 31, 0.6);
+  box-shadow: 0 0 14px rgba(var(--signal-rgb), 0.45);
 }
 
 .stage {
@@ -408,14 +408,14 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #0d1633;
+  background: #181818;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
   transition: background-color 500ms ease, box-shadow 500ms ease;
 }
 
 .stage.in::before {
   background: var(--signal);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 7px rgba(255, 90, 31, 0.18), 0 0 26px rgba(255, 90, 31, 0.7);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 7px rgba(var(--signal-rgb), 0.18), 0 0 26px rgba(var(--signal-rgb), 0.5);
 }
 
 .stage-copy h3 {
@@ -509,9 +509,9 @@
   padding: 20px 22px;
   border-radius: 24px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 1px rgba(255, 90, 31, 0.5),
-    0 0 44px -6px rgba(255, 90, 31, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(var(--signal-rgb), 0.5),
+    0 0 44px -6px rgba(var(--signal-rgb), 0.4),
     0 26px 64px -16px rgba(0, 0, 0, 0.62);
 }
 
@@ -602,8 +602,8 @@
 }
 
 .art-triage .ring-a {
-  stroke: rgba(255, 90, 31, 0.55);
-  fill: rgba(255, 90, 31, 0.1);
+  stroke: rgba(var(--signal-rgb), 0.55);
+  fill: rgba(var(--signal-rgb), 0.1);
 }
 
 .art-triage .ring-b {
@@ -618,7 +618,7 @@
 
 .art-triage .host {
   fill: var(--signal);
-  filter: drop-shadow(0 0 8px rgba(255, 90, 31, 0.9));
+  filter: drop-shadow(0 0 8px rgba(var(--signal-rgb), 0.9));
 }
 
 .art-triage .reach {
@@ -741,8 +741,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
 .tick::after {
@@ -752,7 +752,7 @@
   top: 4px;
   width: 6px;
   height: 10px;
-  border: solid #fff;
+  border: solid var(--contained);
   border-width: 0 2px 2px 0;
   transform: rotate(40deg);
 }
@@ -766,9 +766,9 @@
   border-radius: 16px;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--signal);
-  background: rgba(255, 90, 31, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(255, 90, 31, 0.42);
+  color: var(--warn);
+  background: rgba(var(--warn-rgb), 0.1);
+  box-shadow: inset 0 0 0 1px rgba(var(--warn-rgb), 0.38);
 }
 
 .hold-ico {
@@ -840,7 +840,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #0f1840;
+  background: #1b1b1b;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55);
 }
 
@@ -873,10 +873,11 @@
 .art-approve {
   padding: clamp(22px, 3vw, 32px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 0 0 1px rgba(255, 90, 31, 0.55),
-    0 0 90px -14px rgba(255, 90, 31, 0.5),
-    0 30px 70px -20px rgba(0, 0, 0, 0.65);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(var(--signal-rgb), 0.36),
+    0 0 90px -20px rgba(var(--signal-rgb), 0.34),
+    0 30px 70px -20px rgba(0, 0, 0, 0.7);
   transition: box-shadow 500ms ease;
 }
 
@@ -910,9 +911,9 @@
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 650;
-  color: #1a0a04;
-  background: var(--signal);
-  box-shadow: 0 0 22px -2px rgba(255, 90, 31, 0.7);
+  color: var(--warn);
+  background: rgba(var(--warn-rgb), 0.15);
+  box-shadow: inset 0 0 0 1px rgba(var(--warn-rgb), 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: background-color 300ms ease, color 300ms ease, box-shadow 300ms ease;
 }
 
@@ -969,21 +970,36 @@
 
 .art-approve.done {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.28),
-    0 30px 70px -20px rgba(0, 0, 0, 0.65);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 30px 70px -20px rgba(0, 0, 0, 0.7);
 }
 
 .art-approve.done .badge {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* the one small success mark: a green dot */
+.art-approve.done .badge::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  vertical-align: 0.06em;
+  background: var(--contained);
+  box-shadow: 0 0 8px rgba(var(--contained-rgb), 0.6);
 }
 
 .art-approve.done .btn-primary {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  text-shadow: none;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .undo {
@@ -1076,17 +1092,18 @@
 
 .moment::before {
   background:
-    radial-gradient(40% 40% at 36% 50%, rgba(36, 86, 255, 0.4), transparent 70%),
-    radial-gradient(34% 34% at 66% 54%, rgba(107, 52, 230, 0.34), transparent 70%);
+    radial-gradient(40% 40% at 36% 50%, rgba(255, 255, 255, 0.075), transparent 70%),
+    radial-gradient(34% 34% at 66% 54%, rgba(255, 255, 255, 0.05), transparent 70%);
 }
 
 .moment::after {
-  background: radial-gradient(34% 34% at 50% 50%, rgba(47, 191, 113, 0.3), transparent 72%);
+  background: radial-gradient(34% 34% at 50% 50%, rgba(var(--signal-rgb), 0.15), transparent 72%);
   opacity: 0;
   transition: opacity 1.4s ease;
 }
 
-.moment.contained::after {
+/* a faint red ember while the breach is live; once sealed the room just stays calm */
+.moment.running::after {
   opacity: 1;
 }
 
@@ -1096,15 +1113,34 @@
 }
 
 .moment-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--contained);
+  color: var(--ink-2);
   transition: color 400ms ease;
+}
+
+.moment-status::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--contained);
+  box-shadow: 0 0 10px rgba(var(--contained-rgb), 0.6);
+  transition: background-color 400ms ease, box-shadow 400ms ease;
 }
 
 .moment.running .moment-status {
   color: var(--signal);
+}
+
+.moment.running .moment-status::before {
+  background: var(--signal);
+  box-shadow: 0 0 10px rgba(var(--signal-rgb), 0.7);
 }
 
 .bignum {
@@ -1115,14 +1151,14 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  color: var(--contained);
-  text-shadow: 0 0 90px rgba(47, 191, 113, 0.45);
+  color: var(--ink);
+  text-shadow: 0 0 90px rgba(255, 255, 255, 0.07);
   transition: color 500ms ease, text-shadow 700ms ease;
 }
 
 .moment.running .bignum {
   color: var(--ink);
-  text-shadow: 0 0 90px rgba(255, 255, 255, 0.12);
+  text-shadow: 0 0 90px rgba(var(--signal-rgb), 0.24);
 }
 
 .bignum .unit {
@@ -1176,13 +1212,13 @@
   width: calc(var(--now, 9.4) * 10%);
   border-radius: 2px;
   background: var(--signal);
-  box-shadow: 0 0 14px rgba(255, 90, 31, 0.7);
+  box-shadow: 0 0 14px rgba(var(--signal-rgb), 0.7);
   transition: background-color 400ms ease, box-shadow 400ms ease;
 }
 
 .moment:not(.running) .rail .fill {
-  background: var(--contained);
-  box-shadow: 0 0 14px rgba(47, 191, 113, 0.7);
+  background: var(--ink);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.3);
 }
 
 .scale .tick {
@@ -1221,7 +1257,7 @@
   height: 14px;
   margin-left: -7px;
   border-radius: 50%;
-  background: #121b45;
+  background: #1f1f1f;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
   transition: background-color 300ms ease, box-shadow 300ms ease;
 }
@@ -1232,13 +1268,13 @@
 }
 
 .pip.human.on {
-  background: var(--signal);
-  box-shadow: 0 0 0 5px rgba(255, 90, 31, 0.22), 0 0 18px rgba(255, 90, 31, 0.8);
+  background: var(--warn);
+  box-shadow: 0 0 0 5px rgba(var(--warn-rgb), 0.2), 0 0 18px rgba(var(--warn-rgb), 0.7);
 }
 
 .pip.final.on {
   background: var(--contained);
-  box-shadow: 0 0 0 5px rgba(47, 191, 113, 0.24), 0 0 20px rgba(47, 191, 113, 0.85);
+  box-shadow: 0 0 0 5px rgba(var(--contained-rgb), 0.2), 0 0 18px rgba(var(--contained-rgb), 0.7);
 }
 
 .head {
@@ -1292,7 +1328,7 @@
 
 .steps li.on {
   background: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
   color: var(--ink-2);
 }
 
@@ -1301,18 +1337,30 @@
 }
 
 .steps li.human.on {
-  background: rgba(255, 90, 31, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 170, 130, 0.5), inset 0 0 0 1px rgba(255, 90, 31, 0.6);
+  background: rgba(var(--warn-rgb), 0.13);
+  box-shadow: inset 0 1px 0 rgba(255, 214, 150, 0.36), inset 0 0 0 1px rgba(var(--warn-rgb), 0.5);
 }
 
 .steps li.final.on {
-  background: rgba(47, 191, 113, 0.18);
-  box-shadow: inset 0 1px 0 rgba(150, 240, 190, 0.5), inset 0 0 0 1px rgba(47, 191, 113, 0.65);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
-.steps li.final.on time,
-.steps li.final.on b {
-  color: var(--contained);
+.steps li.final.on time {
+  color: var(--ink-2);
+}
+
+/* sealed: white words, the one green dot */
+.steps li.final.on b::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  vertical-align: 0.08em;
+  background: var(--contained);
+  box-shadow: 0 0 8px rgba(var(--contained-rgb), 0.6);
 }
 
 .moment-foot {
@@ -1419,7 +1467,7 @@
 }
 
 .diagram .t-sig {
-  fill: var(--signal);
+  fill: var(--warn);
   font-size: 13px;
   font-weight: 650;
 }
@@ -1431,8 +1479,8 @@
 }
 
 .diagram .node.sig {
-  stroke: rgba(255, 90, 31, 0.75);
-  fill: rgba(255, 90, 31, 0.12);
+  stroke: rgba(var(--warn-rgb), 0.7);
+  fill: rgba(var(--warn-rgb), 0.1);
 }
 
 .diagram .gate {
@@ -1450,7 +1498,7 @@
 }
 
 .diagram .flow.sig {
-  stroke: var(--signal);
+  stroke: var(--warn);
   stroke-dasharray: 3 6;
 }
 
@@ -1528,7 +1576,7 @@
   aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: calc(var(--r) - clamp(6px, 1vw, 12px));
-  background: #05070f;
+  background: #070707;
 }
 
 .soon {
@@ -1538,7 +1586,7 @@
   place-items: center;
   padding: 16px;
   border-radius: calc(var(--r) - clamp(6px, 1vw, 12px));
-  background: rgba(4, 6, 13, 0.5);
+  background: rgba(6, 6, 6, 0.5);
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   backdrop-filter: blur(10px) saturate(1.2);
 }
@@ -1576,7 +1624,7 @@
   margin-bottom: 4px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
   position: relative;
 }
 

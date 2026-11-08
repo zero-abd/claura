@@ -146,22 +146,24 @@ export const initialsOf = (name: string) => {
   const parts = t.split(/\s+/).filter(Boolean);
   return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
+// Mono theme: graphite monograms (Apple Contacts style). A few steps of grey keep the six people distinguishable
+// without spending any colour: red, orange and green stay reserved for state.
 const KNOWN_AV: Record<string, [string, string]> = {
-  RK: ["#6d7cff", "#3a46c8"],
-  JT: ["#38c2d6", "#1a7f96"],
-  AL: ["#b873ff", "#7a38c8"],
-  CEO: ["#8f9ab5", "#4a556f"],
-  PR: ["#a6a2cf", "#5f5a93"],
-  CV: ["#7eb5c8", "#3c7388"],
+  RK: ["#9a9aa0", "#56565b"],
+  JT: ["#7d7d83", "#424246"],
+  AL: ["#b3b3b8", "#626267"],
+  CEO: ["#8e8e93", "#4a4a4e"],
+  PR: ["#a6a6ab", "#5a5a5f"],
+  CV: ["#88888d", "#47474b"],
 };
-/** Avatar gradient: the six known people keep their colours; anyone enrolled later gets a stable one from their name. */
+/** Avatar gradient: the six known people keep their greys; anyone enrolled later gets a stable one from their name. */
 export function avatarGradient(initials: string): string {
   const k = KNOWN_AV[initials];
   if (k) return `linear-gradient(160deg, ${k[0]}, ${k[1]})`;
   let h = 0;
   for (const c of initials) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const hue = 190 + (h % 150); // cool range: teal to violet, never orange or green (those mean breach and sealed)
-  return `linear-gradient(160deg, hsl(${hue} 52% 62%), hsl(${hue} 48% 38%))`;
+  const l = 52 + (h % 18); // neutral greys only, 52..69% top stop
+  return `linear-gradient(160deg, hsl(240 3% ${l}%), hsl(240 3% ${l - 24}%))`;
 }
 export const avatarStyle = (initials: string) => `background:${avatarGradient(initials)}`;
 export const shortId = (hex: string) => (hex.length > 12 ? `${hex.slice(0, 4)}…${hex.slice(-4)}` : hex);

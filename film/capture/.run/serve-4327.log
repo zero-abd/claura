@@ -521,3 +521,15 @@ If you intend to use the URL of that asset, use /logo.svg?url&raw.
 9:28:43 AM [vite] (client) page reload src/facility3d.ts
 9:28:43 AM [vite] (client) page reload src/main.ts
 9:36:48 AM [vite] (client) page reload src/main.ts
+9:52:01 AM [vite] (client) page reload src/main.ts
+9:52:01 AM [vite] (client) hmr update /src/style.css
+9:55:32 AM [vite] (client) page reload src/map.ts
+9:55:32 AM [vite] (client) page reload src/shell.ts
+9:55:32 AM [vite] (client) page reload src/data/format.ts
+9:55:32 AM [vite] (client) page reload src/views/overview.ts
+9:55:32 AM [vite] (client) page reload public/logo.svg
+9:55:32 AM [vite] (client) page reload index.html
+9:55:32 AM [vite] (client) page reload src/logo.ts
+10:06:56 AM [vite] (client) hmr update /src/style.css
+10:28:43 AM [vite] (client) page reload src/logo.ts
+10:28:43 AM [vite] (client) page reload public/logo.svg

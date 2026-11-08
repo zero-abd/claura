@@ -30,7 +30,7 @@ export const overview = {
           </button>
         </div>
         <div class="stage-foot">
-          <span><i style="background:rgba(196,210,255,.7)"></i>Load</span>
+          <span><i style="background:rgba(211,211,211,.7)"></i>Load</span>
           <span id="legendHot"><i style="background:var(--accent)"></i>Breach</span>
           <span id="legendSafe"><i style="background:var(--safe)"></i>Contained</span>
         </div>

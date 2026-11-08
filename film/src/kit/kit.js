@@ -3,8 +3,9 @@
 const K = (() => {
   const $ = (s) => (typeof s === 'string' ? document.querySelector(s) : s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
-  const INK = 'rgba(247,249,255,0.97)', INK4 = 'rgba(214,222,246,0.24)';
-  const ORANGE = '#FF5A1F', GREEN = '#2FBF71';
+  // mono: white ink; RED is the brand and the breach (the name ORANGE is kept for the scenes that use it), GREEN only small marks
+  const INK = '#f5f5f7', INK4 = 'rgba(245,245,247,0.24)';
+  const ORANGE = '#FF3B30', RED = '#FF3B30', AMBER = '#FF9F0A', GREEN = '#30D158';
   const W = 1920, H = 1080;
 
   // ---------------------------------------------------------------- wallpaper
@@ -250,7 +251,7 @@ const K = (() => {
     exit(tl, P, S, o);
   }
 
-  return { $, $$, ORANGE, GREEN, INK, INK4, wall, tone, blurWords, inkWords, blurLine, letters, out, land, glassIn, pop, count,
+  return { $, $$, ORANGE, RED, AMBER, GREEN, INK, INK4, wall, tone, blurWords, inkWords, blurLine, letters, out, land, glassIn, pop, count,
     camState, cam, camScaleAt, cursor, enter, exit, zoomOut, morphIn, morphOut, scene };
 })();
 

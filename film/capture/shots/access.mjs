@@ -38,7 +38,7 @@ export async function act(page, ctx) {
   await page.click(name, { ms: 40, settle: 0 })
   await sleep(150)
   stamp(page, ctx, 'typeName')
-  await page.type('Deputy counsel', { cps: 20 })
+  await page.type('Outside counsel', { cps: 20 })
   await sleep(150)
 
   const legal = await page.find('@role:legal')
