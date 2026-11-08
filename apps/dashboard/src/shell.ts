@@ -8,7 +8,7 @@ import { fmtT } from "./util";
 import { approverOf, avatarStyle, canApprove, data, roleLabel, roster, summarize } from "./data";
 import { closePerson, personSheetHTML, personSheetOpen, renderPersonSheet } from "./views/access";
 import { joinOpen, joinSheetHTML, renderJoin } from "./views/join";
-import { liveSource, sheetInfo } from "./live-engine";
+import { liveSource, readsResponse, sheetInfo } from "./live-engine";
 import { scopeBadge } from "./views/scope";
 
 const NAV: Record<View, { label: string; icon: string }> = {
@@ -269,10 +269,17 @@ function renderHostSheet(open: boolean) {
 }
 
 export function sheetWanted(ph: Phase): boolean {
+  // live: the approval sheets are filled from the proposal rows. A role that cannot read them (legal, exec, comms) has nothing true
+  // to put on them, and a modal over the War Room is the last thing counsel wants: it sees the phase, not the card.
+  if (isLive() && !readsResponse()) return false;
   if (ph === "approval") return !S.sheetDismissed;
   const u = U();
   return S.A !== null && u >= 0 && u < ISOLATE_DUR + 0.9;
 }
+
+/** When the approval sheet last opened (performance.now), 0 while it is shut. main.ts ignores a click on its buttons for a
+ *  moment after that, so a click aimed at the 3D stage cannot approve a quarantine nobody has read. */
+export const sheetOpened = { at: 0 };
 
 export function renderSheet(ph: Phase) {
   const open = sheetWanted(ph);
@@ -285,6 +292,7 @@ export function renderSheet(ph: Phase) {
     sheet.dataset.open = v;
     sheet.setAttribute("aria-hidden", String(!open));
     sheet.toggleAttribute("inert", !open);
+    sheetOpened.at = open ? performance.now() : 0;
   }
   renderHostSheet(host);
   if (open && personSheetOpen()) closePersonQuiet(); // the approval always comes first

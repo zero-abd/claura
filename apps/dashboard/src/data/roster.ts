@@ -53,7 +53,8 @@ export function buildRoster(d: DataSource): Person[] {
       title: s?.role ?? roleLabel(o.role),
       role: o.role,
       admin: o.role === "admin",
-      verified: s?.verifiedOutOfBand ?? consumed,
+      // enrolled with a break-glass code handed over in person = verified out-of-band (non-admins cannot read the code table)
+      verified: s?.verifiedOutOfBand ?? (consumed || /^code issued by/i.test(o.addedBy)),
       active: o.active,
       online: !!p?.online && o.active,
       lastSeen: p?.lastSeen ?? null,

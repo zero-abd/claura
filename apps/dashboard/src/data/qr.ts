@@ -1,13 +1,29 @@
 // A small QR Code encoder, generated locally with no network and no dependencies.
 //
-// Scope: byte mode, error correction L, fixed version 2 (25 x 25 modules, up to 32 bytes). That is exactly enough for a
-// break-glass enrollment link such as "claura://join/K7QM-4TXD-9HVP". Structure follows ISO/IEC 18004: one RS(44,34)
-// block, finder / timing / alignment patterns, the eight masks scored by the standard penalty rules, 15-bit BCH format
-// information. It is checked in the browser with BarcodeDetector (see tools/shoot.mjs --eval).
+// Scope: byte mode, error correction L, versions 2 to 5 (25 to 37 modules a side, up to 32 / 53 / 78 / 106 bytes), the smallest
+// that fits. Version 2 is exactly enough for a break-glass enrollment link built from the console's own short code, such as
+// "claura://join/K7QM-4TXD-9HVP"; the longer codes the CLI issues ("claura://join/" plus 23 characters = 37 bytes) need version 3.
+// Versions 2 to 5 at level L are single-block, so there is no interleaving, and they carry no version information block.
+// Structure follows ISO/IEC 18004: one RS(n, k) block, finder / timing / alignment patterns, the eight masks scored by the
+// standard penalty rules, 15-bit BCH format information. It is checked in the browser with BarcodeDetector (tools/shoot.mjs --eval).
 
-const SIZE = 25;
-const DATA_CODEWORDS = 34;
-const EC_CODEWORDS = 10;
+interface Spec {
+  version: number;
+  /** modules per side */
+  size: number;
+  data: number;
+  ec: number;
+  /** bytes of payload (byte mode: 4-bit mode + 8-bit count + data) */
+  cap: number;
+  /** centre of the one alignment pattern, bottom right */
+  align: number;
+}
+const SPECS: Spec[] = [
+  { version: 2, size: 25, data: 34, ec: 10, cap: 32, align: 18 },
+  { version: 3, size: 29, data: 55, ec: 15, cap: 53, align: 22 },
+  { version: 4, size: 33, data: 80, ec: 20, cap: 78, align: 26 },
+  { version: 5, size: 37, data: 108, ec: 26, cap: 106, align: 30 },
+];
 
 /** GF(256) multiply, primitive polynomial x^8 + x^4 + x^3 + x^2 + 1 (0x11D). */
 function gfMul(x: number, y: number): number {
@@ -44,9 +60,14 @@ function rsRemainder(data: number[], divisor: number[]): number[] {
   return result;
 }
 
-function codewords(text: string): number[] {
+function specFor(bytes: number): Spec {
+  const spec = SPECS.find((x) => bytes <= x.cap);
+  if (!spec) throw new Error(`QR payload is ${bytes} bytes; version 5-L holds ${SPECS[SPECS.length - 1].cap}`);
+  return spec;
+}
+
+function codewords(text: string, spec: Spec): number[] {
   const bytes = Array.from(new TextEncoder().encode(text));
-  if (bytes.length > 32) throw new Error(`QR payload is ${bytes.length} bytes; version 2-L holds 32`);
   const bits: number[] = [];
   const push = (val: number, len: number) => {
     for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1);
@@ -54,7 +75,7 @@ function codewords(text: string): number[] {
   push(0b0100, 4); // byte mode
   push(bytes.length, 8);
   for (const b of bytes) push(b, 8);
-  const cap = DATA_CODEWORDS * 8;
+  const cap = spec.data * 8;
   push(0, Math.min(4, cap - bits.length)); // terminator
   push(0, (8 - (bits.length % 8)) % 8);
   for (let pad = 0xec; bits.length < cap; pad ^= 0xec ^ 0x11) push(pad, 8);
@@ -64,7 +85,7 @@ function codewords(text: string): number[] {
     for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j];
     data.push(v);
   }
-  return data.concat(rsRemainder(data, rsDivisor(EC_CODEWORDS)));
+  return data.concat(rsRemainder(data, rsDivisor(spec.ec)));
 }
 
 const MASKS: ((x: number, y: number) => boolean)[] = [
@@ -79,6 +100,7 @@ const MASKS: ((x: number, y: number) => boolean)[] = [
 ];
 
 function penalty(m: boolean[][]): number {
+  const SIZE = m.length;
   let score = 0;
   const lines: boolean[][] = [];
   for (let i = 0; i < SIZE; i++) {
@@ -115,8 +137,10 @@ function penalty(m: boolean[][]): number {
   return score;
 }
 
-/** The module matrix (true = dark) for `text`. Throws if it does not fit version 2-L. */
+/** The module matrix (true = dark) for `text`. Throws if it does not fit version 5-L (106 bytes). */
 export function qrMatrix(text: string): boolean[][] {
+  const spec = specFor(new TextEncoder().encode(text).length);
+  const SIZE = spec.size;
   const modules: boolean[][] = Array.from({ length: SIZE }, () => new Array<boolean>(SIZE).fill(false));
   const isFn: boolean[][] = Array.from({ length: SIZE }, () => new Array<boolean>(SIZE).fill(false));
   const setFn = (x: number, y: number, dark: boolean) => {
@@ -140,7 +164,7 @@ export function qrMatrix(text: string): boolean[][] {
   finder(3, 3);
   finder(SIZE - 4, 3);
   finder(3, SIZE - 4);
-  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setFn(18 + dx, 18 + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setFn(spec.align + dx, spec.align + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
 
   const drawFormat = (mask: number) => {
     const data = (1 << 3) | mask; // error correction L = 01
@@ -160,7 +184,7 @@ export function qrMatrix(text: string): boolean[][] {
   drawFormat(0);
 
   // zig-zag the codewords up and down the column pairs, skipping the vertical timing column
-  const cw = codewords(text);
+  const cw = codewords(text, spec);
   let i = 0;
   for (let right = SIZE - 1; right >= 1; right -= 2) {
     if (right === 6) right = 5;

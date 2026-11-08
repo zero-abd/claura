@@ -8,11 +8,30 @@
 import { APPROVAL_AT, ISOLATE_DUR, STEPS, type AgentDef } from "./script";
 import { AMB_DT, AMB_PREFILL, CPS, LIVE, S, type AgentNow, type FinalState, type IncidentInfo, type LiveHooks, type StepState } from "./engine";
 import { data, fmtClock, type EvidenceItem, type IncidentEvent, type IncidentRow, type Proposal } from "./data";
-import type { LiveSource } from "./data/live";
+import type { AgentLine, LiveSource } from "./data/live";
 import { fmtT } from "./util";
 
 let src: LiveSource | null = null;
 export const liveSource = (): LiveSource | null => src;
+
+/** admin, commander, responder and agent read the response rows (proposals, the incident log, agent states, findings, hosts).
+ *  legal, exec and comms read the incident row only, so for them the adapter follows incident.status instead. */
+export const readsResponse = (): boolean => !!src && src.readsResponseRows();
+
+/** What a console that cannot read proposals watched happen on the incident row: the moment the gate opened and the moment
+ *  containment landed. It lets legal and exec show the same time-to-contain as the commander (a person's wait is never counted). */
+const SEEN = { inc: 0, awaitingAt: 0, containedAt: 0 };
+function observe() {
+  const inc = src?.incident();
+  if (!inc) return;
+  if (SEEN.inc !== inc.id) {
+    SEEN.inc = inc.id;
+    SEEN.awaitingAt = 0;
+    SEEN.containedAt = 0;
+  }
+  if (inc.status === "awaiting_approval" && !SEEN.awaitingAt) SEEN.awaitingAt = Date.now();
+  if (inc.status === "contained" && SEEN.awaitingAt && !SEEN.containedAt) SEEN.containedAt = Date.now();
+}
 
 /** The six reversible steps the playbook runs, in STEPS order. quarantine_host is the seventh, behind the human gate. */
 export const STEP_ACTIONS = ["isolate_network", "revoke_credentials", "cordon_host", "pause_guest", "capture_memory", "failover_guests"] as const;
@@ -65,6 +84,8 @@ const settled = (p: Proposal | null) => !!p && p.status !== "pending_approval";
 function stepState(i: number): StepState {
   const sn = snap();
   if (!sn.inc) return "idle";
+  // no proposal rows for this role: awaiting_approval and contained both mean the six reversible steps have run
+  if (!readsResponse()) return sn.inc.status === "open" ? "pending" : "done";
   if (settled(sn.step[i])) return "done"; // executed, approved or blocked: the gate has ruled
   const firstOpen = sn.step.findIndex((p) => !settled(p));
   const warden = src!.agentStates().warden?.status.toLowerCase();
@@ -87,6 +108,10 @@ function toneOf(status: string): string {
   return "busy";
 }
 function agentNow(a: AgentDef): AgentNow {
+  if (!readsResponse()) {
+    const t = "Agent activity is shown to the response team.";
+    return { text: t, full: t, typing: false, status: "Response team only", tone: "idle", stamp: "", index: 0 };
+  }
   const st = src!.agentStates()[a.id];
   const idle = a.thoughts[0];
   if (!st || !st.thought.trim()) return { text: idle.text, full: idle.text, typing: false, status: idle.status, tone: idle.tone, stamp: "idle", index: 0 };
@@ -107,6 +132,15 @@ function agentNow(a: AgentDef): AgentNow {
 function ttc(): number | null {
   const sn = snap();
   if (!sn.inc) return null;
+  if (!readsResponse()) {
+    // the first signal and the pending proposal are not this role's to read: count from the row's opened_at, hold at the gate,
+    // and take off the wait this console watched, so Screen B shows the number Screen A shows (give or take the signal lag)
+    const i = sn.inc;
+    let ms = (i.containedAt ?? Date.now()) - i.openedAt;
+    if (i.status === "awaiting_approval") ms = (SEEN.awaitingAt || Date.now()) - i.openedAt;
+    else if (i.status === "contained" && SEEN.awaitingAt && SEEN.containedAt) ms -= SEEN.containedAt - SEEN.awaitingAt;
+    return Math.max(0, ms) / 1000;
+  }
   const f = sn.final;
   let ms = (sn.inc.containedAt ?? Date.now()) - sn.t0;
   if (f?.status === "pending_approval") ms = f.at - sn.t0;
@@ -136,7 +170,8 @@ function info(): IncidentInfo {
   const moved = guests.filter((g) => g.host === inc.host && g.vm !== inc.vm && g.status === "failed_over").length;
   const captured = sn.props.some((p) => p.action === "capture_memory" && SETTLED.has(p.status));
   const t = ttc();
-  const parts = [`Contained in ${(t ?? 0).toFixed(1)} s`, `${moved} guests failed over`, ...(captured ? ["memory captured"] : [])];
+  const sees = readsResponse(); // legal and exec cannot read guests or proposals: say only what the incident row says
+  const parts = [`Contained in ${(t ?? 0).toFixed(1)} s`, ...(sees ? [`${moved} guests failed over`] : []), ...(captured ? ["memory captured"] : [])];
   return {
     id: src!.incidentLabel(),
     title: inc.title,
@@ -145,7 +180,7 @@ function info(): IncidentInfo {
     agent: guests.find((g) => g.vm === inc.vm)?.workload ?? "agent",
     where: hostWhere(inc.host),
     opened: `${fmtClock(inc.openedAt)} CST`,
-    resolution: { full: parts.join(" · "), overview: parts.filter((p) => p !== "memory captured").join(" · "), hero: parts[1] },
+    resolution: { full: parts.join(" · "), overview: parts.filter((p) => p !== "memory captured").join(" · "), hero: parts[1] ?? parts[0] },
   };
 }
 const HOOKS: LiveHooks = { stepState, stepProgress, agentNow, ttc, info };
@@ -173,7 +208,8 @@ export function liveFrame(dt: number) {
     CLK.lastInc = 0;
     return;
   }
-  if (!S.started || CLK.lastInc !== sn.inc.id) {
+  const arrived = !S.started || CLK.lastInc !== sn.inc.id; // this console is only now seeing this incident
+  if (arrived) {
     if (!S.started) S.ambFrozen = AMB_PREFILL + Math.floor(S.amb / AMB_DT); // freeze the ambient fleet lines while an incident is on screen
     S.started = true;
     if (CLK.lastInc !== sn.inc.id) {
@@ -192,7 +228,10 @@ export function liveFrame(dt: number) {
   });
   const f = sn.final;
   if (f && (f.status === "pending_approval" || SETTLED.has(f.status))) target = Math.max(target, APPROVAL_AT);
-  const approved = !!f && (SETTLED.has(f.status) || sn.inc.status === "contained");
+  // incident.status is readable by every role, the proposals only by the response team: the gate and the end follow the row
+  if (sn.inc.status === "awaiting_approval" || sn.inc.status === "contained") target = Math.max(target, APPROVAL_AT);
+  const approved = sn.inc.status === "contained" || (!!f && SETTLED.has(f.status));
+  observe();
 
   if (f && f.status === "pending_approval" && CLK.lastPending !== f.id) {
     CLK.lastPending = f.id;
@@ -205,8 +244,8 @@ export function liveFrame(dt: number) {
     return;
   }
   if (S.A === null) {
-    if (snapNow) {
-      // opened after the fact: show the end state, no animation
+    if (snapNow || (arrived && sn.inc.status === "contained")) {
+      // opened after the fact (a reload, or a person enrolled after containment): show the end state, no animation
       S.A = APPROVAL_AT;
       S.r = sn.inc.status === "contained" ? APPROVAL_AT + ISOLATE_DUR + 1 : APPROVAL_AT;
     } else {
@@ -216,14 +255,19 @@ export function liveFrame(dt: number) {
   } else S.r += dt;
 }
 
+let unwatch: (() => void) | null = null;
 export function enterLive(s: LiveSource) {
   src = s;
   snapV = -1;
+  unwatch?.();
+  unwatch = s.watch(observe);
   LIVE.hooks = HOOKS;
   CLK.lastInc = 0;
   CLK.lastPending = 0;
 }
 export function leaveLive() {
+  unwatch?.();
+  unwatch = null;
   src = null;
   snapV = -1;
   LIVE.hooks = null;
@@ -310,7 +354,9 @@ export function blast(): Blast {
     note: !scored
       ? "Triage has not scored this incident yet."
       : closed
-        ? `Scope closed. ${moved} of ${co.length} co-resident guests moved to clean hosts.`
+        ? co.length
+          ? `Scope closed. ${moved} of ${co.length} co-resident guests moved to clean hosts.`
+          : "Scope closed. The host is out of the pool."
         : triage
           ? clip(triage.text, 220)
           : "Triage has scored this incident.",
@@ -354,17 +400,30 @@ export function tools(agentId: string): { time: string; call: string; result: st
 /** The policy table's own words for an action ("Cut network for the suspect guest. Undo by restoring the security group."). */
 export const policyNote = (action: string): string => src?.policies().find((p) => p.action === action)?.note ?? "";
 
-/** The model behind the agents, as the rows say it (the runner writes it on every status update). */
+/** The model behind the agents, as the rows say it (the runner writes it on every status update).
+ *  An agent that is idle, or that only shows Scribe's interim template text, has not run without the model: it does not count
+ *  as fallback. "mixed" needs an agent that has acted on something other than Nemotron, so the line can be spoken as it reads. */
 export function modelLabel(): string {
-  const labels = Object.values(src!.agentStates()).map((a) => a.model).filter(Boolean);
-  if (!labels.length) return "waiting for the agent runner";
-  const first = labels[0];
-  if (labels.every((l) => l === first)) return /^nemotron/i.test(first) ? "nemotron-3-nano · on-prem" : first;
-  return "mixed: some agents on fallback";
+  if (!readsResponse()) return "response team only";
+  const rows = Object.values(src!.agentStates()).filter((a) => a.model);
+  if (!rows.length) return "waiting for the agent runner";
+  const onModel = (a: AgentLine) => /^nemotron/i.test(a.model);
+  const interim = (a: AgentLine) => /^template text/i.test(a.model) || /^(idle|watching|standing by)/i.test(a.status);
+  const tag = (a: AgentLine) => `${a.model.split(/\s+/)[0]} · on-prem`; // "nemotron-3-nano:4b (local, on-prem)" -> "nemotron-3-nano:4b · on-prem"
+  const acted = rows.filter((a) => !interim(a));
+  if (!acted.length) {
+    const m = rows.find(onModel);
+    return m ? tag(m) : rows[0].model;
+  }
+  const off = acted.filter((a) => !onModel(a));
+  if (!off.length) return tag(acted[0]);
+  if (off.length < acted.length) return "mixed: some agents on fallback";
+  return off.every((a) => a.model === off[0].model) ? off[0].model : "fallback: no model";
 }
 
 // ------------------------------------------------------------------ the containment card and the approval sheet
 export function stepRight(i: number, s: StepState): string {
+  if (!readsResponse()) return "";
   const sn = snap();
   const p = sn.step[i];
   return s === "done" ? (p ? (p.status === "blocked" ? "Blocked" : fmtT(rel(sn, p.at))) : "") : s === "running" ? "Running" : s === "pending" ? "Queued" : "";

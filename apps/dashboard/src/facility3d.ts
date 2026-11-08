@@ -13,7 +13,8 @@
 //   waiting on human   -> setState('approval'),   fly('rack14')
 //   quarantining       -> setState('containing')   (camera stays on rack14)
 //   contained / report -> setState('contained'),  fly('facility')
-import type { Phase } from "./engine";
+import { S, info, type Phase } from "./engine";
+import { parseHost } from "./hosts";
 import { STEPS } from "./script";
 
 export type F3DState = "nominal" | "breach" | "containing" | "approval" | "contained";
@@ -47,6 +48,8 @@ let manualBase: string | null = null; // a hand-flown camera (flyFacility) holds
 let visible = true; // is a stage slot on screen? (the module keeps rendering until paused)
 let want: { state: F3DState; cam: F3DCam } = { state: "nominal", cam: "facility" };
 let onPick: ((hostId: string) => void) | null = null;
+let flewAt = 0; // performance.now() of the last camera move asked for
+const FLY_MS = 1900; // the module flies a camera in 1.8 s
 
 /** The host picker hook: a click on a host in the 3D scene (module `onPick`) opens the Host sheet. */
 export function setPickHandler(fn: (hostId: string) => void) {
@@ -117,7 +120,21 @@ export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
 function emitPick(hit: unknown) {
   const h = hit as { host?: string; hostId?: string; id?: string } | string | null;
   const id = typeof h === "string" ? h : (h?.host ?? h?.hostId ?? h?.id);
-  if (id) onPick?.(String(id));
+  if (!id) return;
+  // During an incident the camera moves with every phase. A click while it is still in flight lands on whatever is under the
+  // cursor at that instant (a neighbour, T+1.6 s), not where the person aimed: ignore it, they will click again in a second.
+  if (S.started && performance.now() - flewAt < FLY_MS) return;
+  onPick?.(incidentHostFor(String(id)));
+}
+
+/** While an incident is open, a click anywhere on its rack opens the incident host. At the breach camera the host is a slot
+ *  a few pixels tall and its amber glow sits below it, so "the amber rack" otherwise opens a healthy neighbour. */
+function incidentHostFor(id: string): string {
+  if (!S.started) return id;
+  const target = info().host;
+  const a = parseHost(id);
+  const b = parseHost(target);
+  return a && b && a.hall === b.hall && a.rack === b.rack ? target : id;
 }
 
 /** Outline the host the Host sheet is showing (or clear it) in the 3D scene. */
@@ -155,6 +172,7 @@ function applyFacility3D() {
     if (manualBase === null && sentCam !== k) {
       facility.fly(want.cam);
       sentCam = k;
+      flewAt = performance.now();
     }
     if (!visible) facility.pause?.(); // setState/fly restart the loop; keep it asleep while hidden
   } catch {
@@ -186,6 +204,7 @@ export function flyFacility(cam: F3DCam): boolean {
     facility.fly(cam);
     sentCam = camKey(cam);
     manualBase = camKey(want.cam);
+    flewAt = performance.now();
     return true;
   } catch {
     return false;

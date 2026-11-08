@@ -369,7 +369,14 @@ export function renderPersonSheet() {
     if (lastCodeShown !== s.code) {
       lastCodeShown = s.code;
       $("#pcCode").textContent = fmtCode(s.code);
-      const qr = qrSVG(qrMatrix(enrollLink(s.code)), { quiet: 2, label: `QR code for the break-glass code ${fmtCode(s.code)}` });
+      $("#pcCode").style.setProperty("--n", String(fmtCode(s.code).length));
+      // a code too long for the encoder still shows as text: the QR is a convenience, never a reason to lose the sheet
+      let qr = "";
+      try {
+        qr = qrSVG(qrMatrix(enrollLink(s.code)), { quiet: 2, label: `QR code for the break-glass code ${fmtCode(s.code)}` });
+      } catch (e) {
+        console.warn("[claura] QR code not drawn:", e);
+      }
       $("#pcQr").innerHTML = qr;
       $("#pcardQr").innerHTML = qr;
       $("#pcardCode").textContent = fmtCode(s.code);

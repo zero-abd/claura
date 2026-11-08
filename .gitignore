@@ -23,3 +23,5 @@ ssh-ca/
 recordings/
 *.wav
 experiments/**/frames/
+demo/rehearsal/
+demo/.run/

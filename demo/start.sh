@@ -219,8 +219,9 @@ echo
 echo "Claura demo is up"
 GW_QS=; [ "$GW_PORT" != 8787 ] && GW_QS="&gateway=http://localhost:$GW_PORT"   # the console looks for the gateway on :8787 unless told
 [ "$WITH_CONSOLE" = 1 ] && {
-  echo "  replay demo   http://localhost:$CONSOLE_PORT/?demo=1$GW_QS"
   echo "  live mode     http://localhost:$CONSOLE_PORT/?live=1$GW_QS"
+  echo "  replay demo   http://localhost:$CONSOLE_PORT/?demo=1$GW_QS      idle until you press P (the breach then plays from T+0)"
+  echo "                http://localhost:$CONSOLE_PORT/?demo=1&play=1$GW_QS      the same, started at page load: open it at the cue"
 }
 [ "$WITH_GATEWAY" = 1 ] && echo "  gateway       http://localhost:$GW_PORT/   (status page; /api/health for JSON)"
 echo "  live incident $DEMO_DIR/run-incident.sh        (real Nemotron on Maincloud; add --scripted for the backup)"

@@ -1,8 +1,8 @@
 import { POLICY_AUTO, POLICY_HUMAN, POLICY_PRESETS, type PolicyAction } from "../script";
 import { icon } from "../icons";
-import { $, $$, setAttr, setVar } from "../dom";
+import { $, $$, setAttr, setText, setVar } from "../dom";
 import { isLive } from "../engine";
-import { liveSource } from "../live-engine";
+import { liveSource, readsResponse } from "../live-engine";
 
 // Policy: what Warden may do alone, and what needs a human. Interactive in-memory toggles.
 export const policyState = {
@@ -85,23 +85,46 @@ export const policy = {
 
   render() {
     const live = isLive();
+    // live: every switch (the "needs a human" group too) shows the module's own policy table: on = auto, and a tag says approval or denied
+    const pols = live ? (liveSource()?.policies() ?? []) : [];
+    const modeOf = (id: string): string => pols.find((p) => p.action === ACTION_OF[id])?.mode ?? "";
+    const reads = !live || readsResponse(); // legal and exec cannot read the policy table
     if (live) {
-      const pols = liveSource()?.policies() ?? [];
-      policyState.on = new Set(POLICY_AUTO.filter((a) => pols.find((p) => p.action === ACTION_OF[a.id])?.mode === "auto").map((a) => a.id));
+      policyState.on = new Set(POLICY_AUTO.filter((a) => modeOf(a.id) === "auto").map((a) => a.id));
       let note = document.getElementById("polLiveNote");
       if (!note) {
         note = document.createElement("p");
         note.id = "polLiveNote";
         note.className = "pol-live-note";
-        note.textContent = "Live: this page mirrors the module's policy table, so it is read-only here. An admin or commander changes it with set_policy.";
         $("#v-policy .p-bar").after(note);
       }
+      setText(
+        note,
+        reads
+          ? "Live: this page mirrors the module's policy table, so it is read-only here. An admin or commander changes it with set_policy."
+          : "Live: the policy table is shown to the response team. Your role sees the incident, not the playbook.",
+      );
     }
     for (const sw of $$(".switch", $("#v-policy"))) {
       if (live) {
         setAttr(sw, "data-locked", "1");
         setAttr(sw, "aria-disabled", "true");
         setAttr(sw, "tabindex", "-1");
+        const mode = modeOf(sw.dataset.pol!);
+        setAttr(sw, "aria-checked", String(mode === "auto"));
+        setAttr(sw, "data-mode", mode);
+        const row = sw.closest(".prow");
+        let tag = row?.querySelector<HTMLElement>(".pmode") ?? null;
+        if (row && !tag) {
+          tag = document.createElement("span");
+          tag.className = "pmode";
+          sw.before(tag);
+        }
+        if (tag) {
+          setAttr(tag, "data-m", mode);
+          setText(tag, mode === "approval" ? "needs approval" : mode === "deny" ? "denied" : "");
+        }
+        continue;
       }
       const locked = sw.dataset.locked === "1";
       setAttr(sw, "aria-checked", String(!locked && policyState.on.has(sw.dataset.pol!)));

@@ -2434,3 +2434,39 @@ database running in data directory /Users/abd/.local/share/spacetime/data
 2026-11-08T12:42:41.479710Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
 2026-11-08T12:47:41.479406Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
 2026-11-08T12:47:48.045154Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T12:52:41.476747Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T12:57:41.477095Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T12:57:48.048568Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T13:02:41.477545Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:07:41.479209Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:07:48.052242Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T13:12:41.478210Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:14:49.090887Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T13:14:49.095206Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2000467d89adcc7a4615300a3d481ef7dd70c443873dea13f2abd77043be92a and ConnectionId c9352fc96daf8332b77edf2189ddcb3d
+2026-11-08T13:14:49.102770Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2000467d89adcc7a4615300a3d481ef7dd70c443873dea13f2abd77043be92a and ConnectionId c9352fc96daf8332b77edf2189ddcb3d
+2026-11-08T13:14:49.102832Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2000467d89adcc7a4615300a3d481ef7dd70c443873dea13f2abd77043be92a and ConnectionId c9352fc96daf8332b77edf2189ddcb3d; spawning ws_client_actor and ClientConnection
+2026-11-08T13:17:41.479776Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:17:48.053704Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 18 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T13:22:41.480606Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:27:41.481714Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:27:48.056882Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 18 expired views
+2026-11-08T13:32:41.479819Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:37:41.481065Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:37:48.060913Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T13:42:41.481393Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:47:41.481501Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:47:48.062961Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T13:52:41.482737Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:57:41.480379Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T13:57:48.063071Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T14:02:41.479880Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T14:07:41.480302Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T14:07:48.065715Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T14:12:41.481311Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T14:17:41.475678Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T14:17:48.063055Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T14:27:48.065174Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T14:37:48.062351Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T14:47:48.063315Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T14:57:48.063974Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T15:07:48.060057Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views

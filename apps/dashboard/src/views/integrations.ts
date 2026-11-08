@@ -71,7 +71,7 @@ export const integrations = {
             <div class="int-id"><h3></h3><span class="int-track"></span></div>
             <span class="chip int-badge" data-tone="idle"><i></i><span></span></span>
           </div>
-          <p class="int-meta"><code></code></p>
+          <details class="int-tech"><summary>Technical details</summary><p class="int-meta"><code></code></p></details>
           <div class="int-actions"><button type="button" class="btn-chip accent int-open" data-act="int-open" data-target="int-open:${esc(f.name)}">Open</button></div>
           <div class="int-mount" hidden></div>`;
         grid.appendChild(card);

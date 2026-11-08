@@ -17,7 +17,7 @@ import {
 } from "../data";
 import { AGENT_ICON, icon } from "../icons";
 import { $, disc, setAttr, setHTML, setText } from "../dom";
-import { type Phase } from "../engine";
+import { isLive, type Phase } from "../engine";
 import { esc, linkHosts } from "../hosts";
 
 
@@ -175,9 +175,12 @@ export const warroom = {
     setHTML($("#wrPeople"), `pp${v}`, () =>
       people
         .map((p) => {
+          // live: a directory row is a name on the stakeholder list with no identity enrolled behind it, and it says so
           const sub = !p.active
             ? `<span class="ver off">${icon("x")}access revoked</span>`
-            : p.verified
+            : p.kind === "directory" && isLive()
+              ? `<span class="ver off">${icon("info")}not enrolled</span>`
+              : p.verified
               ? `<span class="ver">${icon("seal")}verified out-of-band</span>`
               : `<span class="ver off">${icon("info")}not verified</span>`;
           return `<div class="person" data-online="${p.online ? "1" : "0"}" data-active="${p.active ? "1" : "0"}">

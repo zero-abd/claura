@@ -28,7 +28,7 @@ if [ -n "${gw:-}" ]; then
       if (!j.ready) console.log("         (gateway is still starting)");
     });'
 fi
-curl -fsS -m 2 -o /dev/null "http://127.0.0.1:$CONSOLE_PORT/" 2>/dev/null && up "console   http://localhost:$CONSOLE_PORT/?demo=1  (pid $(pid_of console || echo '?'))" || { down "console   not answering on port $CONSOLE_PORT"; BAD=1; }
+curl -fsS -m 2 -o /dev/null "http://127.0.0.1:$CONSOLE_PORT/" 2>/dev/null && up "console   http://localhost:$CONSOLE_PORT/  (replay: ?demo=1 then press P, or ?demo=1&play=1 to start at page load; live: ?live=1)  (pid $(pid_of console || echo '?'))" || { down "console   not answering on port $CONSOLE_PORT"; BAD=1; }
 tags=$(curl -fsS -m 3 "$OLLAMA_URL/api/tags" 2>/dev/null) || tags=
 if [ -z "$tags" ]; then note "ollama    not running ($OLLAMA_URL)"
 elif printf '%s' "$tags" | grep -q "\"name\":\"$MODEL\""; then

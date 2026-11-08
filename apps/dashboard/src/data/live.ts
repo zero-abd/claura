@@ -434,6 +434,11 @@ export class LiveSource implements DataSource {
       return { identity: this.idHex, name: "Not enrolled", title: "Not enrolled", role: "responder" as OperatorRole };
     });
   }
+  /** Can this role read the response team's rows (proposals, the incident log, agent states, findings, hosts)? legal, exec and
+   *  comms read the incident row only; for them the adapter follows incident.status instead of the rows they cannot see. */
+  readsResponseRows(): boolean {
+    return CORE.includes(this.me().role);
+  }
   private titleFor(name: string, role: OperatorRole): string {
     const s = this.stakeholders().find((x) => x.name.toLowerCase() === name.toLowerCase());
     return s?.role ?? roleLabel(role);

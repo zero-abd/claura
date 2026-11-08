@@ -48,13 +48,14 @@ export const agents = {
           "",
         )}
       </article>`;
-    }).join("");
+    });
+    const stack = (n: number) => `<div class="agent-col">${cards.filter((_c, i) => i % 2 === n).join("")}</div>`;
     return `<section class="view" id="v-agents" data-view="agents">
       <header class="hero-head">
         <h1 class="h-title">Agents</h1>
         <p class="h-sub">Four defenders reason on-prem with NVIDIA Nemotron. Every action stays inside policy.</p>
       </header>
-      <div class="agent-grid">${cards}</div>
+      <div class="agent-grid">${stack(0)}${stack(1)}</div>
     </section>`;
   },
 
@@ -75,13 +76,14 @@ export const agents = {
         // live: reasoning = the agent's findings and current thought, tool calls = its proposals, findings and filings
         const ltr = LV.trace(a.id);
         const ltc = LV.tools(a.id);
-        setText($(`#gv-${a.id}`), `${ltr.length} thought${ltr.length === 1 ? "" : "s"} · ${ltc.length} tool call${ltc.length === 1 ? "" : "s"}`);
-        setHTML($(`#tr-${a.id}`), `lt:${ltr.map((r) => r.time + r.text.length).join()}`, () =>
-          ltr.map((r) => `<li><time>${r.time}</time><span>${linkHosts(r.text)}</span></li>`).join("") || `<li><time></time><span>No activity yet.</span></li>`,
+        const sees = LV.readsResponse(); // legal and exec read the incident row only: the agents' own rows are the response team's
+        setText($(`#gv-${a.id}`), sees ? `${ltr.length} thought${ltr.length === 1 ? "" : "s"} · ${ltc.length} tool call${ltc.length === 1 ? "" : "s"}` : "response team only");
+        setHTML($(`#tr-${a.id}`), `lt:${sees}:${ltr.map((r) => r.time + r.text.length).join()}`, () =>
+          ltr.map((r) => `<li><time>${r.time}</time><span>${linkHosts(r.text)}</span></li>`).join("") || `<li><time></time><span>${sees ? "No activity yet." : "The agents' reasoning is shown to the response team."}</span></li>`,
         );
-        setHTML($(`#tl-${a.id}`), `lc:${ltc.map((c) => c.time + c.call + c.result.length).join()}`, () =>
+        setHTML($(`#tl-${a.id}`), `lc:${sees}:${ltc.map((c) => c.time + c.call + c.result.length).join()}`, () =>
           ltc.map((c) => `<div class="tool"><time>${c.time}</time><code>${linkHosts(c.call)}<span class="res">→ ${linkHosts(c.result)}</span></code></div>`).join("") ||
-          `<div class="tool"><time></time><code><span class="res">No calls yet.</span></code></div>`,
+          `<div class="tool"><time></time><code><span class="res">${sees ? "No calls yet." : "Tool calls are shown to the response team."}</span></code></div>`,
         );
         setText($(`#tl-${a.id}`).previousElementSibling?.querySelector(".tag") ?? null, LV.modelLabel());
         continue;

@@ -323,8 +323,11 @@ interface AnchorState {
   sig: string;
   url: string;
   err: string;
+  /** the gateway wrote nothing to Solana (its devnet wallet has no SOL): a simulated anchor, never shown as an anchor on chain */
+  sim: boolean;
+  reason: string;
 }
-const anchorState: AnchorState = { label: "", busy: false, digest: "", sig: "", url: "", err: "" };
+const anchorState: AnchorState = { label: "", busy: false, digest: "", sig: "", url: "", err: "", sim: false, reason: "" };
 type AnchorFn = (hash: string, label: string) => unknown;
 /** window.claura.anchor, called as a method of window.claura (a feature may rely on `this`). */
 const anchorFn = (): AnchorFn | null => {
@@ -369,6 +372,8 @@ export async function anchorEvidence(): Promise<boolean> {
   anchorState.err = "";
   anchorState.sig = "";
   anchorState.url = "";
+  anchorState.sim = false;
+  anchorState.reason = "";
   try {
     anchorState.digest = await reportDigest(d);
     const r = (await f(anchorState.digest, label)) as unknown;
@@ -376,7 +381,9 @@ export async function anchorEvidence(): Promise<boolean> {
     const sig = typeof r === "string" ? r : String(o.signature ?? o.sig ?? o.txid ?? o.tx ?? o.txSignature ?? "");
     if (!sig) throw new Error("the anchor module returned no signature");
     anchorState.sig = sig;
-    anchorState.url = explorerOf(sig, o.explorer ?? o.explorerUrl ?? o.url ?? o.link);
+    anchorState.sim = o.mock === true || /^mock-/i.test(sig); // mock:true, or a "mock-..." reference: nothing is on the chain
+    anchorState.reason = typeof o.reason === "string" ? o.reason : "";
+    anchorState.url = anchorState.sim ? "" : explorerOf(sig, o.explorer ?? o.explorerUrl ?? o.url ?? o.link);
     return true;
   } catch (e) {
     anchorState.err = e instanceof Error ? e.message : String(e);
@@ -397,12 +404,15 @@ function renderAnchor() {
   const show = s.busy || !!s.sig || !!s.err;
   out.hidden = !show;
   if (!show) return;
-  const state = s.busy ? "busy" : s.sig ? "ok" : "err";
+  const state = s.busy ? "busy" : s.sig ? (s.sim ? "sim" : "ok") : "err";
   setAttr(out, "data-s", state);
   setHTML(out, `${state}:${s.sig}:${s.err}:${s.digest}`, () =>
     s.busy
       ? `<span class="a-dot"></span><b>Anchoring ${esc(s.label)}</b><span>SHA-256 of the record, signed by the gateway</span>`
-      : s.sig
+      : s.sig && s.sim
+        ? `<span class="a-dot"></span><b>Simulated anchor</b><span>${esc(s.label)} · SHA-256 <code title="${esc(s.digest)}">${esc(short(s.digest))}</code> · nothing was written to Solana${s.reason === "unfunded" ? " (the devnet wallet has no SOL)" : ""}</span>
+           <span class="a-sig">local reference <code title="${esc(s.sig)}">${esc(short(s.sig))}</code> · not a transaction on the chain, so there is no Explorer link</span>`
+        : s.sig
         ? `<span class="a-dot"></span><b>Anchored on Solana devnet</b><span>${esc(s.label)} · SHA-256 <code title="${esc(s.digest)}">${esc(short(s.digest))}</code></span>
            <span class="a-sig">signature <code title="${esc(s.sig)}">${esc(short(s.sig))}</code> <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Solana Explorer</a></span>`
         : `<span class="a-dot"></span><b>Could not anchor</b><span>${esc(s.err)}</span>`,

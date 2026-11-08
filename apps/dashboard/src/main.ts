@@ -16,6 +16,7 @@ import {
   S,
   U,
   VIEWS,
+  info,
   isLive,
   phase,
   setOpen,
@@ -26,7 +27,7 @@ import {
 import { $, $$, installSprings, setAttr, syncDisclosures } from "./dom";
 import { FacilityMap } from "./map";
 import { flyFacility, mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
-import { renderSheet, renderShell, shellHTML, sheetWanted } from "./shell";
+import { renderSheet, renderShell, shellHTML, sheetOpened, sheetWanted } from "./shell";
 import { parseHost } from "./hosts";
 import { overview } from "./views/overview";
 import { incident } from "./views/incident";
@@ -149,7 +150,9 @@ function render() {
 
 // ------------------------------------------------------------------ engine loop
 let last = performance.now();
-function frame(now: number) {
+let lastFrameAt = performance.now();
+function tick(now: number) {
+  lastFrameAt = performance.now();
   const dt = Math.min(0.25, Math.max(0, (now - last) / 1000));
   last = now;
   S.amb += dt;
@@ -162,8 +165,20 @@ function frame(now: number) {
     }
   }
   render();
+}
+function frame(now: number) {
+  tick(now);
   requestAnimationFrame(frame);
 }
+// requestAnimationFrame does not run in a tab the OS hides (Screen B behind another window, minimised, a phone with the screen
+// locked), so the clock and the thread would freeze and catch up only when the tab is seen again. Timers still run, slower, so
+// when no frame has landed for a moment this keeps the console following the rows. It never fires while frames are flowing.
+window.setInterval(() => {
+  if (performance.now() - lastFrameAt > 450) tick(performance.now());
+}, 250);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) lastFrameAt = 0; // seen again: let the next timer or frame bring everything up to date at once
+});
 
 function clearStream() {
   for (const el of incident.rowEls.values()) el.remove();
@@ -453,6 +468,11 @@ const api = {
     return data();
   },
 
+  /** The incident on screen, as "INC-0025" (scripted: INC-0419), or "" before one opens. For modules that name it. */
+  get incidentLabel(): string {
+    return S.started ? info().id : "";
+  },
+
   /** Click targets in CSS px (centre + size) for driving a real cursor. visible=false when off-screen or hidden. */
   targets() {
     const out: Record<string, { x: number; y: number; w: number; h: number; visible: boolean }> = {};
@@ -687,7 +707,12 @@ document.addEventListener("click", (e) => {
 
   if (t.closest("#shellBtn")) return void (S.hostSheet && openShellFor(S.hostSheet));
   if (t.closest("#hostClose")) return void api.closeHost();
-  if (t.closest("#approveBtn")) return void api.approve();
+  if (t.closest("#approveBtn")) {
+    // live: the sheet slides up over the middle of the 3D stage, where the Driver is clicking. A click in its first moments is
+    // aimed at the stage, not at the card, so it must not approve. (⌘↵ and a click after the pause still do.)
+    if (isLive() && performance.now() - sheetOpened.at < 700) return;
+    return void api.approve();
+  }
   if (t.closest("#notNow")) return void api.closeApproval();
 
   const chBtn = t.closest(".ch[data-ch]") as HTMLElement | null;
@@ -720,18 +745,28 @@ document.addEventListener("submit", (e) => {
   if (f.id !== "wrForm") return;
   e.preventDefault();
   const input = $("#wrInput") as HTMLInputElement;
-  if (isLive()) {
-    // live: warroom.send() answers with the refusal text, or null once the message is on its way
-    const err = warroom.send(input.value);
-    if (err && err !== "Nothing to send") toast(err, "error");
-    else if (!err) input.value = "";
-  } else if (warroom.send(input.value)) input.value = "";
+  // warroom.send() answers with the refusal text, or null once the message is on its way (live and replay alike)
+  const err = warroom.send(input.value);
+  if (err && err !== "Nothing to send") toast(err, "error");
+  else if (!err) input.value = "";
   render();
 });
+const typing = (t: EventTarget | null) => {
+  const el = t as HTMLElement | null;
+  return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+};
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
+    // Secure Shell's request sheet submits on ⌘↵ too: the console never takes a key that was typed inside another module
+    if ((e.target as HTMLElement | null)?.closest?.(".cs-root, [data-module]")) return;
+    // live: ⌘↵ approves what is on the sheet in front of you, never a proposal that is pending behind a closed sheet
+    if (isLive() && !(phase() === "approval" && sheetWanted("approval") && document.body.dataset.sheet === "1")) return;
     api.approve();
+  } else if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "p" || e.key === "P") && S.demo && !S.started && !isLive() && !typing(e.target)) {
+    // the replay fallback (?demo=1) starts on P: the breach plays from T+0, as it does at page load with ?demo=1&play=1
+    e.preventDefault();
+    api.play();
   } else if (e.key === "Escape") {
     if (S.popover) S.popover = null;
     else if (personSheetOpen()) closePerson();
