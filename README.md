@@ -44,7 +44,7 @@ The attack is simulated. The defense logic runs for real. The table below states
 | Hosts, guests and network reachability | **Seeded.** 13 hosts and 12 guests come from the module's `init`. Reachability is a fixture. |
 | Containment effects | **Database only.** `cordon_host`, `pause_guest`, `failover_guests` and `quarantine_host` change rows. `isolate_network`, `revoke_credentials` and `capture_memory` only log an event. Nothing touches real infrastructure. |
 | Red-team probe (`reimage_host`, blocked by policy) | **Scripted by the runner** and labelled so. Nemotron never chose a denied action by itself. |
-| Operator console (`apps/dashboard`) | **Scripted playback.** It is not connected to SpacetimeDB yet. Its 9.4 s incident is a scripted timeline (see §8). |
+| Operator console (`apps/dashboard`) | **Both, labelled.** The Live view subscribes to SpacetimeDB and calls the real reducers. The other views replay INC-0419 from a script, and the toolbar says "Replay · scripted" (see §8). The 9.4 s is the replay. |
 | Secure shell (`ssh/`) | Real OpenSSH certificates, passkeys and a hash-chained ledger. The host contents are simulated, and the gateway server is **not in this repo**, so the console cannot open it yet. |
 | Voice (`voice/`) | ElevenLabs speech plus local Nemotron answers. The server entry point is **not in this repo** and the console does not load it yet. |
 | 3D facility (`packages/facility-3d`) | Real three.js scene. It needs a build and copy step before the console shows it (see §11). |
@@ -107,7 +107,8 @@ flowchart TB
   Agents -->|"open_incident, record_finding,<br/>file_report"| TB
   H -->|"approve"| A
   SITE --> C
-  TB -. "live subscription (planned)" .-> C
+  TB -->|"subscription (Live view)"| C
+  C -->|"approve, propose_action"| STDB
   C -. "openShell hook" .-> SSH
   C -. "voice hook" .-> V
   V --> O
@@ -314,15 +315,24 @@ as it works, so a console can show it.
 
 ## 8. Operator console
 
-`apps/dashboard` is a scripted playback of INC-0419 with the full operator experience. One `requestAnimationFrame`
-clock drives every view through pure functions in `engine.ts`. All timings live in `script.ts`.
+`apps/dashboard` has two parts:
+
+- **Live** subscribes to the SpacetimeDB module and shows the latest incident, its proposals (with policy mode and
+  status), agent state, the incident log and Scribe's report as rows change. Its buttons call real reducers:
+  **Approve as RK** (or ⌘↵) approves the held quarantine, **Let Warden approve it** shows the module refusing an agent
+  approver, and **Ask Warden to reimage the host** shows the gate blocking a denied action. Code: `src/live.ts`,
+  `src/views/live.ts`, bindings generated into `src/module_bindings`. The SDK loads only when you connect.
+- **Every other view is a scripted replay** of INC-0419 with the full operator experience. One
+  `requestAnimationFrame` clock drives them through pure functions in `engine.ts`; all timings live in `script.ts`.
+  The toolbar pill says "Replay · scripted" until the Live view connects.
 
 **Views:**
 
 | View | What it shows |
 |---|---|
 | Overview | Fleet status, a 2D hall map (3D if built), last incident |
-| Incident | The live incident: hypervisor-boundary path, agents, the 7 containment steps, signals, evidence, blast radius |
+| Incident | Replay of the incident: hypervisor-boundary path, agents, the 7 containment steps, signals, evidence, blast radius |
+| Live | Real rows and reducer calls (above) |
 | War Room | Out-of-band channel: stakeholder brief, `#command`, `#legal`, `#exec`, `#comms-pr`, `#vendors`, tasks, decisions, notification clocks |
 | Shells | Slot for the secure shell (`#claura-shell-slot`) |
 | Agents | Each agent's thoughts, tool calls and bounds |
@@ -347,7 +357,9 @@ clock drives every view through pure functions in `engine.ts`. All timings live 
 | Parameter | Effect |
 |---|---|
 | `demo=1` | Hides the dev dock ("Simulate breach", "Reset") |
-| `view=overview\|incident\|warroom\|shells\|agents\|policy\|reports` | Opens a view |
+| `view=overview\|incident\|live\|warroom\|shells\|agents\|policy\|reports` | Opens a view |
+| `live=1` | Connects the Live view to `ws://127.0.0.1:3000`, database `claura` (or the last address used) |
+| `stdb=ws://host:port&db=name` | Connects to another address |
 | `phase=breach\|approval\|contained\|report` | Jumps to a phase |
 | `t=<seconds>` | Seeks the incident clock |
 | `play=1&approveAt=7.4` | Plays, approving automatically at the given time |
@@ -355,7 +367,7 @@ clock drives every view through pure functions in `engine.ts`. All timings live 
 | `channel=exec` | Selects a War Room channel |
 | `host=b14-gpu-07` | Opens the host sheet |
 
-Keys: ⌘↵ or Ctrl↵ approves, Esc closes a sheet. `window.claura` exposes `play`, `seek`, `approve`, `go`,
+Keys: ⌘↵ or Ctrl↵ approves (the real quarantine when the Live view is open), Esc closes a sheet. `window.claura` exposes `play`, `seek`, `approve`, `go`,
 `openHost`, `targets()` and more for scripted capture.
 
 **Integration hooks, not wired yet:**
@@ -365,7 +377,6 @@ Keys: ⌘↵ or Ctrl↵ approves, Esc closes a sheet. `window.claura` exposes `p
 | `window.claura.openShell(hostId)` and `#claura-shell-slot` | The secure shell gateway |
 | `window.claura.voice.toggle()` / `.playBrief()` | `voice/ui.js`, with `/api/voice` on the same origin |
 | `/bulkhead-3d/facility.js` exporting `createFacility` | `packages/facility-3d` build output |
-| A SpacetimeDB subscription | Not written. Bindings already exist in `backend/agents/src/module_bindings` |
 
 ---
 
@@ -443,6 +454,8 @@ After any schema or reducer change, regenerate the bindings:
 ```bash
 spacetime generate --lang typescript --import-extension ts -y \
   --module-path backend/spacetime/spacetimedb --out-dir backend/agents/src/module_bindings
+spacetime generate --lang typescript -y \
+  --module-path backend/spacetime/spacetimedb --out-dir apps/dashboard/src/module_bindings
 ```
 
 `npm run demo` calls `reset_demo`, which wipes the `claura` database. Pass `--no-reset` to keep it.
@@ -460,7 +473,7 @@ Runner flags: `--scripted`, `--mem`, `--auto-approve-after N`, `--approval-timeo
 ### Console and landing page
 
 ```bash
-cd apps/dashboard && npm install && npm run dev   # http://localhost:4317/?demo=1
+cd apps/dashboard && npm install && npm run dev   # http://localhost:4317/?demo=1&live=1
 cd apps/site && npm install && npm run dev        # http://localhost:4318
 ```
 
@@ -529,9 +542,10 @@ model run takes 30–80 s on a laptop.
 
 | File | What it is |
 |---|---|
-| [`docs/DEMO-FLOW.md`](docs/DEMO-FLOW.md) | Recommended table-demo flow, setup checklist, fallbacks and judge Q&A |
+| [`docs/DEMO-FLOW.md`](docs/DEMO-FLOW.md) | The 3-minute table demo (replay, then Live), setup, fallbacks |
 | `docs/HACKATHON.md` | Event facts, tracks, sponsor requirements |
-| `docs/PITCH.md`, `docs/DEVPOST.md` | Pitch script and Devpost text (written before the backend landed; update before submitting) |
+| `docs/PITCH.md` | What to say: 30-second pitch, the facts to quote, track lines, judge questions |
+| `docs/DEVPOST.md` | Paste-ready Devpost text and a pre-submit checklist |
 | `pitch/drafts/`, `pitch/panel/round1-final.md` | Four pitch angles and a simulated 8-judge review |
 | `film/` | Demo video project. Not rendered; its placeholder stills show the old console look |
 | `brand/BRAND.md` | Logo geometry and colour rules |
