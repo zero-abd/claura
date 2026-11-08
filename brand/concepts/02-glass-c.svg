@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Claura concept 02: Glass C</title>
+  <desc>A C of stacked glass panes: the solid front pane is the seal, the faint panes behind are the aura.</desc>
+  <path fill="#FF5A1F" fill-opacity="0.5" d="M228.943 160.35A106 106 0 1 1 157.627 26.225A24 24 0 0 1 144.211 72.312A58 58 0 1 0 183.233 145.701A24 24 0 0 1 228.943 160.35Z"/>
+  <path fill="#FF5A1F" fill-opacity="0.5" d="M157.627 229.775A106 106 0 1 1 228.943 95.65A24 24 0 0 1 183.233 110.299A58 58 0 1 0 144.211 183.688A24 24 0 0 1 157.627 229.775Z"/>
+  <path id="seal" fill="#FF5A1F" d="M159.399 229.243A106 106 0 1 1 159.399 26.757A24 24 0 0 1 145.181 72.603A58 58 0 1 0 145.181 183.397A24 24 0 0 1 159.399 229.243Z"/>
+</svg>

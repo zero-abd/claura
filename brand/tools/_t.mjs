@@ -1,6 +1,4 @@
-import paper from 'paper-jsdom';
-paper.setup(new paper.Size(256,256));
-const a = new paper.Path.Circle({center:[100,100],radius:50});
-const b = new paper.Path.Circle({center:[140,100],radius:50});
-const u = a.subtract(b);
-console.log(u.pathData);
+import * as g from './geo.mjs';
+const c = g.cradleC({});
+console.log(c.d, '\nopening', c.opening.toFixed(1), 'cap r', c.rc.toFixed(2));
+console.log('bounds', g.P(c.d).bounds.toString());

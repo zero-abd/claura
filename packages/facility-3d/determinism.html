@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>determinism check</title>
+<script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }</script>
+</head><body style="margin:0;background:#000;color:#0f0;font:12px monospace"><div id="stage" style="width:1728px;height:1080px"></div><pre id="out">running</pre>
+<script type="module">
+// Renders frames out of order, several times, and checks each (t, track) always gives the same pixels.
+// Also exercises the hf-seek listener path and measures draw time. Test page only: it may use performance.now().
+import { createFacility } from './src/facility.js';
+const q = new URLSearchParams(location.search);
+const look = q.get('look') === 'iso' ? 'iso' : 'lumen';
+const f = createFacility(document.getElementById('stage'), { look, controls: false, width: +(q.get('w') || 960), height: +(q.get('h') || 600), pixelRatio: +(q.get('dpr') || 1) });
+await f.ready;
+const TRACK = [
+  { t: 0.0, state: 'nominal', cam: 'facility' }, { t: 1.5, state: 'breach' }, { t: 3.5, cam: 'hallB' },
+  { t: 4.2, state: 'containing' }, { t: 7.0, state: 'approval', cam: 'rack14' }, { t: 8.6, state: 'contained' }, { t: 10.2, cam: 'facility' },
+];
+const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i += 7) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); };
+const frame = (t) => hash(f.film.renderAt(t, TRACK).toDataURL('image/png'));
+const times = [8.3, 2.1, 5.5, 11.9, 0, 3.0, 6.1, 9.4, 4.4, 7.7];
+const first = {}, seen = {};
+const order = [...times, ...times.slice().reverse(), ...times.slice(3), ...times.slice(0, 3)];
+let ok = true; const lines = [];
+for (const t of order) { const h = frame(t); if (first[t] == null) first[t] = h; else if (first[t] !== h) { ok = false; lines.push(`MISMATCH t=${t}: ${first[t]} vs ${h}`); } seen[t] = h; }
+lines.push(`film.renderAt out-of-order: ${ok ? 'IDENTICAL' : 'DIFFERENT'} across ${order.length} draws of ${times.length} distinct t`);
+// renderAt(state, t, cam) purity
+const a = hash(f.renderAt('containing', 3.2, 'hallB').toDataURL('image/png'));
+f.renderAt('contained', 4, 'rack14'); f.renderAt('nominal', 9, 'facility');
+const b = hash(f.renderAt('containing', 3.2, 'hallB').toDataURL('image/png'));
+lines.push(`renderAt(state,t,cam) repeat: ${a === b ? 'IDENTICAL' : 'DIFFERENT'} (${a})`);
+// hf-seek path
+let heard = 0; window.addEventListener('hf-seek', (e) => { f.film.renderAt(e.detail.time, TRACK); heard++; });
+window.dispatchEvent(new CustomEvent('hf-seek', { detail: { time: 5.5 } }));
+const viaEvent = hash(f.canvas.toDataURL('image/png'));
+lines.push(`hf-seek(5.5) == film.renderAt(5.5): ${viaEvent === first[5.5] ? 'IDENTICAL' : 'DIFFERENT'} (listener fired ${heard}x)`);
+// distinct frames really differ
+lines.push(`distinct t give distinct pixels: ${new Set(Object.values(first)).size === times.length ? 'yes' : 'NO'}`);
+// perf: pixel-synced draws
+const gl = f.canvas.getContext('webgl2'); const px = new Uint8Array(4);
+const t0 = performance.now(); const N = 60;
+for (let i = 0; i < N; i++) { f.film.renderAt(1.5 + (i / N) * 8, TRACK); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
+lines.push(`draw+sync at ${f.size.width}x${f.size.height} dpr${f.size.pixelRatio}: ${((performance.now() - t0) / N).toFixed(2)} ms/frame`);
+const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+lines.push(`renderer: ${dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'n/a'}`);
+document.getElementById('out').textContent = lines.join('\n');
+document.documentElement.dataset.done = '1';
+</script></body></html>

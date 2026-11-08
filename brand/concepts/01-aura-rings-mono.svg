@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Claura concept 01 (mono): Staggered Aura</title>
+  <desc>Two rings whose openings never line up, so nothing passes straight through; the core sits inside.</desc>
+  <path fill="currentColor" d="M233.921 94.807A111 111 0 1 1 161.193 22.079A13 13 0 0 1 153.418 46.889A85 85 0 1 0 209.111 102.582A13 13 0 0 1 233.921 94.807Z"/>
+  <path fill="currentColor" d="M57.05 130.673A71 71 0 1 1 125.327 198.95A13 13 0 0 1 126.306 172.968A45 45 0 1 0 83.032 129.694A13 13 0 0 1 57.05 130.673Z"/>
+  <path fill="currentColor" d="M106,128c0,-12.2 9.8,-22 22,-22c12.2,0 22,9.8 22,22c0,12.2 -9.8,22 -22,22c-12.2,0 -22,-9.8 -22,-22z"/>
+</svg>

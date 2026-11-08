@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-look="lumen">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claura · DFW-2</title>
+<script type="importmap">
+{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+</script>
+<style>
+  :root { --bg:#06080c; --ink:#c9d4e3; --dim:#7d8ba0; --line:rgba(120,140,170,.28); --accent:#FF5A1F; --ok:#2FBF71; --panel:rgba(8,11,16,.78); --font: ui-monospace,"SF Mono",Menlo,monospace; --r:2px; --blur:none; }
+  html[data-look="lumen"] { --bg:#0c0f14; --ink:#f2f5fa; --dim:rgba(235,240,250,.62); --line:rgba(255,255,255,.16); --panel:rgba(255,255,255,.09); --font:-apple-system,"SF Pro Display","SF Pro Text",Inter,system-ui,sans-serif; --r:16px; --blur:blur(28px) saturate(1.6); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:var(--font); overflow:hidden; }
+  #stage { position:fixed; inset:0; }
+  .ui { position:fixed; z-index:2; display:flex; gap:6px; align-items:center; padding:6px; background:var(--panel); border:1px solid var(--line); border-radius:var(--r); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur); }
+  html[data-look="lumen"] .ui { box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18); }
+  html[data-ui="0"] .ui { display:none; }
+  #brand { top:18px; left:18px; padding:10px 14px 10px 10px; gap:10px; }
+  #brand svg { width:26px; height:26px; }
+  #brand b { font-weight:600; letter-spacing:-.02em; font-size:15px; }
+  #brand small { display:block; color:var(--dim); font-size:11px; margin-top:1px; letter-spacing:.02em; }
+  html[data-look="iso"] #brand b { text-transform:uppercase; letter-spacing:.14em; font-size:12px; }
+  #looks { top:18px; right:18px; }
+  #states { bottom:18px; left:50%; transform:translateX(-50%); }
+  #cams { bottom:18px; left:18px; }
+  .ui[hidden] { display:none; }
+  #hostcard { top:18px; left:50%; transform:translateX(-50%); padding:10px 10px 10px 16px; gap:14px; }
+  #hostcard small { display:block; color:var(--dim); font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
+  #hostcard b { display:block; font-size:15px; font-weight:600; margin:2px 0; letter-spacing:-.01em; }
+  #hostcard span { font-size:11px; color:var(--dim); }
+  #hostcard span.bad { color:#ff8a5c; } #hostcard span.ok { color:#5fd89a; }
+  button.primary { background:var(--accent); color:#fff; border-color:transparent; font-weight:600; }
+  button.primary:hover { color:#fff; filter:brightness(1.1); }
+  #toast { bottom:74px; left:50%; transform:translateX(-50%); padding:10px 16px; font-size:12px; }
+  #read { bottom:18px; right:18px; padding:9px 14px; font-size:11px; color:var(--dim); }
+  #read b { color:var(--ink); font-weight:600; }
+  button { font:inherit; font-size:12px; color:var(--dim); background:transparent; border:1px solid transparent; border-radius:calc(var(--r) - 4px); padding:8px 12px; cursor:pointer; transition:color .15s, background .15s, border-color .15s; white-space:nowrap; }
+  html[data-look="lumen"] button { border-radius:11px; }
+  button:hover { color:var(--ink); }
+  button.on { color:var(--ink); border-color:var(--line); background:rgba(255,255,255,.08); }
+  button[data-s="breach"].on, button[data-s="containing"].on, button[data-s="approval"].on { border-color:rgba(255,90,31,.7); color:#fff; background:rgba(255,90,31,.18); }
+  button[data-s="contained"].on { border-color:rgba(47,191,113,.7); color:#fff; background:rgba(47,191,113,.18); }
+  button.play { color:var(--ink); border-color:var(--line); }
+  .sep { width:1px; align-self:stretch; background:var(--line); margin:2px 2px; }
+  .lbl { color:var(--dim); font-size:10px; padding:0 6px 0 8px; letter-spacing:.12em; text-transform:uppercase; }
+  @media (max-width:900px){ #states{ left:12px; right:12px; transform:none; overflow:auto; bottom:68px;} #cams{ left:12px; bottom:12px;} #read{ display:none;} }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="ui" id="brand">
+  <svg viewBox="0 0 256 256" aria-hidden="true"><path fill="#FF5A1F" d="M207.7 61.1A104 104 0 1 0 207.7 194.9L180.1 171.7A68 68 0 1 1 180.1 84.3Z"/><path id="markseal" fill="#FF5A1F" d="M190 104a12 12 0 0 1 12-12h10a12 12 0 0 1 12 12v48a12 12 0 0 1-12 12h-10a12 12 0 0 1-12-12Z"/></svg>
+  <div><b>Claura</b><small>DFW-2 · Hall B · rack 14</small></div>
+</div>
+<div class="ui" id="looks"><span class="lbl">Look</span><button data-look="iso">Iso-glow</button><button data-look="lumen">Lumen</button></div>
+<div class="ui" id="states">
+  <button data-s="nominal">Nominal</button><button data-s="breach">Breach</button><button data-s="containing">Containing</button><button data-s="approval">Approval</button><button data-s="contained">Contained</button>
+  <span class="sep"></span><button class="play" id="story">Play story</button>
+</div>
+<div class="ui" id="cams"><span class="lbl">Camera</span><button data-c="facility">Facility</button><button data-c="hallB">Hall B</button><button data-c="rack14">Rack 14</button><button data-c="orbit">Orbit</button></div>
+<div class="ui" id="read"></div>
+<div class="ui" id="hostcard" hidden>
+  <div><small id="hc-where"></small><b id="hc-host"></b><span id="hc-status"></span></div>
+  <button class="primary" id="hc-shell">Open secure shell</button><button id="hc-fly">Zoom</button><button id="hc-close" aria-label="Clear selection">&#x2715;</button>
+</div>
+<div class="ui" id="toast" hidden></div>
+
+<script type="module">
+const q = new URLSearchParams(location.search);
+const { createFacility, STATES, STATE_DURATION } = await import(q.has('bundle') ? './dist/facility.js' : './src/facility.js');
+let look = q.get('look') === 'iso' ? 'iso' : 'lumen';
+const bg = q.get('bg') || 'default';
+const stateParam = q.get('state'), camParam = q.get('cam') || 'facility';
+const hasT = q.has('t');
+const staticFrame = hasT || (stateParam && q.has('still'));
+if (q.get('ui') === '0') document.documentElement.dataset.ui = '0';
+const stage = document.getElementById('stage');
+const readEl = document.getElementById('read');
+let f = null, curState = stateParam && STATES.includes(stateParam) ? stateParam : 'nominal', curCam = camParam, storyTimers = [];
+
+let picked = null;
+const card = document.getElementById('hostcard'), toast = document.getElementById('toast');
+const STATUS = { nominal: ['healthy', 'ok'], breach: ['compromised · vm-7f3a', 'bad'], containing: ['containing', 'bad'], approval: ['isolated · awaiting approval', 'bad'], contained: ['sealed', 'ok'] };
+function showCard(hit) {
+  picked = hit;
+  if (!hit) { card.hidden = true; return; }
+  const [txt, cls] = hit.host === 'b14-gpu-07' ? STATUS[curState] : ['healthy', 'ok'];
+  document.getElementById('hc-where').textContent = `Hall ${hit.hall} · rack ${hit.rack}`;
+  document.getElementById('hc-host').textContent = hit.host;
+  const st = document.getElementById('hc-status'); st.textContent = txt; st.className = cls;
+  card.hidden = false;
+}
+document.getElementById('hc-shell').addEventListener('click', () => {
+  if (!picked) return;
+  // The dashboard listens for this and launches its real secure shell.
+  window.dispatchEvent(new CustomEvent('claura:open-shell', { detail: picked }));
+  toast.textContent = `Opening secure shell to ${picked.host} (demo event: claura:open-shell)`; toast.hidden = false;
+  setTimeout(() => { toast.hidden = true; }, 2600);
+});
+document.getElementById('hc-fly').addEventListener('click', () => { if (picked) { stopStory(); curCam = picked.rack === 'B14' ? 'rack14' : 'custom'; f.fly(picked.pose); paint(); } });
+document.getElementById('hc-close').addEventListener('click', () => { f.highlight(null, 'select'); showCard(null); });
+function mount() {
+  document.documentElement.dataset.look = look;
+  if (f) f.dispose();
+  f = createFacility(stage, { look, background: bg === 'transparent' ? 'transparent' : bg });
+  f.onPick(showCard);
+  if (picked) f.highlight(picked.host, 'select');
+  window.facility = f;
+  return f.ready;
+}
+function paint() {
+  document.querySelectorAll('[data-s]').forEach((b) => b.classList.toggle('on', b.dataset.s === curState));
+  document.querySelectorAll('[data-c]').forEach((b) => b.classList.toggle('on', b.dataset.c === curCam));
+  document.querySelectorAll('[data-look]').forEach((b) => { if (b.tagName === 'BUTTON') b.classList.toggle('on', b.dataset.look === look); });
+  readEl.innerHTML = `<b>${curState}</b> · ${curCam} · ${look === 'iso' ? 'iso-glow' : 'lumen'} · click a host`;
+  if (picked) showCard(picked);
+  document.getElementById('markseal').setAttribute('fill', curState === 'contained' ? '#2FBF71' : '#FF5A1F');
+}
+const stopStory = () => { storyTimers.forEach(clearTimeout); storyTimers = []; document.getElementById('story').textContent = 'Play story'; };
+function go(state, cam) {
+  if (state) { curState = state; f.setState(state); }
+  if (cam) { curCam = cam; f.fly(cam); }
+  paint();
+}
+document.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => { stopStory(); go(b.dataset.s); }));
+document.querySelectorAll('[data-c]').forEach((b) => b.addEventListener('click', () => { stopStory(); go(null, b.dataset.c); }));
+document.querySelectorAll('button[data-look]').forEach((b) => b.addEventListener('click', async () => {
+  if (b.dataset.look === look) return;
+  look = b.dataset.look; await mount(); go(curState, curCam); paint();
+}));
+document.getElementById('story').addEventListener('click', () => {
+  if (storyTimers.length) { stopStory(); return; }
+  document.getElementById('story').textContent = 'Stop';
+  const seq = [[0, 'nominal', 'facility'], [3500, 'breach', 'facility'], [7500, null, 'hallB'], [9000, 'containing', 'hallB'], [14000, 'approval', 'rack14'], [18500, 'contained', 'rack14'], [23500, null, 'facility'], [27500, null, 'orbit']];
+  seq.forEach(([ms, s, c]) => storyTimers.push(setTimeout(() => { go(s, c); if (ms === 27500) stopStory(); }, ms)));
+});
+
+await mount();
+if (staticFrame) {
+  const st = STATES.includes(stateParam) ? stateParam : 'nominal';
+  const t = hasT ? parseFloat(q.get('t')) : (STATE_DURATION[st] || 0) + 1;
+  curState = st; curCam = camParam;
+  f.renderAt(st, t, camParam);
+  readEl.innerHTML = `<b>${st}</b> · ${camParam} · t=${t}s`;
+  paint();
+} else if (stateParam) {
+  paint(); f.setState(curState); f.fly(curCam);
+} else { paint(); f.play(); }
+if (q.get('hover')) { try { f.highlight(q.get('hover'), 'hover'); } catch (e) { console.error(e.message); } }
+if (q.get('pick')) { try { f.highlight(q.get('pick'), 'select'); showCard({ host: q.get('pick'), hall: q.get('pick')[0].toUpperCase(), rack: q.get('pick').slice(0, 3).toUpperCase(), pose: 'rack14' }); } catch (e) { console.error(e.message); } }
+document.documentElement.dataset.ready = '1';
+</script>
+</body>
+</html>

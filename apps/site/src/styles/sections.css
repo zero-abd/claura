@@ -47,6 +47,13 @@
   color: var(--ink);
 }
 
+/* a firmer tint than other glass, so content passing under the bar never fights its labels */
+.nav.glass {
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 60%),
+    rgba(8, 14, 38, 0.58);
+}
+
 @media (max-width: 760px) {
   .nav nav {
     display: none;
@@ -57,7 +64,8 @@
 .hero {
   position: relative;
   padding-top: clamp(104px, 11vw, 124px);
-  overflow: clip;
+  /* clip sideways only, so the frame shadow can fall past the bottom edge without a seam */
+  overflow-x: clip;
 }
 
 /* a corridor of watertight doors, receding from the headline */
@@ -78,6 +86,12 @@
   stroke: rgb(160, 188, 255);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
+}
+
+@media (max-width: 720px) {
+  .doors {
+    opacity: 0.5;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -199,11 +213,11 @@
 .hero-shot::before {
   content: "";
   position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: 0;
-  height: 55%;
-  background: radial-gradient(60% 70% at 50% 55%, rgba(255, 90, 31, 0.26), transparent 70%);
+  left: 4%;
+  right: 4%;
+  bottom: 4%;
+  height: 60%;
+  background: radial-gradient(closest-side, rgba(255, 90, 31, 0.24), transparent);
   pointer-events: none;
 }
 
@@ -873,6 +887,10 @@
   gap: 16px;
 }
 
+.nb {
+  white-space: nowrap;
+}
+
 .approve-head h4 {
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   line-height: 1.15;
@@ -1016,6 +1034,11 @@
 }
 
 @media (max-width: 520px) {
+  .approve-head {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 12px;
+  }
   .ledger li {
     grid-template-columns: 52px 1fr;
   }
@@ -1258,6 +1281,7 @@
 .steps time {
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .steps b {
@@ -1308,10 +1332,16 @@
   .steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .steps li {
-    grid-template-columns: auto 1fr;
-    align-items: baseline;
-    gap: 8px;
+  .pip {
+    top: 19px;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+  }
+  .pip.on,
+  .pip.human.on,
+  .pip.final.on {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16), 0 0 10px rgba(255, 255, 255, 0.5);
   }
   .scale .tick:nth-of-type(even) {
     display: none;

@@ -1,6 +1,6 @@
 import { POLICY_AUTO, POLICY_HUMAN, POLICY_PRESETS, type PolicyAction } from "../script";
 import { icon } from "../icons";
-import { $, $$, setAttr } from "../dom";
+import { $, $$, setAttr, setVar } from "../dom";
 
 // Policy: what Warden may do alone, and what needs a human. Interactive in-memory toggles.
 export const policyState = {
@@ -77,8 +77,8 @@ export const policy = {
     for (const b of $$("button", seg)) setAttr(b, "aria-selected", String(b.dataset.preset === cur));
     const sel = cur ? ($(`button[data-preset="${cur}"]`, seg) as HTMLElement) : null;
     if (sel && sel.offsetWidth) {
-      seg.style.setProperty("--x", `${sel.offsetLeft - 4}px`);
-      seg.style.setProperty("--w", `${sel.offsetWidth}px`);
+      setVar(seg, "--x", `${sel.offsetLeft - 4}px`);
+      setVar(seg, "--w", `${sel.offsetWidth}px`);
     }
   },
 };

@@ -14,7 +14,7 @@ concepts.forEach((c, i) => {
   <div class="row small"><div class="dark">${s16}${s32}</div><div class="light" style="color:#0B0C0E">${m16}${layersToSvg(b.color,{size:16})}${s32}</div></div></div>`;
 });
 fs.writeFileSync('preview.html', `<!doctype html><meta charset=utf-8><style>
-body{margin:0;background:#1a1b1e;font:13px -apple-system,sans-serif;color:#ddd;padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;width:1300px;box-sizing:content-box}
+body{margin:0;background:#1a1b1e;font:13px -apple-system,sans-serif;color:#ddd;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:1000px;box-sizing:content-box}
 .card{background:#25262a;border-radius:12px;padding:10px}.t{margin-bottom:6px;font-weight:600}
 .row{display:flex;gap:8px}.dark,.light{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:8px}
 .dark{background:radial-gradient(circle at 30% 20%,#2a2f4a,#0B0C0E)}.light{background:#f4f4f6;color:#0B0C0E}.small .dark,.small .light{padding:6px}

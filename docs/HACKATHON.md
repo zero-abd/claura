@@ -245,3 +245,15 @@ VM escape evidence (used in PITCH.md)
 - https://i.blackhat.com/asia-20/Thursday/asia-20-Shao-3D-Red-Pill-A-Guest-To-Host-Escape-On-QEMUKVM-Virtio-Device.pdf
 - https://www.computerworld.com/article/1667668/pwn2own-ends-with-two-virtual-machine-escapes.html
 - https://www.sentinelone.com/vulnerability-database/cve-2024-0099/ (third-party tracker; confirm in NVIDIA's bulletin)
+
+## Winstead track: organizer clarifications (from the HackUTD Discord, answered by the track lead, 2026-11-07)
+- **Attacker's reach:** unknown, so assume they can see normal communications. Ransomware has locked a substantial amount of data, phones are down and email is sporadic.
+- **Where the command center runs** (inside the compromised network or outside it): "we will allow you to take a creative approach here, it's up to you."
+- **Dashboard comms:** "the assumption is nobody has information. There needs to be a way for stakeholders to communicate and coordinate over the given issue."
+
+**How Claura answers it:**
+- **War Room:** an out-of-band coordination channel. It runs off the compromised network on SpacetimeDB's cloud (Maincloud) and uses break-glass identities issued before any incident. It doesn't need email or phones.
+- **Scribe's brief:** a plain-language brief for non-technical stakeholders, covering what we know and what we don't know yet.
+- **Coordination:** channels by role, tasks with owners, and a decision log in which the quarantine approval is recorded.
+- **Notification clocks:** example obligations, to be confirmed with counsel.
+- **On-prem agents:** Nemotron runs on-prem, so raw telemetry stays in the building. Only summaries, decisions and messages cross into the out-of-band plane.

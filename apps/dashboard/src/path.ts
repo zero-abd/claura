@@ -72,7 +72,7 @@ export function updatePath(root: HTMLElement, s: PathState, amb: number): string
   seal.style.opacity = sealed ? String(clamp((s.r - SEAL_AT) / 0.1)) : "0";
   seal.style.setProperty("--drop", `${((1 - dp) * -64).toFixed(2)}px`);
   setAttr(seal, "data-s", contained ? "safe" : sealed ? "sealed" : "idle");
-  const bp = sealed ? clamp((s.r - SEAL_AT - 0.16) / 0.55) : 0;
+  const bp = sealed ? clamp((s.r - SEAL_AT - 0.16) / 0.34) : 0;
   const burst = q("pBurst");
   burst.style.opacity = bp > 0 && bp < 1 ? String(((1 - bp) * 0.7).toFixed(3)) : "0";
   burst.style.transform = `translate(-50%, -50%) scale(${(0.5 + bp * 2.2).toFixed(3)})`;

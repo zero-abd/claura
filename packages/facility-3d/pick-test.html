@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>pick test</title>
+<script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }</script>
+</head><body style="margin:0;background:#000;color:#0f0;font:12px monospace"><div id="stage" style="width:1200px;height:750px"></div><pre id="out">running</pre>
+<script type="module">
+// Finds b14-gpu-07 on screen by scanning pickAt(), then drives real pointer events on the canvas and checks the callbacks.
+const q = new URLSearchParams(location.search);
+const { createFacility } = await import(q.has('bundle') ? './dist/facility.js' : './src/facility.js');
+const f = createFacility(document.getElementById('stage'), { look: q.get('look') === 'iso' ? 'iso' : 'lumen', width: 1200, height: 750, pixelRatio: 1 });
+await f.ready;
+const lines = [];
+f.renderAt('breach', 3.5, 'rack14');
+// 1) scan the frame for the host
+let found = null, seen = new Set();
+for (let y = 10; y < 750 && !found; y += 6) for (let x = 10; x < 1200; x += 6) { const h = f.pickAt(x, y); if (h) { seen.add(h.host); if (h.host === 'b14-gpu-07' && !found) found = { x, y, h }; } }
+lines.push(`pickAt scan: found b14-gpu-07 at ${found ? found.x + ',' + found.y : 'NOT FOUND'}; ${seen.size} distinct hosts visible in the rack14 frame`);
+lines.push(`pick payload: ${JSON.stringify({ host: found.h.host, hall: found.h.hall, rack: found.h.rack })} (pose ${typeof found.h.pose === 'string' ? found.h.pose : 'object'})`);
+// 2) real pointer events
+const canvas = f.canvas, r = canvas.getBoundingClientRect();
+const ev = (type, x, y, extra = {}) => canvas.dispatchEvent(new PointerEvent(type, { clientX: r.left + x, clientY: r.top + y, pointerId: 1, bubbles: true, ...extra }));
+const hovers = [], picks = [];
+f.onHover((h) => hovers.push(h ? h.host : null));
+const off = f.onPick((h) => picks.push({ host: h.host, hall: h.hall, rack: h.rack }));
+ev('pointermove', found.x, found.y);
+lines.push(`hover -> cursor="${canvas.style.cursor}" onHover=${JSON.stringify(hovers)}`);
+ev('pointermove', 3, 3);
+lines.push(`leave -> cursor="${canvas.style.cursor}" onHover=${JSON.stringify(hovers)}`);
+ev('pointerdown', found.x, found.y); ev('pointerup', found.x, found.y);
+lines.push(`click -> onPick=${JSON.stringify(picks)}`);
+// 3) a drag must not pick
+ev('pointerdown', found.x, found.y); ev('pointermove', found.x + 40, found.y + 10); ev('pointerup', found.x + 40, found.y + 10);
+lines.push(`drag does not pick: ${picks.length === 1 ? 'yes' : 'NO (' + picks.length + ')'}`);
+// 4) programmatic highlight + error handling
+f.highlight('c05-gpu-03', 'select'); f.highlight('b14-gpu-07', 'hover');
+let err = ''; try { f.highlight('zz9-gpu-1'); } catch (e) { err = e.message; }
+lines.push(`bad host throws: ${err || 'NO'}`);
+off();
+// 5) highlight is UI state: clearing it restores the pure frame exactly
+f.highlight(null); f.highlight(null, 'select');
+const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i += 5) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); };
+const clean = hash(f.renderAt('breach', 3.5, 'rack14').toDataURL());
+f.highlight('b14-gpu-07', 'select'); const withHl = hash(f.renderAt('breach', 3.5, 'rack14').toDataURL());
+f.highlight(null, 'select'); const clean2 = hash(f.renderAt('breach', 3.5, 'rack14').toDataURL());
+lines.push(`frame with selection differs: ${clean !== withHl ? 'yes' : 'NO'}; cleared frame identical to original: ${clean === clean2 ? 'yes' : 'NO'}`);
+document.getElementById('out').textContent = lines.join('\n');
+</script></body></html>

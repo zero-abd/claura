@@ -132,10 +132,10 @@ const hb = HALL_CENTERS.B;
 const facilityPts = boxPts(-PLINTH.hx, PLINTH.hx, -PLINTH.depth, 3.4, -PLINTH.hz, PLINTH.hz);
 const hallBPts = boxPts(hb[0] - HALL.len / 2 - 0.4, hb[0] + HALL.len / 2 + 0.4, -0.1, 3.6, hb[1] - HALL.wid / 2 - 0.4, hb[1] + HALL.wid / 2 + 0.4);
 const zf14 = frontZ(B14);
-const rack14Pts = boxPts(B14.x - 1.55, B14.x + 1.55, 0, 3.3, B14.z - 0.9, zf14 + 1.7);
+const rack14Pts = boxPts(B14.x - 1.7, B14.x + 1.7, 0, 4.1, B14.z - 1.0, zf14 + 1.55);
 
 export const PRESETS = {
-  facility: fitPose(facilityPts, 45, ISO_EL, [0.05, 0.0]),
+  facility: fitPose(facilityPts, 45, ISO_EL, [0.1, 0.12]),
   hallB: fitPose(hallBPts, 45, 33, [0.08, 0.06]),
   rack14: fitPose(rack14Pts, 28, 24, [0.04, 0.02]),
 };
@@ -143,12 +143,19 @@ export const PRESETS = {
 PRESETS.orbit = (() => {
   let w = 0, h = 0;
   for (let az = 0; az < 360; az += 10) {
-    const p = fitPose(facilityPts, az, ISO_EL, [0.05, 0.0]);
+    const p = fitPose(facilityPts, az, ISO_EL, [0.1, 0.12]);
     w = Math.max(w, p.w); h = Math.max(h, p.h);
   }
   return { target: [0, 0.4, 0], az: 45, el: ISO_EL, w, h };
 })();
 export const PRESET_NAMES = ['facility', 'hallB', 'rack14', 'orbit'];
+
+/** A pose that frames one rack from the front (rows facing -z are viewed from the other side). Feed it to fly(). */
+export function rackPose(rack) {
+  const az = rack.f > 0 ? 28 : 208, f = rack.f;
+  const zFront = rack.z + f * (RACK.d / 2 + 1.5), zBack = rack.z - f * 0.7;
+  return fitPose(boxPts(rack.x - 1.6, rack.x + 1.6, 0, 3.4, Math.min(zFront, zBack), Math.max(zFront, zBack)), az, 24, [0.05, 0.05]);
+}
 
 export function resolvePose(cam, t) {
   let p;

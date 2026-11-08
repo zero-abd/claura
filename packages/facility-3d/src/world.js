@@ -16,8 +16,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { clamp, lerp, sstep, easeInOutSine, easeInQuart, mulberry32, hash01, shimmer } from './util.js';
 import {
   RACK, HALL, SLAB_Y, PLINTH, HALL_CENTERS, HALL_IDS, RACKS, B14, C05, C12, HUB, BLADES, BLADE_H,
-  bladeY, frontZ, HOST, SUSPECT_CELL, GUEST_CELLS, hostCellPos, MIGRATION, topSlotPos, linkPoints, CONDUITS,
-  RACK_BY_ID,
+  bladeY, BLADE_Y0, frontZ, HOST, SUSPECT_CELL, GUEST_CELLS, hostCellPos, MIGRATION, topSlotPos, linkPoints, CONDUITS,
+  RACK_BY_ID, hostId, bladeAt, parseHost, hostSlot,
 } from './layout.js';
 
 const ORANGE = new THREE.Color('#FF5A1F');
@@ -42,7 +42,7 @@ const PAL = {
   },
   lumen: {
     bg: '#0c0f14',
-    rack: '#aab2bd', panel: '#07090d', blade: '#20262f', plinth: '#171b22', slab: '#1d222a', aisle: '#12151a', hub: '#8d95a1',
+    rack: '#7d8591', panel: '#07090d', blade: '#20262f', plinth: '#171b22', slab: '#1d222a', aisle: '#12151a', hub: '#8d95a1',
     cool: [0.55, 0.86, 1.0], off: [0.035, 0.05, 0.075],
     label: '#e9eef6',
   },
@@ -168,8 +168,14 @@ const RING_FS = /* glsl */`
     #include <colorspace_fragment>
   }`;
 const WIRE_VS = /* glsl */`
+  uniform float uR0, uK;
   varying float vU; varying vec3 vN;
-  void main() { vU = uv.x; vN = normal; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+  void main() {
+    vU = uv.x; vN = normal;
+    vec3 c = position - normal * uR0;           // centre line
+    vec3 p = c + normal * uR0 * uK;             // radius rescaled so the wire keeps its on-screen width
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  }`;
 const WIRE_FS = /* glsl */`
   uniform vec3 uColor; uniform float uA, uB, uT, uGlow, uBase, uPulse, uFreq, uDir;
   varying float vU; varying vec3 vN;
@@ -207,7 +213,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   };
 
   // ---------------------------------------------------------------- lights
-  let keyLight = null, orangeLight = null;
+  let keyLight = null, orangeLight = null, haloLight = null;
   if (ISO) {
     scene.add(new THREE.AmbientLight(0xffffff, 0.55 * Math.PI));
     const d = new THREE.DirectionalLight(0xffffff, 0.75 * Math.PI);
@@ -215,7 +221,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     scene.add(d);
   } else {
     scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1f28, 0.35));
-    keyLight = new THREE.DirectionalLight(0xfff4e8, 2.3);
+    keyLight = new THREE.DirectionalLight(0xfff4e8, 2.9);
     keyLight.position.set(-11, 19, 13);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(4096, 4096);
@@ -231,6 +237,9 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     const rim = new THREE.DirectionalLight(0xc8d8ff, 0.5);
     rim.position.set(4, 5, 18);
     scene.add(rim);
+    haloLight = new THREE.PointLight(0xff5a1f, 0, 8, 1.4);
+    haloLight.position.set(B14.x, SLAB_Y + RACK.h + 0.6, B14.z + 0.3);
+    scene.add(haloLight);
     orangeLight = new THREE.PointLight(0xff5a1f, 0, 9, 1.6);
     orangeLight.position.set(B14.x, 1.6, frontZ(B14) + 0.9);
     scene.add(orangeLight);
@@ -251,7 +260,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     M.plinth = new THREE.MeshStandardMaterial({ color: P.plinth, roughness: 0.55, metalness: 0.2 });
     M.slab = new THREE.MeshStandardMaterial({ color: P.slab, roughness: 0.5, metalness: 0.25 });
     M.aisle = new THREE.MeshStandardMaterial({ color: P.aisle, roughness: 0.6, metalness: 0.2 });
-    M.rack = new THREE.MeshStandardMaterial({ color: P.rack, roughness: 0.34, metalness: 0.85 });
+    M.rack = new THREE.MeshStandardMaterial({ color: P.rack, roughness: 0.3, metalness: 0.9 });
     M.panel = new THREE.MeshStandardMaterial({ color: P.panel, roughness: 0.18, metalness: 0.5 });
     M.blade = new THREE.MeshStandardMaterial({ color: P.blade, roughness: 0.4, metalness: 0.7 });
     M.hub = new THREE.MeshStandardMaterial({ color: P.hub, roughness: 0.36, metalness: 0.8 });
@@ -428,7 +437,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const floorGlow = mkGlowPlane(3.4, B14.x, B14.z + 0.5);
   const hubGlowPlane = mkGlowPlane(3.0, HUB.x, HUB.z);
   hubGlowPlane.position.y = 0.025;
-  const sealGlow = mkGlowPlane(3.1, B14.x, B14.z + 0.3);
+  const sealGlow = mkGlowPlane(2.6, B14.x, B14.z + 0.3);
 
   const sprites = [];
   const mkSprite = (color, size, x, y, z) => {
@@ -491,8 +500,8 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const cellRate = cellMeta.map((m, i) => 0.22 + 0.95 * hash01(m.id ?? i, 7));
 
   // ---------------------------------------------------------------- wires (link + conduits), pulses
-  const wireUniforms = (color, base, pulse, freq, dir, glow = 0) => ({
-    uColor: { value: color.clone() }, uA: { value: 0 }, uB: { value: 1 }, uT: { value: 0 }, uGlow: { value: glow },
+  const wireUniforms = (color, base, pulse, freq, dir, glow = 0, r0 = 0.02) => ({
+    uR0: { value: r0 }, uK: { value: 1 }, uColor: { value: color.clone() }, uA: { value: 0 }, uB: { value: 1 }, uT: { value: 0 }, uGlow: { value: glow },
     uBase: { value: base }, uPulse: { value: pulse }, uFreq: { value: freq }, uDir: { value: dir },
   });
   const wireMat = (u, glow) => new THREE.ShaderMaterial({
@@ -503,22 +512,32 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const linkLen = curve.getLength();
   const linkRadius = ISO ? 0.02 : 0.03;
   const linkGeo = track(new THREE.TubeGeometry(curve, 260, linkRadius, 6, false));
-  const linkU = wireUniforms(ORANGE, 1.0, 0.9, linkLen / 0.6, 1.4);
+  const linkU = wireUniforms(ORANGE, 1.0, 0.9, linkLen / 0.6, 1.4, 0, linkRadius);
   const linkMesh = new THREE.Mesh(linkGeo, track(wireMat(linkU, 0)));
   linkMesh.frustumCulled = false; linkMesh.renderOrder = 6;
   root.add(linkMesh);
   const linkGlowGeo = track(new THREE.TubeGeometry(curve, 260, linkRadius * 4.5, 8, false));
-  const linkGU = wireUniforms(ORANGE, 0.9, 0.7, linkLen / 0.6, 1.4, ISO ? 0.1 : 0.16);
+  const linkGU = wireUniforms(ORANGE, 0.9, 0.7, linkLen / 0.6, 1.4, ISO ? 0.1 : 0.16, linkRadius * 4.5);
   const linkGlow = new THREE.Mesh(linkGlowGeo, track(wireMat(linkGU, 1)));
   linkGlow.frustumCulled = false; linkGlow.renderOrder = 7;
   root.add(linkGlow);
 
   const conduitCool = cool.clone().multiplyScalar(ISO ? 0.55 : 0.5);
+  const fillet = (pts, r = 0.28) => {
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const a = V3(pts[i - 1]), b = V3(pts[i]), c = V3(pts[i + 1]);
+      const da = a.clone().sub(b).normalize(), dc = c.clone().sub(b).normalize();
+      out.push(b.clone().addScaledVector(da, r).toArray(), pts[i], b.clone().addScaledVector(dc, r).toArray());
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  };
   const conduits = CONDUITS.map((pts) => {
-    const c = new THREE.CatmullRomCurve3(pts.map(V3), false, 'centripetal', 0.5);
+    const c = new THREE.CatmullRomCurve3(fillet(pts).map(V3), false, 'centripetal', 0.5);
     const len = c.getLength();
     const g = track(new THREE.TubeGeometry(c, 120, 0.016, 5, false));
-    const u = wireUniforms(conduitCool, 0.28, 1.1, len / 1.4, -0.45);
+    const u = wireUniforms(conduitCool, 0.28, 1.1, len / 1.4, -0.45, 0, 0.016);
     const mesh = new THREE.Mesh(g, track(wireMat(u, 0)));
     mesh.frustumCulled = false;
     root.add(mesh);
@@ -546,10 +565,11 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const finH = 2.55, finT = 0.05, finLen = 1.5, finZc = B14.z + 0.25;
   const hazTex = track(hazardTexture());
   const plates = [];
-  function makePlate(name, size, pos, strip, hatch) {
+  function makePlate(name, size, pos, strip, hatch, glass = false) {
     const g = new THREE.Group();
     g.position.set(pos[0], pos[1], pos[2]);
     const mat = M.plate.clone(); track(mat);
+    if (glass) { mat.transparent = true; mat.opacity = ISO ? 0.34 : 0.42; mat.depthWrite = false; mat.polygonOffset = false; if (!ISO) { mat.roughness = 0.12; mat.metalness = 0.6; } }
     const mesh = new THREE.Mesh(track(new THREE.BoxGeometry(size[0], size[1], size[2])), mat);
     mesh.castShadow = !ISO; mesh.receiveShadow = !ISO;
     g.add(mesh);
@@ -585,18 +605,18 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const fin2 = makePlate('d2', [finT, finH, finLen], [B14.x + P_ / 2, SLAB_Y + finH / 2, finZc], { pos: [0, -finH / 2 + 0.08, 0], size: [finT + 0.012, 0.16, finLen + 0.004] }, finHatch);
   const frontW = P_ - 0.06, frontH = 2.12;
   const frontHatch = hatchLines(9, (k) => { const x = -frontW / 2 + k * frontW; return [[x - 0.08, frontH / 2 - 0.15, finT / 2 + 0.001], [x + 0.08, frontH / 2, finT / 2 + 0.001]]; });
-  const door3 = makePlate('d3', [frontW, frontH, finT], [B14.x, SLAB_Y + frontH / 2, zf14 + 0.4], { pos: [0, frontH / 2 - 0.07, 0], size: [frontW, 0.14, finT + 0.012] }, frontHatch);
+  const door3 = makePlate('d3', [frontW, frontH, finT], [B14.x, SLAB_Y + frontH / 2, zf14 + 0.4], { pos: [0, frontH / 2 - 0.07, 0], size: [frontW, 0.14, finT + 0.012] }, frontHatch, true);
   const lidLen = finLen, lidT = 0.05, lidY = SLAB_Y + RACK.h + 0.06;
   const lidHatch = hatchLines(9, (k) => { const x = -frontW / 2 + k * frontW; return [[x - 0.08, lidT / 2 + 0.001, lidLen / 2 - 0.16], [x + 0.08, lidT / 2 + 0.001, lidLen / 2]]; });
   const lid = makePlate('lid', [frontW, lidT, lidLen], [B14.x, lidY, finZc], { pos: [0, 0, lidLen / 2 - 0.08], size: [frontW, lidT + 0.012, 0.16] }, lidHatch);
 
   // aura ring + seal bar, built from the Claura mark (open C ring, door bar closing its opening)
-  const RING_R = 1.9, RING_r = (RING_R * 68) / 104, GAP = (40 * Math.PI) / 180;
+  const RING_R = 1.75, RING_r = (RING_R * 68) / 104, GAP = (40 * Math.PI) / 180;
   const ringShape = new THREE.Shape();
   ringShape.absarc(0, 0, RING_R, GAP, Math.PI * 2 - GAP, false);
   ringShape.absarc(0, 0, RING_r, Math.PI * 2 - GAP, GAP, true);
   ringShape.closePath();
-  const ringDepth = 0.07;
+  const ringDepth = 0.1;
   const ringGeo = track(new THREE.ExtrudeGeometry(ringShape, { depth: ringDepth, bevelEnabled: !ISO, bevelSize: 0.012, bevelThickness: 0.012, bevelSegments: 2, curveSegments: 72 }));
   ringGeo.rotateX(-Math.PI / 2);
   const barW = 24 * RING_R / 104, barL = 72 * RING_R / 104, barX = 74 * RING_R / 104;
@@ -607,8 +627,9 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const barGeo = track(new THREE.ExtrudeGeometry(barShape, { depth: ringDepth + 0.03, bevelEnabled: !ISO, bevelSize: 0.012, bevelThickness: 0.012, bevelSegments: 2, curveSegments: 32 }));
   barGeo.rotateX(-Math.PI / 2);
   const auraGroup = new THREE.Group();
-  auraGroup.position.set(B14.x, SLAB_Y + 0.004, B14.z + 0.3);
-  auraGroup.rotation.y = Math.PI / 4; // opening faces screen-right so it reads like the mark
+  const HALO_Y = SLAB_Y + RACK.h + 0.95; // the aura floats above B14, clear of the tall racks that would hide a floor ring
+  auraGroup.position.set(B14.x, HALO_Y, B14.z + 0.3);
+  auraGroup.rotation.y = Math.PI / 4; // opening faces screen-right, exactly like the Claura mark
   root.add(auraGroup);
   let ringMat, barMat, ringLineMat = null, barLineMat = null;
   if (ISO) {
@@ -659,7 +680,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   guests.forEach((_, i) => { for (let j = 0; j < TRAIL; j++) parts.setColorAt(i * TRAIL + j, tmpC.setRGB(1, 1, 1)); });
   root.add(parts);
   const ICE = new THREE.Color(ISO ? '#d6ebff' : '#e8f4ff');
-  const guestHalos = guests.map(() => mkSprite(ICE, 0.9, 0, 0, 0));
+  const guestHalos = guests.map(() => mkSprite(ICE, 1.15, 0, 0, 0));
   const landFlash = guests.map(() => mkSprite(ICE, 1.3, 0, 0, 0));
 
   // ---------------------------------------------------------------- labels
@@ -667,8 +688,8 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const labelCache = new Map();
   const FONT = '-apple-system, "SF Pro Display", "SF Pro Text", Inter, "Helvetica Neue", Arial, sans-serif';
   const MONO = 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace';
-  function labelTex(text, tone) {
-    const key = text + '|' + tone;
+  function labelTex(text, tone, noTick = false) {
+    const key = text + '|' + tone + '|' + noTick;
     if (labelCache.has(key)) return labelCache.get(key);
     const S = 3;
     const probe = document.createElement('canvas').getContext('2d');
@@ -676,9 +697,9 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     const font = ISO ? `600 ${size}px ${MONO}` : `600 ${size}px ${FONT}`;
     probe.font = font;
     const track_ = ISO ? 1.2 : 0.2;
-    const txt = ISO ? text.toUpperCase() : text;
+    const txt = ISO && !/^[a-z]+\d*-/.test(text) ? text.toUpperCase() : text;
     const tw = probe.measureText(txt).width + track_ * txt.length;
-    const padX = ISO ? 6 : 12, h = ISO ? 20 : 26, tick = 16;
+    const padX = ISO ? 6 : 12, h = ISO ? 20 : 26, tick = noTick ? 0 : 16;
     const w = Math.ceil(tw + padX * 2 + (tone !== 'plain' ? 12 : 0)), H = h + tick;
     const c = document.createElement('canvas');
     c.width = Math.ceil(w * S); c.height = Math.ceil(H * S);
@@ -696,7 +717,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
       g.fillStyle = 'rgba(6,8,12,0.78)'; g.globalAlpha = 1; g.fillRect(1, 1, w - 2, h - 2);
     }
     g.strokeStyle = col; g.globalAlpha = tone === 'plain' ? 0.45 : 0.9; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(w / 2, h); g.lineTo(w / 2, H); g.stroke();
+    if (!noTick) { g.beginPath(); g.moveTo(w / 2, h); g.lineTo(w / 2, H); g.stroke(); }
     g.globalAlpha = 1;
     let x = padX;
     if (tone !== 'plain') { g.fillStyle = col; g.beginPath(); g.arc(padX + 3, h / 2, 3, 0, Math.PI * 2); g.fill(); x += 12; }
@@ -709,11 +730,11 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     labelCache.set(key, r);
     return r;
   }
-  function addLabel(name, text, tone, anchor, vis) {
-    const t = labelTex(text, tone);
+  function addLabel(name, text, tone, anchor, vis, o = {}) {
+    const t = labelTex(text, tone, o.noTick);
     const mat = new THREE.SpriteMaterial({ map: t.tex, transparent: true, depthTest: false, depthWrite: false, opacity: 0 });
     const s = new THREE.Sprite(mat);
-    s.center.set(0.5, 0);
+    s.center.set(...(o.center || [0.5, 0]));
     s.position.set(anchor[0], anchor[1], anchor[2]);
     s.renderOrder = 100; s.frustumCulled = false;
     root.add(s);
@@ -726,17 +747,17 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   HALL_IDS.forEach((id) => hallLabel(id));
   const title = addLabel('title', 'DFW-2 · 2,048 hosts', 'plain', [-9.4, 0.4, 6.9], (H) => sstep(11, 14, H));
   addLabel('hub', 'Mgmt / BMC', 'plain', [HUB.x, hubTop + 1.5, HUB.z], (H) => sstep(6.5, 8.5, H));
-  const b14tag = addLabel('b14', 'B14', 'plain', [B14.x, SLAB_Y + RACK.h + 0.7, B14.z], () => 1);
-  addLabel('c05', 'C05', 'plain', [C05.x, SLAB_Y + RACK.h + 0.55, C05.z], (H) => sstep(5, 9, H) * (1 - sstep(18.5, 20, H)));
-  addLabel('c12', 'C12', 'plain', [C12.x, SLAB_Y + RACK.h + 0.55, C12.z], (H) => sstep(5, 9, H) * (1 - sstep(18.5, 20, H)));
+  const b14tag = addLabel('b14', 'B14', 'plain', [B14.x - 1.38, HALO_Y, B14.z + 0.3 + 1.38], () => 1, { noTick: true, center: [1, 0.5] });
+  const c05 = addLabel('c05', 'C05', 'plain', [C05.x, SLAB_Y + RACK.h + 0.55, C05.z], () => 1);
+  const c12 = addLabel('c12', 'C12', 'plain', [C12.x, SLAB_Y + RACK.h + 0.55, C12.z], () => 1);
   const hostLabel = addLabel('host', 'b14-gpu-07', 'plain', [B14.x - 0.5, chTop - 0.02, zf14 + 0.08], (H) => 1 - sstep(5.8, 7.2, H));
   const vmLabel = addLabel('vm', 'vm-7f3a', 'hot', [vmPos.x + 0.04, vmPos.y + 0.09, vmPos.z + 0.05], (H) => 1 - sstep(5.8, 7.2, H));
   const b14Texts = {
-    plain: labelTex('B14', 'plain'),
-    breach: labelTex('B14 · breach', 'hot'),
-    containing: labelTex('B14 · containing', 'hot'),
-    approval: labelTex('B14 · awaiting approval', 'hot'),
-    sealed: labelTex('B14 · sealed', 'ok'),
+    plain: labelTex('B14', 'plain', true),
+    breach: labelTex('B14 · breach', 'hot', true),
+    containing: labelTex('B14 · containing', 'hot', true),
+    approval: labelTex('B14 · awaiting approval', 'hot', true),
+    sealed: labelTex('B14 · sealed', 'ok', true),
   };
   const setLabelTex = (L, t) => { if (L.tex !== t) { L.tex = t; L.mat.map = t.tex; L.mat.needsUpdate = true; } };
   title.sprite.center.set(0, 0);
@@ -781,6 +802,53 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     staticLines = bank.build(mat, true);
     root.add(staticLines);
     track(staticLines.geometry);
+  }
+
+  // ---------------------------------------------------------------- picking + highlight (UI state, not part of the pure frame)
+  const raycaster = new THREE.Raycaster();
+  const unitBox = new LineBank();
+  unitBox.box(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, new THREE.Color(1, 1, 1));
+  const mkOutline = (color, wk, opacity) => {
+    const mat = lineMat({ color: new THREE.Color(color), transparent: true, opacity, depthTest: false, depthWrite: false });
+    mat.userData.wk = wk;
+    const o = unitBox.build(mat, false);
+    o.renderOrder = 60; o.visible = false;
+    root.add(o);
+    return o;
+  };
+  const outlines = {
+    hover: { rack: mkOutline('#cfdcff', 1.0, 0.42), host: mkOutline('#ffffff', 1.25, 0.9) },
+    select: { rack: mkOutline('#ffffff', 1.25, 0.7), host: mkOutline('#ffffff', 1.9, 1.0) },
+  };
+  const selHalo = mkSprite(new THREE.Color('#ffffff'), 1.1, 0, 0, 0);
+  const highlighted = { hover: null, select: null };
+  /** Outline a host (hover or selection). id = 'b14-gpu-07' or null to clear. Returns false for an unknown id. */
+  function setHighlight(kind, id) {
+    const o = outlines[kind];
+    const p = id ? parseHost(id) : null;
+    if (id && !p) return false;
+    highlighted[kind] = p ? p.host : null;
+    o.rack.visible = o.host.visible = !!p;
+    if (kind === 'select') selHalo.visible = !!p;
+    if (!p) return true;
+    const r = p.rack, s = hostSlot(r, p.blade);
+    o.rack.position.set(r.x, SLAB_Y + RACK.h / 2, r.z);
+    o.rack.scale.set(RACK.w + 0.03, RACK.h + 0.03, RACK.d + 0.03);
+    o.host.position.set(s.x, s.y, s.z);
+    o.host.scale.set(s.w, s.h, s.d);
+    if (kind === 'select') { selHalo.position.set(s.x, s.y, s.z + r.f * 0.1); selHalo.material.opacity = ISO ? 0.22 : 0.3; }
+    return true;
+  }
+  /** Raycast (ndc coords, -1..1) against the racks. Returns { host, hall, rack, rackIndex, blade, point } or null. */
+  function pick(nx, ny) {
+    raycaster.setFromCamera({ x: nx, y: ny }, camera);
+    const hits = raycaster.intersectObject(rackMesh, false);
+    if (!hits.length) return null;
+    const h = hits[0];
+    const r = RACKS[h.instanceId];
+    if (!r) return null;
+    const blade = bladeAt(h.point.y);
+    return { host: hostId(r, blade), hall: r.hall, rack: r.id, rackIndex: r.index, blade, point: [h.point.x, h.point.y, h.point.z] };
   }
 
   // ---------------------------------------------------------------- per-frame update
@@ -865,8 +933,9 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
           const gone = sstep(0.0, 0.12, s);
           const a = alive * (1 - gone);
           // a faint orange tint on the host while the breach is live
-          const tint = ch.hyp * 0.25 * (1 - gone);
-          r = cool.r * a * 1.15 + tint * 0.9; g = cool.g * a * 1.15 + tint * 0.28; b = cool.b * a * 1.15;
+          const tint = ch.hyp * 0.18 * (1 - gone);
+          const kk = ISO ? 0.5 : 0.62;
+          r = cool.r * a * kk + tint * 0.5; g = cool.g * a * kk + tint * 0.16; b = cool.b * a * kk;
         }
         if (m.vm === SUSPECT_CELL && ch.green > 0.01) { /* sealed: stays dark */ }
       } else {
@@ -877,11 +946,14 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
         const sinceArrive = keep(ch.mig - gk.delay - gk.dur);
         const flash = arrived * Math.exp(-sinceArrive / 0.5) * 1.6;
         const lv = arrived * (0.85 + flash);
-        r = off.r * 2 + 0.78 * lv; g = off.g * 2 + 0.9 * lv; b = off.b * 2 + 1.0 * lv;
+        tmpM.compose(tmpP.set(m.x, m.y, m.z), ID_Q, tmpS.set(arrived > 0.001 ? 0.14 : 0, arrived > 0.001 ? 0.006 : 0, arrived > 0.001 ? 0.3 : 0));
+        cells.setMatrixAt(i, tmpM);
+        const sk = ISO ? 1 : 0.62;
+        r = 0.012 + 0.78 * lv * sk; g = 0.019 + 0.9 * lv * sk; b = 0.032 + 1.0 * lv * sk;
       }
       cells.setColorAt(i, tmpC.setRGB(r, g, b));
     }
-    cells.instanceColor.needsUpdate = true;
+    cells.instanceColor.needsUpdate = true; cells.instanceMatrix.needsUpdate = true;
 
     // --- wires
     const lu = linkU;
@@ -896,7 +968,12 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
       linkHead.material.opacity = (ch.linkB < 0.999 || ch.linkA > 0.001) ? 0.9 : 0;
       linkHead.visible = linkHead.material.opacity > 0.01;
     } else linkHead.visible = false;
-    for (const c of conduits) c.u.uT.value = T;
+    for (const c of conduits) { c.u.uT.value = T; c.u.uK.value = clamp((ISO ? 0.9 : 1.1) / view.ppm / 0.016, 0.12, 2.5); }
+    {
+      const rw = ISO ? 1.6 / view.ppm : clamp(2.4 / view.ppm, 0.011, 0.034);
+      lu.uK.value = clamp(rw / linkRadius, 0.1, 3);
+      lg.uK.value = clamp((ISO ? 6.5 : 9) / view.ppm / (linkRadius * 4.5), 0.1, 3);
+    }
 
     // --- pulse rings
     const period = 2.4;
@@ -943,7 +1020,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
         p.lmat.opacity = clamp(0.35 + glow * 0.7, 0, 1);
       } else {
         p.mat.emissive.copy(colr);
-        p.mat.emissiveIntensity = glow * 0.35;
+        p.mat.emissiveIntensity = moving * 0.2 + seated * (0.035 + 0.02 * ch.appr * slowPulse);
       }
     }
 
@@ -960,18 +1037,20 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
         ringLineMat.opacity = clamp(ringA * 0.95 * pulse, 0, 1); barLineMat.opacity = clamp(ringA * (0.95), 0, 1);
       } else {
         ringMat.emissive.copy(col); barMat.emissive.copy(col);
-        ringMat.emissiveIntensity = 1.5 * pulse; barMat.emissiveIntensity = 1.8 * pulse + 1.2 * ch.flash;
-        ringMat.opacity = ringA * 0.92; barMat.opacity = ringA * 0.95;
+        const eb = lerp(1.15, 0.7, ch.green);
+        ringMat.emissiveIntensity = eb * pulse; barMat.emissiveIntensity = (eb + 0.3) * pulse + 0.9 * ch.flash;
+        ringMat.opacity = ringA >= 0.999 ? 1 : ringA * 0.9; barMat.opacity = ringA >= 0.999 ? 1 : ringA * 0.95;
+        haloLight.color.copy(col); haloLight.intensity = ringA * lerp(7, 4.5, ch.green) * pulse;
       }
       const es = easeInQuart(clamp(ch.seal));
-      barPivot.position.set(barX + (1 - es) * 1.6, (1 - es) * 0.9, 0);
+      barPivot.position.set(barX + (1 - es) * 1.05, (1 - es) * 0.5, 0);
       sealGlow.material.color.copy(col);
-      sealGlow.material.opacity = ringA * (ISO ? 0.22 : 0.45) * (0.7 + 0.5 * pulse) * (ch.green > 0.5 ? 0.8 : 1);
+      sealGlow.material.opacity = ringA * (ISO ? 0.16 : 0.32) * (0.7 + 0.5 * pulse) * (ch.green > 0.5 ? 0.8 : 1);
       sealGlow.visible = sealGlow.material.opacity > 0.003;
       if (!ISO) {
         sealGlow.material.opacity *= 0.9;
         orangeLight && (orangeLight.color.copy(ORANGE).lerp(GREEN, ch.green));
-        if (ch.green > 0.01 && orangeLight) orangeLight.intensity += ch.green * 6 * ch.ring * (0.9 + 0.1 * slowPulse);
+        if (ch.green > 0.01 && orangeLight) orangeLight.intensity += ch.green * 2.2 * ch.ring * (0.9 + 0.1 * slowPulse);
       }
     }
 
@@ -983,7 +1062,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
       const flying = u > 0.0005 && u < 0.9995;
       for (let j = 0; j < TRAIL; j++) {
         const sj = easeInOutSine(clamp(u - j * 0.016));
-        const sc = flying ? 0.105 * (1 - j / (TRAIL + 1)) : 0;
+        const sc = flying ? 0.17 * (1 - j / (TRAIL + 1)) : 0;
         gk.bez.getPoint(sj, bez);
         tmpM.compose(tmpP.copy(bez), ID_Q, tmpS.set(sc, sc, sc));
         parts.setMatrixAt(k * TRAIL + j, tmpM);
@@ -993,12 +1072,12 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
       const gh = guestHalos[k];
       gk.bez.getPoint(s, bez);
       gh.position.copy(bez);
-      gh.material.opacity = flying ? (ISO ? 0.5 : 0.7) : 0;
+      gh.material.opacity = flying ? (ISO ? 0.5 : 0.38) : 0;
       gh.visible = flying;
       const lf = landFlash[k];
       const since = keep(ch.mig - gk.delay - gk.dur);
       lf.position.set(gk.bez.v3.x, gk.bez.v3.y + 0.05, gk.bez.v3.z);
-      lf.material.opacity = u >= 0.9995 ? Math.exp(-since / 0.55) * (ISO ? 0.5 : 0.75) : 0;
+      lf.material.opacity = u >= 0.9995 ? Math.exp(-since / 0.55) * (ISO ? 0.5 : 0.42) : 0;
       lf.visible = lf.material.opacity > 0.01;
     }
     parts.instanceMatrix.needsUpdate = true; parts.instanceColor.needsUpdate = true;
@@ -1012,14 +1091,14 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     for (const L of labels) {
       const wpx = L.tex.w, hpx = L.tex.h;
       L.sprite.scale.set(sscale(wpx), sscale(hpx), 1);
-      L.mat.opacity = L.vis(H);
+      L.mat.opacity = (L === c05 || L === c12) ? sstep(0.2, 1.0, ch.mig) * 0.95 : L.vis(H);
       L.sprite.visible = L.mat.opacity > 0.01;
     }
   }
 
   function setViewport(wCss, hCss, dpr) {
     for (const m of lineMats) m.resolution.set(wCss * dpr, hCss * dpr);
-    for (const m of lineMats) m.linewidth = lineWidth * dpr;
+    for (const m of lineMats) m.linewidth = lineWidth * (m.userData.wk ?? 1) * dpr;
     if (bgMesh) bgMesh.material.uniforms.uAspect.value = wCss / hCss;
   }
 
@@ -1028,7 +1107,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     const pm = new THREE.PMREMGenerator(renderer);
     const env = new RoomEnvironment();
     scene.environment = pm.fromScene(env, 0.04).texture;
-    scene.environmentIntensity = 0.5;
+    scene.environmentIntensity = 0.42;
     env.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
     pm.dispose();
   }
@@ -1041,7 +1120,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   }
 
   return {
-    look, scene, camera, update, setViewport, initEnvironment, dispose,
+    look, scene, camera, update, setViewport, initEnvironment, dispose, pick, setHighlight,
     background: bgMesh, bgColor: P.bg, keyLight,
     config: ISO
       ? { toneMapping: THREE.NoToneMapping, exposure: 1, shadows: false }

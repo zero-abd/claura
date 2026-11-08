@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claura · transparent embed</title>
+<script type="importmap">
+{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+</script>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,"SF Pro Display",system-ui,sans-serif;color:#fff}
+  /* any page background shows through the canvas */
+  body{background:radial-gradient(1200px 800px at 70% 20%,#6a4cff 0%,#2b1f6b 38%,#0b0a1c 100%)}
+  #stage{position:fixed;inset:0}
+  .glass{position:fixed;left:28px;bottom:28px;width:300px;padding:18px 20px;border-radius:22px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(28px) saturate(1.7);-webkit-backdrop-filter:blur(28px) saturate(1.7);box-shadow:0 18px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.35)}
+  .glass b{display:block;font-size:15px;letter-spacing:-.01em;margin-bottom:6px}.glass span{font-size:13px;opacity:.78;line-height:1.45}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="glass"><b>DFW-2 · Hall B · rack 14</b><span>The canvas is transparent: the page behind it (and this frosted panel in front of it) is untouched.</span></div>
+<script type="module">
+// Embedding demo: background:'transparent'. Pick a frame with ?look=&state=&t=&cam=
+const q = new URLSearchParams(location.search);
+const { createFacility } = await import('./src/facility.js');
+const f = createFacility(document.getElementById('stage'), { look: q.get('look') === 'iso' ? 'iso' : 'lumen', background: 'transparent', controls: false });
+await f.ready;
+f.renderAt(q.get('state') || 'breach', parseFloat(q.get('t') || '3.6'), q.get('cam') || 'facility');
+document.documentElement.dataset.ready = '1';
+</script>
+</body>
+</html>

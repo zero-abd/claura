@@ -13,8 +13,8 @@ import {
 import { hash } from "./util";
 
 export type Phase = "nominal" | "breach" | "approval" | "isolating" | "contained" | "report";
-export type View = "overview" | "incident" | "agents" | "policy" | "reports";
-export const VIEWS: View[] = ["overview", "incident", "agents", "policy", "reports"];
+export type View = "overview" | "incident" | "warroom" | "shells" | "agents" | "policy" | "reports";
+export const VIEWS: View[] = ["overview", "incident", "warroom", "shells", "agents", "policy", "reports"];
 
 export const S = {
   started: false,
@@ -31,6 +31,9 @@ export const S = {
   open: new Map<string, boolean>(), // disclosure state by key
   stepOv: new Map<number, boolean>(), // manual override for step:N (auto = current step)
   sheetDismissed: false,
+  hostSheet: null as string | null, // host id while the Host sheet is open
+  shellNote: false, // "Secure shell module not loaded" note is showing
+  micOn: false,
   demo: false,
 };
 

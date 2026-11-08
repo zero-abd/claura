@@ -27,7 +27,6 @@ const MODULE_URL = `${import.meta.env.BASE_URL}bulkhead-3d/facility.js`;
 const LOOK = "glass"; // passed through as `look`; change here if the module names it differently
 
 let facility: Facility | null = null;
-let container: HTMLElement | null = null;
 let mounted = false;
 let sentState: F3DState | null = null;
 let sentCam: F3DCam | null = null;
@@ -52,7 +51,6 @@ export function facilityTarget(ph: Phase, r: number): { state: F3DState; cam: F3
 export const stageMode = () => (mounted ? "mounted" : "fallback");
 
 export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
-  container = el;
   try {
     // A missing file in dev/preview falls back to index.html (text/html): treat that as "not present".
     const head = await fetch(MODULE_URL, { method: "HEAD", cache: "no-store" });

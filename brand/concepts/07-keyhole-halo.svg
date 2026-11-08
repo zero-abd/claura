@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Claura concept 07: Keyhole Halo</title>
+  <desc>A keyhole standing inside a halo that opens only at its foot.</desc>
+  <path fill="#FF5A1F" d="M71.496 223.542A111 111 0 1 1 184.504 223.542A13 13 0 0 1 171.269 201.163A85 85 0 1 0 84.731 201.163A13 13 0 0 1 71.496 223.542Z"/>
+  <path id="seal" fill="#FF5A1F" d="M98,104c0,-16.6 13.4,-30 30,-30c16.6,0 30,13.4 30,30c0,10.8 -5.7,20.2 -14.2,25.5l12.2,66.5h-56l12.2,-66.5c-8.5,-5.3 -14.2,-14.7 -14.2,-25.5z"/>
+</svg>

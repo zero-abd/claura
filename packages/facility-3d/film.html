@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claura · DFW-2 film frame</title>
+<script type="importmap">
+{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+</script>
+<style>html,body{margin:0;height:100%;background:transparent;overflow:hidden} #stage{position:fixed;inset:0}</style>
+</head>
+<body>
+<div id="stage"></div>
+<script type="module">
+// One deterministic frame, no UI.
+//   /film.html?t=7.5                      -> frame of the hard-coded 12 s track below
+//   /film.html?state=breach&t=3&cam=hallB -> renderAt(state, t, cam)
+//   extra: look=iso|lumen  bg=transparent|#hex  w=1920&h=1080&dpr=1  (fixed size, e.g. for video)
+// HyperFrames: window.__hf.buildReady resolves when meshes are built and shaders compiled; send "hf-seek"
+// events with detail.time to draw any frame, in any order.
+const q = new URLSearchParams(location.search);
+// ?bundle=1 loads the single-file build (dist/facility.js) instead of the sources
+const { createFacility } = await import(q.has('bundle') ? './dist/facility.js' : './src/facility.js');
+const look = q.get('look') === 'iso' ? 'iso' : 'lumen';
+const bg = q.get('bg') || 'default';
+const f = createFacility(document.getElementById('stage'), { look, background: bg, controls: false, pick: false });
+if (q.has('w') && q.has('h')) f.resize(+q.get('w'), +q.get('h'), q.has('dpr') ? +q.get('dpr') : 1);
+
+// facility -> breach -> hallB -> containing -> rack14 approval -> contained -> facility   (12 s)
+const TRACK = [
+  { t: 0.0, state: 'nominal', cam: 'facility' },
+  { t: 1.5, state: 'breach' },
+  { t: 3.5, cam: 'hallB' },
+  { t: 4.2, state: 'containing' },
+  { t: 7.0, state: 'approval', cam: 'rack14' },
+  { t: 8.6, state: 'contained' },
+  { t: 10.2, cam: 'facility' },
+];
+const DURATION = 12;
+
+window.__hf = window.__hf || {};
+window.__hf.buildReady = window.__hf.buildReady || f.ready;
+window.renderFrame = (t) => f.film.renderAt(t, TRACK);
+window.addEventListener('hf-seek', (e) => window.renderFrame(e.detail.time));
+
+await f.ready;
+if (q.has('state')) f.renderAt(q.get('state'), q.has('t') ? parseFloat(q.get('t')) : 3, q.get('cam') || 'facility');
+else window.renderFrame(q.has('t') ? parseFloat(q.get('t')) : 0);
+document.documentElement.dataset.ready = '1';
+window.__filmDuration = DURATION;
+</script>
+</body>
+</html>

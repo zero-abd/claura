@@ -1,5 +1,6 @@
 import { clamp, easeInOut, easeOut, hash, lerp } from "./util";
 import { ISOLATE_DUR } from "./script";
+import { HALL_LETTERS, guestsFor, hostId } from "./hosts";
 
 // 2D facility drawing. It is the fallback inside #facility3d: it draws until (and unless)
 // the optional 3D module mounts. Glass look: soft rack cells, one glowing hot rack.
@@ -17,6 +18,8 @@ export interface MapState {
   u: number; // seconds since approval (or -Infinity)
 }
 export type MapMode = "stage" | "ambient";
+/** What the pointer is over: a rack in a hall, or a host in the elevation below. */
+export type MapHit = { kind: "rack"; hall: number; rack: number } | { kind: "host"; id: string };
 
 const HALLS = ["A", "B", "C", "D"];
 const COLS = 8;
@@ -28,7 +31,6 @@ const DESTS = [
   { hall: 2, rack: 4, n: 6 }, // C05
   { hall: 2, rack: 11, n: 5 }, // C12
 ];
-const GUESTS = Array.from({ length: 16 }, (_, i) => (i === HOT_HOST ? 12 : 6 + Math.floor(hash(77, i) * 5)));
 
 function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const k = Math.min(r, w / 2, h / 2);
@@ -45,6 +47,9 @@ export class FacilityMap {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   mode: MapMode = "stage";
+  /** The rack whose 16 hosts are shown in the elevation (default: the incident rack, B14). */
+  sel = { hall: HOT_HALL, rack: HOT_RACK };
+  hover: MapHit | null = null;
   w = 0;
   h = 0;
   dpr = 1;
@@ -72,7 +77,7 @@ export class FacilityMap {
     const stage = this.mode === "stage";
     const padX = stage ? 32 : 28;
     const top = stage ? 76 : 30;
-    const bottom = stage ? 28 : 30;
+    const bottom = stage ? 64 : 30;
     const gapX = stage ? 30 : 26;
     const showInset = stage && this.h >= 500;
     const insetH = showInset ? 196 : 0;
@@ -94,6 +99,33 @@ export class FacilityMap {
     return { x: hx + col * (g.cw + g.rg), y: g.y0 + g.label + row * (g.ch + g.rgY), w: g.cw, h: g.ch };
   }
 
+  /** Host box geometry in the elevation (stage mode, expanded). */
+  private hostBox(g: ReturnType<FacilityMap["geom"]>, i: number) {
+    const W = this.w - g.padX * 2;
+    const hg = 5;
+    const hw = (W - hg * 15) / 16;
+    const hy = g.insetTop + 28;
+    const hh = Math.min(96, this.h - hy - 40);
+    return { x: g.padX + i * (hw + hg), y: hy, w: hw, h: hh };
+  }
+
+  /** Hit-test a point in canvas CSS px. Used by the pointer handlers: the map is a host picker. */
+  hit(px: number, py: number): MapHit | null {
+    if (this.w === 0 || this.mode !== "stage") return null;
+    const g = this.geom();
+    if (g.showInset)
+      for (let i = 0; i < 16; i++) {
+        const b = this.hostBox(g, i);
+        if (px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) return { kind: "host", id: hostId(this.sel.hall, this.sel.rack, i + 1) };
+      }
+    for (let h = 0; h < 4; h++)
+      for (let rk = 0; rk < 32; rk++) {
+        const r = this.rackRect(g, h, rk);
+        if (px >= r.x - 2 && px <= r.x + r.w + 2 && py >= r.y - 2 && py <= r.y + r.h + 2) return { kind: "rack", hall: h, rack: rk };
+      }
+    return null;
+  }
+
   draw(s: MapState) {
     this.last = s;
     if (this.w === 0) return;
@@ -107,7 +139,7 @@ export class FacilityMap {
     const contained = s.u >= ISOLATE_DUR;
     const quarantining = s.u >= 0;
     const tone = contained ? SAFE : TONE;
-    const amb = g.stage ? 1 : 0.8;
+    const amb = g.stage ? 1 : 0.5;
 
     // failover particles timing (same script as before: starts at T+4.6)
     const foStart = 4.6;
@@ -186,7 +218,7 @@ export class FacilityMap {
           ctx.shadowColor = rgba(tone, 0.9);
           ctx.shadowBlur = contained ? 16 : 20 + pulse * 8;
           rr(ctx, r.x - 1, r.y - 1, r.w + 2, r.h + 2, 6);
-          ctx.fillStyle = rgba(tone, contained ? 0.1 : 0.14 + flash * 0.6 + pulse * 0.06);
+          ctx.fillStyle = rgba(tone, contained ? (g.stage ? 0.1 : 0.2) : (g.stage ? 0.14 : 0.3) + flash * 0.6 + pulse * 0.06);
           ctx.fill();
           ctx.strokeStyle = rgba(tone, 1);
           ctx.lineWidth = 1.6;
@@ -257,50 +289,84 @@ export class FacilityMap {
       ctx.restore();
     }
 
-    if (g.showInset) this.drawInset(s, g, parts, hotR, tone, inc, contained, quarantining);
+    if (g.stage) this.drawPick(g);
+    if (g.showInset) this.drawInset(s, g, parts, tone, inc, contained, quarantining);
   }
 
-  /** Rack B14 elevation: 16 hosts with guest dots. Shown when the stage is expanded. */
+  /** Selection ring and hover label: the map is a host picker. */
+  private drawPick(g: ReturnType<FacilityMap["geom"]>) {
+    const { ctx } = this;
+    const ring = (hall: number, rack: number, a: number, w: number) => {
+      const r = this.rackRect(g, hall, rack);
+      ctx.save();
+      rr(ctx, r.x - 2.5, r.y - 2.5, r.w + 5, r.h + 5, 7);
+      ctx.strokeStyle = `rgba(255,255,255,${a})`;
+      ctx.lineWidth = w;
+      ctx.stroke();
+      ctx.restore();
+    };
+    ring(this.sel.hall, this.sel.rack, 0.5, 1.3);
+    const hv = this.hover;
+    if (hv && hv.kind === "rack") {
+      ring(hv.hall, hv.rack, 0.95, 1.6);
+      const r = this.rackRect(g, hv.hall, hv.rack);
+      this.chipLabel(`Rack ${HALL_LETTERS[hv.hall].toUpperCase()}${hv.rack + 1}`, r.x + r.w / 2, r.y - 8);
+    }
+  }
+  private chipLabel(text: string, cx: number, bottom: number) {
+    const { ctx } = this;
+    ctx.font = `600 12px ${FONT}`;
+    const tw = ctx.measureText(text).width + 18;
+    const tx = Math.min(Math.max(cx - tw / 2, 6), this.w - tw - 6);
+    const ty = bottom - 22;
+    rr(ctx, tx, ty, tw, 22, 11);
+    ctx.fillStyle = "rgba(14,18,36,0.94)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.24)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = "#fff";
+    ctx.fillText(text, tx + 9, ty + 15);
+  }
+
+  /** Elevation of the selected rack: 16 hosts with guest dots. Shown when the stage is expanded. Hosts are clickable. */
   private drawInset(
     s: MapState,
     g: ReturnType<FacilityMap["geom"]>,
     parts: { t0: number }[],
-    hotR: { x: number; y: number; w: number; h: number },
     tone: number[],
     inc: boolean,
     contained: boolean,
     quarantining: boolean,
   ) {
     const { ctx } = this;
-    const W = this.w - g.padX * 2;
+    const { hall, rack } = this.sel;
+    const live = inc && hall === HOT_HALL && rack === HOT_RACK; // the incident story plays only on B14
+    const selR = this.rackRect(g, hall, rack);
     const x0 = g.padX;
+    const W = this.w - g.padX * 2;
     const top = g.insetTop;
-    const hg = 5;
-    const hw = (W - hg * 15) / 16;
-    const hy = top + 28;
-    const hh = Math.min(96, this.h - hy - 40);
-    const h07x = x0 + HOT_HOST * (hw + hg);
+    const keyIdx = live ? HOT_HOST : 7;
+    const kb = this.hostBox(g, keyIdx);
 
-    if (inc) {
-      ctx.strokeStyle = rgba(tone, 0.55);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 4]);
-      ctx.beginPath();
-      ctx.moveTo(hotR.x + hotR.w / 2, hotR.y + hotR.h + 3);
-      const midY = top - 8;
-      ctx.lineTo(hotR.x + hotR.w / 2, midY);
-      ctx.lineTo(h07x + hw / 2, midY);
-      ctx.lineTo(h07x + hw / 2, hy - 3);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
+    ctx.strokeStyle = live ? rgba(tone, 0.55) : "rgba(255,255,255,0.22)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 4]);
+    ctx.beginPath();
+    ctx.moveTo(selR.x + selR.w / 2, selR.y + selR.h + 3);
+    const midY = top - 8;
+    ctx.lineTo(selR.x + selR.w / 2, midY);
+    ctx.lineTo(kb.x + kb.w / 2, midY);
+    ctx.lineTo(kb.x + kb.w / 2, kb.y - 3);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     ctx.font = `600 13px ${FONT}`;
     ctx.fillStyle = "rgba(255,255,255,0.86)";
-    ctx.fillText("Rack B14", x0, top + 14);
+    ctx.fillText(`Rack ${HALL_LETTERS[hall].toUpperCase()}${rack + 1}`, x0, top + 14);
     const departed = parts.filter((p) => s.r >= p.t0).length;
-    let status = "16 hosts";
-    if (inc) {
+    let status = "16 hosts · click one to inspect";
+    if (live) {
       status = "b14-gpu-07 · 12 guests";
       if (s.r >= 3.3) status = "b14-gpu-07 · cordoned";
       if (s.r >= 4.6) status = `failing over ${Math.min(11, departed)}/11 guests`;
@@ -310,18 +376,19 @@ export class FacilityMap {
     }
     ctx.textAlign = "right";
     ctx.font = `500 13px ${FONT}`;
-    ctx.fillStyle = inc ? rgba(tone, 1) : "rgba(255,255,255,0.4)";
+    ctx.fillStyle = live ? rgba(tone, 1) : "rgba(255,255,255,0.4)";
     ctx.fillText(status, x0 + W, top + 14);
     ctx.textAlign = "left";
 
     for (let i = 0; i < 16; i++) {
-      const x = x0 + i * (hw + hg);
-      const isHot = i === HOT_HOST && inc;
+      const { x, y: hy, w: hw, h: hh } = this.hostBox(g, i);
+      const isHot = live && i === HOT_HOST;
+      const hovered = this.hover?.kind === "host" && this.hover.id === hostId(hall, rack, i + 1);
       rr(ctx, x, hy, hw, hh, 8);
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillStyle = hovered ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)";
       ctx.fill();
-      ctx.strokeStyle = isHot ? rgba(tone, 1) : "rgba(255,255,255,0.1)";
-      ctx.lineWidth = isHot ? 1.6 : 1;
+      ctx.strokeStyle = isHot ? rgba(tone, 1) : hovered ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.1)";
+      ctx.lineWidth = isHot || hovered ? 1.6 : 1;
       if (isHot) {
         ctx.save();
         ctx.shadowColor = rgba(tone, 0.8);
@@ -344,7 +411,7 @@ export class FacilityMap {
         }
       } else ctx.stroke();
 
-      const n = GUESTS[i];
+      const n = guestsFor(hall, rack, i + 1);
       const ds = 4.5;
       const dgx = 3.5;
       const dgy = 4.5;
@@ -380,9 +447,10 @@ export class FacilityMap {
       }
       ctx.font = `500 11px ${FONT}`;
       ctx.textAlign = "center";
-      ctx.fillStyle = isHot ? rgba(tone, 1) : "rgba(255,255,255,0.26)";
-      if (isHot || i % 3 === 0 || i === 15) ctx.fillText(String(i + 1).padStart(2, "0"), x + hw / 2, hy + hh + 17);
+      ctx.fillStyle = isHot ? rgba(tone, 1) : hovered ? "#fff" : "rgba(255,255,255,0.26)";
+      if (isHot || hovered || i % 3 === 0 || i === 15) ctx.fillText(String(i + 1).padStart(2, "0"), x + hw / 2, hy + hh + 17);
       ctx.textAlign = "left";
+      if (hovered) this.chipLabel(hostId(hall, rack, i + 1), x + hw / 2, hy - 6);
     }
   }
 }

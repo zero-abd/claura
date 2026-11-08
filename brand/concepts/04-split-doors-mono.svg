@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Claura concept 04 (mono): Bulkhead Doors</title>
+  <desc>Two bulkhead doors slid shut, one bolt across the seam.</desc>
+  <path fill="currentColor" d="M18,128c0,-58.1 45,-105.6 102,-109.7v79.7l-32,0c-12.2,0 -22,9.8 -22,22v16c0,12.2 9.8,22 22,22l32,0v79.7c-57,-4.1 -102,-51.7 -102,-109.7z"/>
+  <path fill="currentColor" d="M136,18.3c57,4.1 102,51.7 102,109.7c0,58.1 -45,105.6 -102,109.7v-79.7h32c12.2,0 22,-9.8 22,-22v-16c0,-12.2 -9.8,-22 -22,-22l-32,0z"/>
+  <path fill="currentColor" d="M92,148c-6.6,0 -12,-5.4 -12,-12v-16c0,-6.6 5.4,-12 12,-12h72c6.6,0 12,5.4 12,12v16c0,6.6 -5.4,12 -12,12z"/>
+</svg>

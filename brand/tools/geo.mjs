@@ -70,19 +70,59 @@ export function spiralD({ cx = 128, cy = 128, r0, r1, a0, a1, w, step = 4 }) {
   return { out, inn };
 }
 
-/** Ring of varying width (thick in the middle, thin at the tips) with round tips. */
-export function taperedRing({ cx = 128, cy = 128, r, wMax, wMin, a0, a1, p = 1, peak = 0.5 }) {
-  const n = 120, out = [], inn = [];
+/** Ring of varying width (thick at 'peak', thin at the tips) with round tips. */
+export function taperedRing({ cx = 128, cy = 128, r, wMax, wMin, a0, a1, p = 1, peak = 0.5, tol = 0.12 }) {
+  const n = 220, out = [], inn = [];
   for (let i = 0; i <= n; i++) {
     const t = i / n, a = a0 + (a1 - a0) * t;
-    // asymmetric bump: peak position controls where it is thickest
     const u = t <= peak ? t / peak : (1 - t) / (1 - peak);
     const w = wMin + (wMax - wMin) * Math.pow(Math.sin((Math.PI / 2) * u), p);
     out.push(pt(cx, cy, r + w / 2, a));
     inn.push(pt(cx, cy, r - w / 2, a));
   }
-  const body = new paper.Path({ segments: [...out, ...inn.reverse()], closed: true });
-  body.smooth({ type: 'catmull-rom', factor: 0.5 });
+  const po = new paper.Path({ segments: out }); po.simplify(tol);
+  const pi = new paper.Path({ segments: inn }); pi.simplify(tol); pi.reverse();
+  const body = new paper.Path();
+  body.addSegments(po.segments); body.addSegments(pi.segments); body.closePath();
   const c0 = circle(...pt(cx, cy, r, a0), wMin / 2), c1 = circle(...pt(cx, cy, r, a1), wMin / 2);
   return U(U(body, c0), c1);
+}
+
+/** C with a circular inner edge (concentric socket for an orb); outer edge swells to wMax at 'peak'. */
+export function socketRing({ cx = 128, cy = 128, ri, wMax, wMin, a0, a1, p = 1, peak = 0.5, tol = 0.12, tip = 'round' }) {
+  const n = 240, out = [], inn = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, a = a0 + (a1 - a0) * t;
+    const u = t <= peak ? t / peak : (1 - t) / (1 - peak);
+    const w = wMin + (wMax - wMin) * Math.pow(Math.sin((Math.PI / 2) * u), p);
+    out.push(pt(cx, cy, ri + w, a));
+    inn.push(pt(cx, cy, ri, a));
+  }
+  const po = new paper.Path({ segments: out }); po.simplify(tol);
+  const pi = new paper.Path({ segments: inn }); pi.simplify(tol); pi.reverse();
+  const body = new paper.Path();
+  body.addSegments(po.segments); body.addSegments(pi.segments); body.closePath();
+  if (tip !== 'round') return body;
+  const c0 = circle(...pt(cx, cy, ri + wMin / 2, a0), wMin / 2), c1 = circle(...pt(cx, cy, ri + wMin / 2, a1), wMin / 2);
+  return U(U(body, c0), c1);
+}
+
+/**
+ * "Cradle" aura: a C whose inner edge is a circle (the socket: radius ri, centre cx,cy) and whose outer
+ * edge is a single eccentric circle (radius ri+t0, centre shifted left by e). Each tip is a round cap
+ * tangent to BOTH circles (a true fillet), placed at +-alpha from the socket centre. Arcs only.
+ */
+export function cradleC({ cx = 156, cy = 128, ri = 78, e = 21, t0 = 33, alpha = 36 }) {
+  const R = ri + t0, a = rad(alpha), K = R + ri;
+  const m = (K * K - e * e) / (2 * (K + e * Math.cos(a)));  // |tip centre - socket centre| = ri + rc
+  const rc = m - ri;
+  const S = [cx, cy], O = [cx - e, cy];
+  const C = (sgn) => [cx + m * Math.cos(a), cy + sgn * m * Math.sin(a)];
+  const unit = (p, q) => { const dx = p[0] - q[0], dy = p[1] - q[1], l = Math.hypot(dx, dy); return [dx / l, dy / l]; };
+  const To = (sgn) => { const c = C(sgn), u = unit(c, O); return [O[0] + R * u[0], O[1] + R * u[1]]; };
+  const Ti = (sgn) => { const c = C(sgn), u = unit(c, S); return [S[0] + ri * u[0], S[1] + ri * u[1]]; };
+  const n = (v) => +v.toFixed(2);
+  const [uo, lo, li, ui] = [To(-1), To(1), Ti(1), Ti(-1)];
+  const d = `M${n(uo[0])} ${n(uo[1])}A${R} ${R} 0 1 0 ${n(lo[0])} ${n(lo[1])}A${n(rc)} ${n(rc)} 0 0 0 ${n(li[0])} ${n(li[1])}A${ri} ${ri} 0 1 1 ${n(ui[0])} ${n(ui[1])}A${n(rc)} ${n(rc)} 0 0 0 ${n(uo[0])} ${n(uo[1])}Z`;
+  return { d, rc, R, tipC: C(-1), opening: 2 * m * Math.sin(a) - 2 * rc };
 }

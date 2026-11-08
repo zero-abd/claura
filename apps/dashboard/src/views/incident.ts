@@ -35,6 +35,7 @@ import {
 } from "../engine";
 import { pathHTML, updatePath } from "../path";
 import { fmtT } from "../util";
+import { onlineCount } from "./warroom";
 
 const rowHead = (ico: string, title: string, valId: string, val = "") =>
   `<span class="r-ico">${icon(ico)}</span><span class="r-title">${title}</span><span class="r-val" id="${valId}">${val}</span>`;
@@ -94,6 +95,7 @@ export const incident = {
             <div class="pill-row">
               <span class="pill" id="pill"><i class="pill-dot"></i>${logoSVG(19, "mark pill-mark")}<span id="pillText">All clear</span></span>
               <button type="button" class="btn-chip accent" id="reviewBtn" data-act="review" hidden>Review</button>
+              <button type="button" class="btn-chip wr-chip" data-go="warroom" data-target="warroom-pill">${icon("warroom")}<span id="wrPillText">War Room</span>${icon("chevron", "ico wr-chev")}</button>
             </div>
             <div>
               <h1 id="hTitle">No open incidents</h1>
@@ -124,9 +126,9 @@ export const incident = {
         </div>
       </div>
 
-      <div class="glass group">
-        ${disc("signals", rowHead("signal", "Signals", "sigVal", "6 correlated"), `<div class="row-body"><div class="sig" id="sigLines"></div></div>`, "row")}
-        ${disc("evidence", rowHead("file", "Evidence", "evVal", "none yet"), evidenceBody(), "row")}
+      <div class="dgrid">
+        ${disc("signals", rowHead("signal", "Signals", "sigVal", "6 correlated"), `<div class="row-body"><div class="sig" id="sigLines"></div></div>`, "row glass")}
+        ${disc("evidence", rowHead("file", "Evidence", "evVal", "none yet"), evidenceBody(), "row glass")}
         ${disc(
           "blast",
           rowHead("blast", "Blast radius", "blVal", "scoring"),
@@ -139,11 +141,11 @@ export const incident = {
             </div>
             <p class="row-note" id="blNote">Triage has not scored this incident yet.</p>
           </div>`,
-          "row",
+          "row glass",
         )}
         ${disc(
           "details",
-          rowHead("info", "Details", "dtVal", `${INCIDENT.vm} · ${INCIDENT.agent}`),
+          rowHead("info", "Details", "dtVal", INCIDENT.vm),
           `<div class="row-body"><dl class="facts">
             <div><dt>Guest VM</dt><dd>${INCIDENT.vm}</dd></div>
             <div><dt>Agent</dt><dd>${INCIDENT.agent}</dd></div>
@@ -154,7 +156,7 @@ export const incident = {
             <div><dt>Fleet mean to contain</dt><dd>${FLEET.meanTtc} s · ${FLEET.incidents30d} incidents</dd></div>
             <div><dt>Fleet</dt><dd>${FLEET.hosts} hosts · ${FLEET.vms} VMs</dd></div>
           </dl></div>`,
-          "row",
+          "row glass",
         )}
       </div>
     </section>`;
@@ -181,6 +183,7 @@ export const incident = {
       setHTML(meta, "o", () => `${INCIDENT.id}<span class="sep">·</span>${INCIDENT.host}<span class="sep">·</span>${INCIDENT.where}`);
     }
     ($("#reviewBtn") as HTMLButtonElement).hidden = !(ph === "approval" && S.sheetDismissed);
+    setText($("#wrPillText"), `War Room · ${onlineCount()} online`);
 
     if (t === null) {
       setText($("#ttcLabel"), "Mean time to contain");

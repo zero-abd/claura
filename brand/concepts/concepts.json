@@ -1,0 +1,101 @@
+[
+  {
+    "n": "01",
+    "slug": "aura-rings",
+    "name": "Staggered Aura",
+    "direction": "Aura field",
+    "rationale": "Two rings whose openings never line up, so nothing passes straight through; the core sits inside.",
+    "mono": "01-aura-rings-mono.svg",
+    "file": "01-aura-rings.svg",
+    "reads_at_16px": false,
+    "check_16px": "Three elements in 16 px: the gaps close up and it reads as a target or spiral blob."
+  },
+  {
+    "n": "02",
+    "slug": "glass-c",
+    "name": "Glass C",
+    "direction": "Glass C",
+    "rationale": "A C of stacked glass panes: the solid front pane is the seal, the faint panes behind are the aura.",
+    "mono": "02-glass-c-mono.svg",
+    "file": "02-glass-c.svg",
+    "reads_at_16px": true,
+    "check_16px": "A solid C; the faint echo panes drop out, which is fine, the C stays clear."
+  },
+  {
+    "n": "03",
+    "slug": "eclipse",
+    "name": "Eclipse",
+    "direction": "Ring around a dot",
+    "rationale": "A containment ring that thickens away from the breach it holds.",
+    "mono": "03-eclipse-mono.svg",
+    "file": "03-eclipse.svg",
+    "reads_at_16px": true,
+    "check_16px": "Ring with an off-centre dot survives; it reads as an eye or moon as much as a C."
+  },
+  {
+    "n": "04",
+    "slug": "split-doors",
+    "name": "Bulkhead Doors",
+    "direction": "Bulkhead hatch",
+    "rationale": "Two bulkhead doors slid shut, one bolt across the seam.",
+    "mono": "04-split-doors-mono.svg",
+    "file": "04-split-doors.svg",
+    "reads_at_16px": true,
+    "check_16px": "Disc, seam and bolt all hold in colour; in mono the bolt is the weakest part."
+  },
+  {
+    "n": "05",
+    "slug": "cradle",
+    "name": "Cradle",
+    "direction": "Shield-orb",
+    "rationale": "A C-shaped aura cupping the breach in a concentric socket; the mouth is narrower than the orb, so it cannot slip out.",
+    "mono": "05-cradle-mono.svg",
+    "file": "05-cradle.svg",
+    "reads_at_16px": true,
+    "check_16px": "A C and a dot with clear space between them: the cleanest silhouette of the set."
+  },
+  {
+    "n": "06",
+    "slug": "spiral",
+    "name": "Closing Spiral",
+    "direction": "Aura that closes",
+    "rationale": "One stroke winding in until it holds a single point.",
+    "mono": "06-spiral-mono.svg",
+    "file": "06-spiral.svg",
+    "reads_at_16px": false,
+    "check_16px": "The turns merge into a smudge and the centre dot is lost."
+  },
+  {
+    "n": "07",
+    "slug": "keyhole-halo",
+    "name": "Keyhole Halo",
+    "direction": "Lock-halo",
+    "rationale": "A keyhole standing inside a halo that opens only at its foot.",
+    "mono": "07-keyhole-halo-mono.svg",
+    "file": "07-keyhole-halo.svg",
+    "reads_at_16px": false,
+    "check_16px": "Holds its shape but reads as a generic lock or power icon, not Claura."
+  },
+  {
+    "n": "08",
+    "slug": "enso-pearl",
+    "name": "Enso Pearl",
+    "direction": "Calm guardian",
+    "rationale": "A calm tapered ring, closed by one pearl set in its mouth.",
+    "mono": "08-enso-pearl-mono.svg",
+    "file": "08-enso-pearl.svg",
+    "reads_at_16px": true,
+    "check_16px": "Ring reads; the pearl is only about 1.5 px, and the pair can echo a crescent and star."
+  },
+  {
+    "n": "09",
+    "slug": "closing-a",
+    "name": "Closing a",
+    "direction": "Monogram that seals",
+    "rationale": "A C that closes into an a: the stem is the seal.",
+    "mono": "09-closing-a-mono.svg",
+    "file": "09-closing-a.svg",
+    "reads_at_16px": false,
+    "check_16px": "Legible, but as the letters \"CI\" (continuous integration), the wrong message."
+  }
+]

@@ -100,3 +100,31 @@ export const CONDUITS = [
   [[-1.4, 0.03, 0.0], [-5.2, 0.03, 0.0], [-5.2, 0.03, -1.5]], // to A
   [[-5.2, 0.03, 0.0], [-5.2, 0.03, 1.5]], // to D
 ];
+
+// ---------------------------------------------------------------- hosts (picking)
+// Each drawn rack shows 12 hosts (one per blade, bottom to top: gpu-01 .. gpu-12). The drawn racks stand in for the
+// 2,048-host fleet. In B14 the three blades 5-7 are one chassis, b14-gpu-07 (the host with the 12 guest VMs).
+export const hostId = (rack, blade) => {
+  const b = rack.id === 'B14' && blade >= HOST.blades[0] && blade <= HOST.blades[2] ? 6 : blade;
+  return `${rack.id.toLowerCase()}-gpu-${String(b + 1).padStart(2, '0')}`;
+};
+/** y (world) on a rack -> blade index 0..11 (clamped). */
+export const bladeAt = (y) => Math.max(0, Math.min(BLADES - 1, Math.floor((y - SLAB_Y - BLADE_Y0) / BLADE_H)));
+/** 'b14-gpu-07' -> { rack, blade, host } or null. For B14's chassis, blade is the middle blade. */
+export function parseHost(id) {
+  const m = /^([a-d])(\d{2})-gpu-(\d{2})$/i.exec(String(id || '').trim());
+  if (!m) return null;
+  const rack = RACK_BY_ID[m[1].toUpperCase() + m[2]];
+  const blade = Number(m[3]) - 1;
+  if (!rack || blade < 0 || blade >= BLADES) return null;
+  const host = hostId(rack, blade);
+  if (host !== `${rack.id.toLowerCase()}-gpu-${m[3]}`) return null; // blades 5 and 7 of B14 are part of gpu-07
+  return { rack, blade, host };
+}
+/** Box (world) occupied by a host slot on the rack front: used for the hover outline. */
+export function hostSlot(rack, blade) {
+  const chassis = rack.id === 'B14' && blade === 6;
+  const y0 = bladeY(chassis ? HOST.blades[0] : blade) - BLADE_H / 2, y1 = bladeY(chassis ? HOST.blades[2] : blade) + BLADE_H / 2;
+  const zf = frontZ(rack);
+  return { x: rack.x, y: (y0 + y1) / 2, z: zf + rack.f * (chassis ? HOST.protrude / 2 : 0.012), w: chassis ? HOST.w + 0.06 : 0.55, h: y1 - y0 - 0.012, d: chassis ? HOST.protrude + 0.03 : 0.05 };
+}

@@ -13,3 +13,11 @@ build/
 out/
 renders/
 *.f32
+*.key
+id_ed25519*
+id_rsa*
+*-cert.pub
+ssh-ca/
+**/shots-raw/
+**/.cache/
+recordings/

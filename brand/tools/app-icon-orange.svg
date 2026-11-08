@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Claura app icon</title>
+  <defs>
+    <path id="body" d="M923.9,619.7c-0.1,18.3 -0.3,40.6 -0.8,59.3c-0.3,12.4 -0.8,25.2 -1.6,37.6c-0.6,9.6 -1.4,19.4 -2.4,29c-4.7,43.5 -14.9,89.8 -45.9,122.6c-4.9,5.2 -10.2,9.9 -15.9,14.2c-10.1,7.6 -21.3,13.8 -33,18.6c-21.1,8.7 -43.6,13.5 -66.2,16.6c-34.4,4.7 -69.3,5.6 -104,6.1c-42.8,0.6 -108.8,0.4 -142,0.4c-35.9,0 -71.8,0 -107.7,-0.1c-18.3,-0.1 -40.6,-0.3 -59.3,-0.8c-12.4,-0.3 -25.2,-0.8 -37.6,-1.6c-9.6,-0.6 -19.4,-1.4 -29,-2.4c-48.2,-5.2 -99.7,-17.6 -132.3,-56.2c-6.3,-7.5 -11.8,-15.7 -16.4,-24.3c-15.2,-28.5 -21.4,-61.1 -24.8,-93c-4.5,-41.7 -4.7,-84 -4.8,-125.9c-0.1,-35.9 -0.1,-71.8 -0.1,-107.7c0,-55.6 -0.6,-111.4 0.9,-167c1,-37.2 2.9,-74.9 11.4,-111.2c4.5,-19.2 11.1,-38 21.2,-54.9c5,-8.3 10.8,-16 17.4,-23c32.8,-34.7 81.8,-46 127.6,-50.9c9.6,-1 19.4,-1.8 29,-2.4c12.4,-0.8 25.1,-1.3 37.6,-1.6c18.7,-0.5 41,-0.8 59.3,-0.8c35.9,-0.1 71.8,-0.1 107.7,-0.1c35.9,0 71.8,0 107.7,0.1c18.3,0.1 40.6,0.3 59.3,0.8c12.4,0.3 25.2,0.8 37.6,1.6c9.6,0.6 19.4,1.4 29,2.4c48.2,5.2 99.7,17.6 132.3,56.2c27.4,32.5 36.7,76.1 41.2,117.3c1,9.6 1.8,19.4 2.4,29c0.8,12.4 1.3,25.1 1.6,37.6c0.5,18.7 0.8,41 0.8,59.3c0.1,35.9 0.2,144.1 0,215.3z"/>
+    <clipPath id="clipBody"><use href="#body"/></clipPath>
+    <path id="ring" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z"/>
+    <path id="orb" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z"/>
+    <clipPath id="clipGlyph"><use href="#ring"/><use href="#orb"/></clipPath>
+    <linearGradient id="bg" gradientUnits="userSpaceOnUse" x1="170" y1="100" x2="860" y2="930"><stop offset="0" stop-color="#FF9461"/><stop offset=".5" stop-color="#FF5A1F"/><stop offset="1" stop-color="#D93A05"/></linearGradient>
+    <radialGradient id="bloom" gradientUnits="userSpaceOnUse" cx="330" cy="215" r="600"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.5"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="shade" gradientUnits="userSpaceOnUse" cx="790" cy="930" r="560"><stop offset="0" stop-color="#7A1700" stop-opacity="0.5"/><stop offset="1" stop-color="#7A1700" stop-opacity="0"/></radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".9"/><stop offset=".35" stop-color="#FFFFFF" stop-opacity=".12"/><stop offset=".7" stop-color="#FFFFFF" stop-opacity=".04"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/></linearGradient>
+    <linearGradient id="pane" gradientUnits="userSpaceOnUse" x1="300" y1="190" x2="740" y2="840"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.34"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.07"/></linearGradient>
+    <linearGradient id="paneEdge" gradientUnits="userSpaceOnUse" x1="260" y1="170" x2="780" y2="860"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".85"/><stop offset=".4" stop-color="#FFFFFF" stop-opacity=".1"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="glyphf" gradientUnits="userSpaceOnUse" x1="40" y1="20" x2="220" y2="240"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".97"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".74"/></linearGradient>
+    <linearGradient id="edge" gradientUnits="userSpaceOnUse" x1="40" y1="17" x2="220" y2="239"><stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity=".25"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".7"/></linearGradient>
+    <radialGradient id="orbf" gradientUnits="userSpaceOnUse" cx="144" cy="112" r="62.400000000000006"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#FFFFFF" stop-opacity=".92"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".62"/></radialGradient>
+    <filter id="blurXL" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="30"/></filter>
+    <filter id="blurM" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="blurS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+
+  <!-- ground shadow of the icon body -->
+  <use href="#body" fill="#000" opacity=".34" filter="url(#blurXL)" transform="translate(0 26)"/>
+
+  <g clip-path="url(#clipBody)">
+    <use href="#body" fill="url(#bg)"/>
+    <use href="#body" fill="url(#bloom)"/>
+    <use href="#body" fill="url(#shade)"/>
+
+    <!-- frosted glass layer: the aura field behind the mark -->
+    <circle cx="512" cy="522" r="318" fill="#000" opacity="0.16" filter="url(#blurXL)" transform="translate(0 20)"/>
+    <circle cx="512" cy="522" r="318" fill="url(#pane)"/>
+    <circle cx="512" cy="522" r="317" fill="none" stroke="url(#paneEdge)" stroke-width="3"/>
+    <circle cx="512" cy="522" r="300" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="2"/>
+
+    <!-- mark: depth shadow, glass body, inner light, specular edge -->
+    <g transform="translate(512 520) scale(2.0) translate(-128.44 -128)">
+      <g transform="translate(0 7)" opacity="0.42" filter="url(#blurM)" fill="#7A1700"><use href="#ring"/><use href="#orb"/></g>
+      <use href="#ring" fill="url(#glyphf)" fill-opacity="1"/>
+      <use href="#orb" fill="url(#orbf)"/>
+      <circle cx="158" cy="134" r="24" fill="#FF5A1F" opacity=".9" filter="url(#blurS)"/>
+      <g clip-path="url(#clipGlyph)">
+        <g fill="none" stroke="#FFFFFF" stroke-width="9" opacity="0.85" filter="url(#blurS)"><use href="#ring"/><use href="#orb"/></g>
+        <use href="#ring" fill="none" stroke="#FFFFFF" stroke-opacity=".0" stroke-width="1"/>
+      </g>
+      <use href="#ring" fill="none" stroke="url(#edge)" stroke-width="1.4" opacity=".95"/>
+      <use href="#orb" fill="none" stroke="url(#edge)" stroke-width="1.4" opacity=".95"/>
+      <ellipse cx="142" cy="102" rx="24" ry="11.52" fill="#FFFFFF" opacity="0" transform="rotate(-24 142 102)" filter="url(#blurS)"/>
+    </g>
+
+    <!-- specular rim of the whole icon (inner half of the stroke only) -->
+    <use href="#body" fill="none" stroke="url(#rim)" stroke-width="7"/>
+    <use href="#body" fill="url(#bloom)" opacity=".0"/>
+  </g>
+</svg>
