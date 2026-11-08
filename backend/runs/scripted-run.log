@@ -1,0 +1,104 @@
+npm notice run claura-agents@0.1.0 demo
+npm notice run tsx src/main.ts --scripted --auto-approve-after 3
++  0.00s RUNNER    SCRIPTED mode (no model); backend: SpacetimeDB ws://127.0.0.1:3000 db "claura"
+ℹ️ INFO Connecting to SpacetimeDB WS...
++  0.05s RUNNER    reset_demo done: hosts, guests, policy and agent rows reseeded
++  0.05s SENTRY    [Watching] Watching the fleet. Syscall baselines steady.
++  0.06s TRIAGE    [Standing by] No open incidents. Blast-radius model warm.
++  0.06s WARDEN    [Standing by] Holding. Containment playbook loaded; policy gate enforces what I may do.
++  0.07s SCRIBE    [Idle] No open incidents.
++  0.07s RUNNER    replaying 6 telemetry signals
++  0.07s TELEMETRY vmm    VMM audit: unexpected ioctl 0xC0186441
++  0.23s TELEMETRY vgpu   vGPU mdev driver fault (vm-7f3a)
++  0.37s TELEMETRY iommu  IOMMU fault: DMA write outside guest range
++  0.57s TELEMETRY edr    host EDR: qemu spawned /bin/sh
++  0.77s TELEMETRY flow   east-west flow -> 10.0.0.1:623 (IPMI)
++  0.92s TELEMETRY iam    workload identity agent-7f3 used token outside scope
++  0.93s SENTRY    [Correlating] Telemetry burst received. Correlating signals across sources.
++  1.39s SENTRY    [Correlating] 6 signals from 6 independent sources point at b14-gpu-07 / vm-7f3a: VMM ioctl, device fault, DMA fault, qemu spawned a shell. Pattern matches a guest-to-host escape.
++  1.85s SENTRY    [Escalated] Incident #2 opened (critical): Suspected guest-to-host escape via the vGPU path
++  1.85s SENTRY    incident #2 open (1.77s after first signal)
++  1.85s SCRIBE    [Recording] Logging each step as it lands.
++  1.86s TRIAGE    [Scoring] Mapping blast radius for b14-gpu-07: co-resident guests, exposed credentials, management-plane reachability.
++  2.32s TRIAGE    [Scoring] b14-gpu-07 (hall B, rack 14) runs 12 guests; 11 are co-resident with vm-7f3a.
++  2.77s TRIAGE    [Scoring] Management plane is reachable from b14-gpu-07; no sign it is compromised.
++  3.24s TRIAGE    [Scored 0.87] Blast radius 0.87. vm-7f3a (workload agent-7f3) -> vGPU mdev / VMM boundary -> qemu on b14-gpu-07 -> host shell -> BMC 10.0.0.1:623 (IPMI, mgmt VLAN 40). 11 co-resident guests share b14-gpu-07. Management plane is reach…
++  3.24s TRIAGE    blast score 0.87
++  3.24s WARDEN    [Executing] Reversible steps first on b14-gpu-07: cut the network, pull credentials, cordon, pause, capture, fail over. Quarantine last.
++  3.70s WARDEN    [Executing] isolate_network -> vm-7f3a: Cut the suspect VM off the network: its vNIC is the path to the IPMI flow on 10.0.0.1:623.
++  3.70s POLICY    isolate_network -> vm-7f3a: EXECUTED (policy: auto)
++  4.16s WARDEN    [Executing] revoke_credentials -> agent-7f3: The workload identity used a token outside its scope; revoke it so it cannot be replayed.
++  4.16s POLICY    revoke_credentials -> agent-7f3: EXECUTED (policy: auto)
++  4.62s WARDEN    [Executing] cordon_host -> b14-gpu-07: Stop new placements on the suspect host while it is investigated.
++  4.63s POLICY    cordon_host -> b14-gpu-07: EXECUTED (policy: auto)
++  5.08s WARDEN    [Executing] pause_guest -> vm-7f3a: Freeze the suspect VM so the attacker cannot progress and its memory stays intact.
++  5.09s POLICY    pause_guest -> vm-7f3a: EXECUTED (policy: auto)
++  5.54s WARDEN    [Executing] capture_memory -> vm-7f3a: Capture guest memory for forensics before anything is torn down.
++  5.55s POLICY    capture_memory -> vm-7f3a: EXECUTED (policy: auto)
++  6.00s WARDEN    [Executing] failover_guests -> b14-gpu-07: Move the co-resident guests to clean hosts so tenants are off the compromised host.
++  6.01s POLICY    failover_guests -> b14-gpu-07: EXECUTED (policy: auto)
++  6.47s WARDEN    [Awaiting approval] quarantine_host -> b14-gpu-07: The host showed a guest-to-host escape; remove it from the pool. High impact, needs a human.
++  6.48s POLICY    quarantine_host -> b14-gpu-07: PENDING_APPROVAL (policy: approval)
++  6.49s WARDEN    [Awaiting approval] Quarantine of b14-gpu-07 needs a human. Reversible containment is in place; waiting for an operator.
++  6.49s WARDEN    playbook order followed (reversible first, quarantine last)
++  6.49s WARDEN    RED-TEAM probe (scripted in the runner, NOT chosen by the model): proposing reimage_host to show the policy gate blocking an aggressive action
++  6.49s WARDEN    [Executing] RED-TEAM PROBE (scripted, not model-chosen): testing that policy blocks reimage_host on b14-gpu-07.
++  6.50s POLICY    reimage_host -> b14-gpu-07: BLOCKED (policy: deny)
++  6.50s POLICY    gate held: reimage_host was blocked by policy (red-team probe)
++  6.51s WARDEN    [Awaiting approval] quarantine_host b14-gpu-07 is pending. Waiting for an operator to approve.
++  6.51s RUNNER    waiting for human approval of proposal #15 (quarantine_host); auto-approving as RK after 3s
++  9.57s HUMAN     auto-approving as operator "RK" (--auto-approve-after 3)
++  9.58s HUMAN     RK approved quarantine_host -> b14-gpu-07
++  9.58s WARDEN    [Quarantining] Approved. Taking b14-gpu-07 out of the pool.
++  9.58s WARDEN    host b14-gpu-07 quarantined, incident #2 contained
++  9.59s WARDEN    [Contained] Host b14-gpu-07 quarantined. Escape stopped at the hypervisor boundary.
++  9.59s TRIAGE    [Closed] Scope closed. Blast score was 0.87.
++  9.60s SCRIBE    [Writing] Writing the report for incident #2 from the event log.
++ 10.05s SCRIBE    [Writing] Compiling 18 log entries into the report.
++ 10.52s SCRIBE    [Filed] Report for incident #2 filed (1018 chars).
++ 10.52s SENTRY    [Watching] Back on watch. Incident #2 contained.
+
+==============================================================================
+CLAURA RUN SUMMARY
+==============================================================================
+
+Timeline (milestones, seconds after the first signal)
+  T+0.00s   first telemetry signal ingested
+  T+1.77s   Sentry opened incident #2
+  T+3.16s   Triage recorded the attack graph + blast score
+  T+6.41s   Warden: quarantine_host pending human approval
+  T+9.51s   operator approved quarantine_host
+  T+9.51s   host quarantined, incident contained
+  T+10.44s  Scribe filed the incident report
+
+Measured times (wall clock on this machine)
+  first signal -> incident open       1.77s
+  first signal -> pending approval    6.41s
+  first signal -> contained           9.51s
+    of which waiting for the human    3.10s
+    machine time (without the wait)   6.41s
+  contained -> report filed           0.93s
+  server clock: opened_at -> contained_at  7.73s
+
+Agents
+  agent    mode             turns  calls  bad  model-time  tokens  note
+  sentry   scripted             0      0    0       0.00s       0  canned text, no model
+  triage   scripted             0      0    0       0.00s       0  canned text, no model
+  warden   scripted             0      0    0       0.00s       0  canned text, no model
+  scribe   scripted             0      0    0       0.00s       0  canned text, no model
+  red-team: SCRIPTED probe (reimage_host), not chosen by the model
+
+Containment proposals (what the policy gate decided)
+  #9   isolate_network     vm-7f3a      executed          policy=auto  by policy
+  #10  revoke_credentials  agent-7f3    executed          policy=auto  by policy
+  #11  cordon_host         b14-gpu-07   executed          policy=auto  by policy
+  #12  pause_guest         vm-7f3a      executed          policy=auto  by policy
+  #13  capture_memory      vm-7f3a      executed          policy=auto  by policy
+  #14  failover_guests     b14-gpu-07   executed          policy=auto  by policy
+  #15  quarantine_host     b14-gpu-07   approved          policy=approval  by RK
+  #16  reimage_host        b14-gpu-07   blocked           policy=deny  by policy
+
+Report (1018 chars)
+  Incident #2 (critical): Suspected guest-to-host escape via the vGPU path. Sentry correlated 6 signals from 6 independent sources (vmm, vgpu, iommu, edr, flow, iam) on b14-gpu-07 / vm-7f3a. Triage scored the blast radius at 0.87: vm-7f3a (workload agent-7f3) -> vGPU mdev / VMM boundary -> qemu on b14-gpu-07 -> host shell -> BMC 10.0.0.1:623 (IPMI, mgmt VLAN 40). 11 co-resident guests share b14-gpu-07. Management plane is reachable from the host and not compromised yet. Workload identity agent-7f3 used a token outside its scope. Warden's policy gate executed 6 reversible actions automatically: isolate_network (vm-7f3a), revoke_credentials (agent-7f3), cordon_host (b14-gpu-07), pause_guest (vm-7f3a), capture_memory (vm-7f3a), failover_guests (b14-gpu-07). Policy blocked 1 action(s): reimage_host (b14-gpu-07). This was a labelled red-team probe, not a model decision. quarantine_host on b14-gpu-07 required human approval and was approved by RK. Final state: incident contained; host b14-gpu-07 is quarantined.
+
+Result: CONTAINED, report filed, exit 0

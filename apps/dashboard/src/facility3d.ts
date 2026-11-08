@@ -22,19 +22,30 @@ interface Facility {
   setState(s: F3DState): void;
   fly(c: F3DCam): void;
   resize?: () => void;
+  play?: () => void;
+  pause?: () => void;
+  ready?: Promise<unknown>;
+  /** subscribe to host clicks: cb({ host: 'b14-gpu-07', hall, rack }) */
+  onPick?: (cb: (hit: unknown) => void) => unknown;
+  /** outline a host in the scene: highlight('b14-gpu-07', 'select'); highlight(null, 'select') clears */
+  highlight?: (host: string | null, kind?: string) => void;
 }
 
 const MODULE_URL = `${import.meta.env.BASE_URL}bulkhead-3d/facility.js`;
-const LOOK = "glass"; // passed through as `look`; change here if the module names it differently
+const LOOK = "lumen"; // the module's looks are 'lumen' (default) and 'iso'
+// Orbit/zoom off: the module's wheel handler calls preventDefault, which would stop the page scrolling over the
+// hero. Camera moves come from the phases (fly). Host picking stays on. Flip to true for a free-look stage.
+const CONTROLS = false;
 
 let facility: Facility | null = null;
 let mounted = false;
 let sentState: F3DState | null = null;
 let sentCam: F3DCam | null = null;
+let visible = true; // is a stage slot on screen? (the module keeps rendering until paused)
 let want: { state: F3DState; cam: F3DCam } = { state: "nominal", cam: "facility" };
 let onPick: ((hostId: string) => void) | null = null;
 
-/** The host picker hook: the 3D module calls it (as `onPick`) when a host is clicked; it opens the Host sheet. */
+/** The host picker hook: a click on a host in the 3D scene (module `onPick`) opens the Host sheet. */
 export function setPickHandler(fn: (hostId: string) => void) {
   onPick = fn;
 }
@@ -63,18 +74,14 @@ export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
     const head = await fetch(MODULE_URL, { method: "HEAD", cache: "no-store" });
     const type = head.headers.get("content-type") ?? "";
     if (!head.ok || !/javascript|ecmascript/i.test(type)) return false;
-    const mod = await import(/* @vite-ignore */ MODULE_URL);
+    // Absolute URL on purpose: in dev Vite appends ?import to root-relative dynamic imports, which public files reject.
+    const mod = await import(/* @vite-ignore */ new URL(MODULE_URL, document.baseURI).href);
     const create = mod.createFacility ?? mod.default?.createFacility ?? (typeof mod.default === "function" ? mod.default : null);
     if (typeof create !== "function") return false;
-    const inst: Facility = await create(el, {
-      look: LOOK,
-      background: "transparent",
-      onPick: (pick: unknown) => {
-        const id = typeof pick === "string" ? pick : ((pick as { hostId?: string; id?: string } | null)?.hostId ?? (pick as { id?: string } | null)?.id);
-        if (id) onPick?.(String(id));
-      },
-    });
+    const inst: Facility = await create(el, { look: LOOK, background: "transparent", controls: CONTROLS, onPick: emitPick });
     if (!inst || typeof inst.setState !== "function") return false;
+    await inst.ready; // shaders compiled, first frame drawn
+    inst.onPick?.(emitPick);
     facility = inst;
     mounted = true;
     el.classList.add("has-3d");
@@ -82,11 +89,43 @@ export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
     sentState = null;
     sentCam = null;
     applyFacility3D();
+    applyVisibility();
     return true;
-  } catch {
+  } catch (err) {
+    // The file exists but did not start: keep the 2D map and say why (a missing file stays silent).
+    console.warn("[claura] 3D stage did not start, using the 2D map:", err);
     facility = null;
     mounted = false;
     return false;
+  }
+}
+
+function emitPick(hit: unknown) {
+  const h = hit as { host?: string; hostId?: string; id?: string } | string | null;
+  const id = typeof h === "string" ? h : (h?.host ?? h?.hostId ?? h?.id);
+  if (id) onPick?.(String(id));
+}
+
+/** Outline the host the Host sheet is showing (or clear it) in the 3D scene. */
+export function setFacilitySelection(hostId: string | null) {
+  try {
+    facility?.highlight?.(hostId, "select");
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Pause the module's render loop while no stage is on screen (Agents, Policy, ...). */
+export function setFacilityVisible(v: boolean) {
+  visible = v;
+  applyVisibility();
+}
+function applyVisibility() {
+  try {
+    if (visible) facility?.play?.();
+    else facility?.pause?.();
+  } catch {
+    /* ignore */
   }
 }
 
@@ -101,6 +140,7 @@ function applyFacility3D() {
       facility.fly(want.cam);
       sentCam = want.cam;
     }
+    if (!visible) facility.pause?.(); // setState/fly restart the loop; keep it asleep while hidden
   } catch {
     /* a misbehaving module must never break the console */
   }

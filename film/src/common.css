@@ -1,2 +1,171 @@
-@font-face { font-family: 'Big Shoulders Stencil'; src: url('assets/fonts/BigShouldersStencil.woff2') format('woff2'); font-weight: 100 900; }
-@font-face { font-family: 'Big Shoulders'; src: url('assets/fonts/BigShoulders.woff2') format('woff2'); font-weight: 100 900; }
+/* Claura film kit: Liquid Glass, matched to the product (bulkhead/src/style.css: tokens -> wallpaper -> glass).
+   Inlined into every scene by tools/build.mjs at the COMMON marker. Scene-only rules go under #<id>-stage. */
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-500.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: block; }
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: block; }
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-700.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: block; }
+
+:root {
+  --font: 'Inter Film', 'Inter', sans-serif;
+  --ink: rgba(247, 249, 255, 0.97);
+  --ink-2: rgba(226, 232, 250, 0.74);
+  --ink-3: rgba(214, 222, 246, 0.54);
+  --ink-4: rgba(214, 222, 246, 0.26);
+  --hair: rgba(255, 255, 255, 0.1);
+  --fill-1: rgba(255, 255, 255, 0.06);
+  --fill-2: rgba(255, 255, 255, 0.1);
+  --accent: var(--color-accent, #ff5a1f);
+  --accent-rgb: 255, 90, 31;
+  --safe: var(--color-sealed, #2fbf71);
+  --safe-rgb: 47, 191, 113;
+  --bg: #05070d;
+}
+#root { position: absolute; inset: 0; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
+#root * { box-sizing: border-box; }
+
+/* ------------------------------------------------------------ stage layers: stage > wall, whip > cam > content, fx */
+.stage { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+.whip, .settle { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+.fx { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+.fx-fill, .fx-zoom { position: absolute; inset: 0; opacity: 0; }
+.fx-ghost { position: absolute; inset: 0; opacity: 0; border-radius: 0; }
+
+/* ------------------------------------------------------------ wallpaper (deep, never a flat void) */
+.wall { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(120% 100% at 50% -10%, #0e1531 0%, #080b19 55%, #04060b 100%); }
+.wp { position: absolute; border-radius: 50%; }
+.wp.b1 { width: 1320px; height: 1100px; left: -420px; top: -430px; background: radial-gradient(closest-side, rgba(38, 66, 214, 0.74), rgba(38, 66, 214, 0.28) 55%, transparent); }
+.wp.b2 { width: 1220px; height: 1220px; right: -360px; top: -90px; background: radial-gradient(closest-side, rgba(116, 52, 222, 0.6), rgba(116, 52, 222, 0.2) 58%, transparent); }
+.wp.b3 { width: 1540px; height: 980px; left: 16%; bottom: -580px; background: radial-gradient(closest-side, rgba(16, 156, 186, 0.48), rgba(16, 156, 186, 0.16) 60%, transparent); }
+.wp.b4 { width: 900px; height: 900px; left: -230px; bottom: -300px; background: radial-gradient(closest-side, rgba(200, 56, 132, 0.34), transparent); }
+.wp.ember, .wp.green { width: 1240px; height: 920px; right: 0; top: -300px; opacity: 0; }
+.wp.ember { background: radial-gradient(closest-side, rgba(255, 90, 31, 0.56), rgba(255, 90, 31, 0.17) 55%, transparent); }
+.wp.green { background: radial-gradient(closest-side, rgba(47, 191, 113, 0.44), rgba(47, 191, 113, 0.14) 55%, transparent); }
+.wp.spot { width: 900px; height: 900px; left: 510px; top: 90px; opacity: 0; background: radial-gradient(closest-side, rgba(255, 90, 31, 0.5), rgba(255, 90, 31, 0.12) 60%, transparent); }
+.grain { position: absolute; inset: 0; opacity: 0.08; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.vig { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 75% at 50% 42%, transparent 45%, rgba(0, 0, 0, 0.5) 100%); }
+
+/* ------------------------------------------------------------ glass: blur + saturate, specular top edge, inner border, layered shadow */
+.glass {
+  position: absolute;
+  border-radius: 36px;
+  color: var(--ink);
+  background:
+    radial-gradient(110% 70% at 6% -4%, rgba(255, 255, 255, 0.1), transparent 55%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.045) 40%, rgba(255, 255, 255, 0.025) 100%),
+    rgba(16, 22, 46, 0.38);
+  -webkit-backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+  backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 24px 36px -24px rgba(255, 255, 255, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 22px 48px -16px rgba(0, 0, 0, 0.55),
+    0 48px 96px -36px rgba(0, 0, 0, 0.5);
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.12) 22%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.26) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass.thick { background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)), rgba(9, 13, 30, 0.56); -webkit-backdrop-filter: blur(46px) saturate(1.8); backdrop-filter: blur(46px) saturate(1.8); }
+.glass.clear { background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.09)); -webkit-backdrop-filter: blur(20px) saturate(1.7); backdrop-filter: blur(20px) saturate(1.7); }
+.glass.pill { border-radius: 999px; }
+.glass.hot {
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.42),
+    inset 0 0 90px -20px rgba(var(--accent-rgb), 0.3),
+    0 22px 48px -16px rgba(0, 0, 0, 0.55),
+    0 48px 96px -36px rgba(var(--accent-rgb), 0.38);
+}
+.glass.safe {
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.4),
+    inset 0 0 90px -20px rgba(var(--safe-rgb), 0.26),
+    0 22px 48px -16px rgba(0, 0, 0, 0.55),
+    0 48px 96px -36px rgba(var(--safe-rgb), 0.32);
+}
+/* a lit control: the product's primary button */
+.btn-primary {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  height: 88px; padding: 0 48px; border-radius: 44px;
+  font: 600 34px/1 var(--font); letter-spacing: -0.016em; color: #fff; white-space: nowrap;
+  background: linear-gradient(180deg, #ff7f4d 0%, #ff5a1f 52%, #f24a0d 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.3), 0 22px 44px -12px rgba(var(--accent-rgb), 0.7);
+  text-shadow: 0 1px 1px rgba(120, 30, 0, 0.35);
+}
+
+/* ------------------------------------------------------------ type: Inter as the SF stand-in, Apple hierarchy */
+.t-hero    { font: 600 156px/1.0 var(--font); letter-spacing: -0.048em; color: var(--ink); white-space: nowrap; }
+.t-display { font: 600 120px/1.02 var(--font); letter-spacing: -0.044em; color: var(--ink); white-space: nowrap; }
+.t-title   { font: 600 84px/1.06 var(--font); letter-spacing: -0.036em; color: var(--ink); }
+.t-head    { font: 600 64px/1.1 var(--font); letter-spacing: -0.03em; color: var(--ink); }
+.t-lead    { font: 500 44px/1.28 var(--font); letter-spacing: -0.018em; color: var(--ink-2); }
+.t-body    { font: 500 34px/1.32 var(--font); letter-spacing: -0.012em; color: var(--ink-2); }
+.t-label   { font: 600 32px/1.15 var(--font); letter-spacing: -0.01em; color: var(--ink-2); }
+.t-note    { font: 500 28px/1.25 var(--font); letter-spacing: -0.004em; color: var(--ink-3); }
+.t-num     { font-variant-numeric: tabular-nums; }
+.w { display: inline-block; }
+.acc { color: var(--accent); }
+.safe-c { color: var(--safe); }
+.ico { display: block; flex: none; }
+
+/* ------------------------------------------------------------ chips (the product's pill / chip) */
+.chip {
+  position: absolute;
+  display: inline-flex; align-items: center; gap: 14px;
+  height: 60px; padding: 0 26px 0 20px; border-radius: 30px;
+  font: 600 30px/1 var(--font); letter-spacing: -0.01em; white-space: nowrap; color: var(--ink-2);
+  background: var(--fill-1);
+  box-shadow: inset 0 0 0 1.5px var(--hair), inset 0 1.5px 0 rgba(255, 255, 255, 0.14);
+}
+.chip i { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-4); flex: none; }
+.chip.hot { color: #ff7a45; background: rgba(var(--accent-rgb), 0.15); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.36), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
+.chip.hot i { background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.9); }
+.chip.safe { color: #4fd68c; background: rgba(var(--safe-rgb), 0.14); box-shadow: inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
+.chip.safe i { background: var(--safe); }
+
+/* ------------------------------------------------------------ device frame for real UI footage */
+.device {
+  position: absolute;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #05070d;
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    0 36px 72px -24px rgba(0, 0, 0, 0.72),
+    0 80px 150px -50px rgba(0, 0, 0, 0.62);
+}
+.device::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 6; box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.dev-bar { position: absolute; left: 0; right: 0; top: 0; height: 38px; z-index: 4; background: linear-gradient(180deg, rgba(36, 42, 68, 0.98), rgba(20, 24, 42, 0.98)); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.55); }
+.dev-lights { position: absolute; left: 20px; top: 13px; display: flex; gap: 9px; }
+.dev-lights i { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 0.75px rgba(0, 0, 0, 0.25); }
+.dev-lights i:nth-child(1) { background: #ff5f57; }
+.dev-lights i:nth-child(2) { background: #febc2e; }
+.dev-lights i:nth-child(3) { background: #28c840; }
+.dev-screen { position: absolute; left: 0; right: 0; bottom: 0; top: 38px; overflow: hidden; background: #05070d; }
+.device.bare .dev-bar { display: none; }
+.device.bare .dev-screen { top: 0; }
+.dev-screen > img, .dev-screen > video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* ------------------------------------------------------------ the cursor (only where the footage has none) */
+.cursor { position: absolute; left: 0; top: 0; width: 52px; height: 52px; z-index: 40; transform-origin: 6px 4px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+
+/* ------------------------------------------------------------ callouts on footage */
+.callout { position: absolute; left: 0; top: 0; transform-origin: 0 50%; }
+.callout .co-dot { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.22), 0 2px 8px rgba(0, 0, 0, 0.5); }
+.callout .co-line { position: absolute; left: 0; top: -1px; height: 2px; background: rgba(255, 255, 255, 0.75); transform-origin: 0 50%; }
+.callout .co-pill { position: absolute; top: -34px; height: 68px; padding: 0 30px; border-radius: 34px; display: flex; align-items: center; gap: 14px; font: 600 32px/1 var(--font); letter-spacing: -0.012em; white-space: nowrap; }

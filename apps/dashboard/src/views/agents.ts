@@ -77,8 +77,8 @@ export const agents = {
       );
       setHTML($(`#tl-${a.id}`), `c${tc.length}:${S.A ?? ""}`, () =>
         tc
-          .map((c) => `<div class="tool"><time>${fmtT(at(c))}</time><code>${linkHosts(c.call)}<span>→ ${linkHosts(c.result)}</span></code></div>`)
-          .join("") || `<div class="tool"><time></time><code><span>No calls yet.</span></code></div>`,
+          .map((c) => `<div class="tool"><time>${fmtT(at(c))}</time><code>${linkHosts(c.call)}<span class="res">→ ${linkHosts(c.result)}</span></code></div>`)
+          .join("") || `<div class="tool"><time></time><code><span class="res">No calls yet.</span></code></div>`,
       );
     }
   },

@@ -1,0 +1,13 @@
+2:22:08 AM [vite] (client) Re-optimizing dependencies because lockfile has changed
+
+  VITE v6.4.5  ready in 105 ms
+
+  ➜  Local:   http://localhost:4327/
+  ➜  Network: use --host to expose
+2:22:25 AM [vite] (client) page reload src/main.ts
+2:23:41 AM [vite] (client) page reload src/views/overview.ts
+2:24:38 AM [vite] (client) page reload src/shell.ts
+2:24:38 AM [vite] (client) page reload src/main.ts
+2:25:54 AM [vite] (client) hmr update /src/style.css
+2:26:29 AM [vite] (client) page reload src/views/warroom.ts
+2:26:29 AM [vite] (client) hmr update /src/style.css

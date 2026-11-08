@@ -2,7 +2,7 @@
   "name": "bulkhead",
   "private": true,
   "version": "0.1.0",
-  "description": "Bulkhead: agentic incident-response console prototype (scripted demo data).",
+  "description": "Claura: agentic incident-response console prototype (scripted demo data).",
   "type": "module",
   "scripts": {
     "dev": "vite --port 4317",
@@ -12,9 +12,5 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "vite": "^6.4.5"
-  },
-  "dependencies": {
-    "@fontsource-variable/archivo": "^5.3.0",
-    "@fontsource/ibm-plex-mono": "^5.3.0"
   }
 }

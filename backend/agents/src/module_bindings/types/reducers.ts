@@ -6,15 +6,15 @@
 import { type Infer as __Infer } from "spacetimedb";
 
 // Import all reducer arg schemas
-import ApproveReducer from "../approve_reducer";
-import FileReportReducer from "../file_report_reducer";
-import IngestSignalReducer from "../ingest_signal_reducer";
-import OpenIncidentReducer from "../open_incident_reducer";
-import ProposeActionReducer from "../propose_action_reducer";
-import RecordFindingReducer from "../record_finding_reducer";
-import ResetDemoReducer from "../reset_demo_reducer";
-import SetAgentStateReducer from "../set_agent_state_reducer";
-import SetPolicyReducer from "../set_policy_reducer";
+import ApproveReducer from "../approve_reducer.ts";
+import FileReportReducer from "../file_report_reducer.ts";
+import IngestSignalReducer from "../ingest_signal_reducer.ts";
+import OpenIncidentReducer from "../open_incident_reducer.ts";
+import ProposeActionReducer from "../propose_action_reducer.ts";
+import RecordFindingReducer from "../record_finding_reducer.ts";
+import ResetDemoReducer from "../reset_demo_reducer.ts";
+import SetAgentStateReducer from "../set_agent_state_reducer.ts";
+import SetPolicyReducer from "../set_policy_reducer.ts";
 
 export type ApproveParams = __Infer<typeof ApproveReducer>;
 export type FileReportParams = __Infer<typeof FileReportReducer>;

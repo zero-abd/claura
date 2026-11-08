@@ -103,7 +103,7 @@ export const warroom = {
       ${disc("decisions", `<span class="r-ico">${icon("seal")}</span><span class="r-title">Decision log</span><span class="r-val" id="dcVal"></span>`, `<div class="row-body wr-pad"><div id="dcList"></div></div>`, "row")}
       ${disc(
         "clock",
-        `<span class="r-ico">${icon("clock")}</span><span class="r-title">Notification clock</span>`,
+        `<span class="r-ico">${icon("clock")}</span><span class="r-title">Notification clock</span><span class="r-val"></span>`,
         `<div class="row-body wr-pad">
           <span class="tag warm">${OBLIGATIONS_LABEL}</span>
           ${OBLIGATIONS.map(

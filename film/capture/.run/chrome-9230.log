@@ -1,0 +1,140 @@
+
+DevTools listening on ws://127.0.0.1:9230/devtools/browser/f75c1099-4aae-4b9d-a6be-b4683cdd9d89
+Trying to load the allocator multiple times. This is *not* supported.
+[28670:5231665:1108/021556.526217:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231737:1108/021556.526428:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231665:1108/021556.527966:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231737:1108/021556.534224:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231665:1108/021556.539115:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231737:1108/021556.539172:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231665:1108/021556.539272:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231737:1108/021556.539305:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231665:1108/021556.539386:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231737:1108/021556.539558:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231665:1108/021556.539637:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[28670:5231737:1108/021556.539662:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+[29251:5234645:1108/021615.442111:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[29251:5234645:1108/021615.442487:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.2.0, arch: arm64, System uptime (seconds): 172790, parent pid: 28665
+[29251:5234645:1108/021615.446243:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/abd/Library/Application Support/Google/GoogleUpdater): 473677049856B (441.146GiB) / 994610155520B (926.303GiB)
+[29251:5234645:1108/021615.446283:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/p6/nq1dfgm52s50vn4t3dpb6rbr0000gn/T/): 473677049856B (441.146GiB) / 994610155520B (926.303GiB)
+[29251:5234645:1108/021615.446343:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[29253:5234649:1108/021615.454351:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[29253:5234649:1108/021615.454703:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.2.0, arch: arm64, System uptime (seconds): 172790, parent pid: 1
+[29253:5234649:1108/021615.455899:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/abd/Library/Application Support/Google/GoogleUpdater): 473677053952B (441.146GiB) / 994610155520B (926.303GiB)
+[29253:5234649:1108/021615.455923:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/p6/nq1dfgm52s50vn4t3dpb6rbr0000gn/T/): 473677053952B (441.146GiB) / 994610155520B (926.303GiB)
+[29253:5234649:1108/021615.455986:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[29251:5234645:1108/021615.456321:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[29251:5234645:1108/021615.456748:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[29251:5234645:1108/021615.456791:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[29251:5234645:1108/021615.456840:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/abd/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[29251:5234645:1108/021615.456874:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/abd/Library/Application Support/Google/ChromeForTesting/Crashpad/settings.dat: No such file or directory (2)
+[29251:5234645:1108/021615.456880:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/abd/Library/Application Support/Google/Chrome-headless/Crashpad/settings.dat: No such file or directory (2)
+[29251:5234645:1108/021615.456888:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[29251:5234657:1108/021615.457087:VERBOSE1:chrome/updater/app/app_wakeall.cc:58] Launching `/Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake`
+[29254:5234663:1108/021615.464970:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[29254:5234663:1108/021615.465397:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.2.0, arch: arm64, System uptime (seconds): 172790, parent pid: 29251
+[29254:5234663:1108/021615.466819:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/abd/Library/Application Support/Google/GoogleUpdater): 473677045760B (441.146GiB) / 994610155520B (926.303GiB)
+[29254:5234663:1108/021615.466845:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/p6/nq1dfgm52s50vn4t3dpb6rbr0000gn/T/): 473677045760B (441.146GiB) / 994610155520B (926.303GiB)
+[29254:5234663:1108/021615.466897:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[29256:5234667:1108/021615.473837:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[29256:5234667:1108/021615.474149:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.2.0, arch: arm64, System uptime (seconds): 172790, parent pid: 1
+[29256:5234667:1108/021615.475230:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/abd/Library/Application Support/Google/GoogleUpdater): 473677041664B (441.146GiB) / 994610155520B (926.303GiB)
+[29256:5234667:1108/021615.475249:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/p6/nq1dfgm52s50vn4t3dpb6rbr0000gn/T/): 473677041664B (441.146GiB) / 994610155520B (926.303GiB)
+[29256:5234667:1108/021615.475296:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[29254:5234663:1108/021615.475585:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[29254:5234663:1108/021615.476502:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[29254:5234663:1108/021615.476566:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[29254:5234663:1108/021615.476639:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/abd/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[29254:5234663:1108/021615.476686:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/abd/Library/Application Support/Google/ChromeForTesting/Crashpad/settings.dat: No such file or directory (2)
+[29254:5234663:1108/021615.476693:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/abd/Library/Application Support/Google/Chrome-headless/Crashpad/settings.dat: No such file or directory (2)
+[29254:5234663:1108/021615.476703:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[29254:5234663:1108/021615.476887:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run
+[29254:5234663:1108/021658.457342:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[29254:5234663:1108/021658.457866:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[29254:5234663:1108/021658.457885:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.
+[29251:5234657:1108/021658.691927:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/abd/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0
+[29251:5234645:1108/021658.692173:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[29251:5234645:1108/021658.692543:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[29251:5234645:1108/021658.692562:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.
+Trying to load the allocator multiple times. This is *not* supported.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794125936.401357 5249012 environment.cc:526] Selected adapter: Apple M5, arch=metal-3, vendor=apple, backend=Metal, adapterType=Integrated GPU
+I0000 00:00:1794125936.406321 5249025 environment.cc:526] Selected adapter: Apple M5, arch=metal-3, vendor=apple, backend=Metal, adapterType=Integrated GPU
+sandbox_extension_issue_file failed for /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.73/Helpers/Google Chrome Helper.app/Contents/Resources: 1 (Operation not permitted)
+[29256:5234667:1108/022137.827589:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[29256:5234667:1108/022137.827928:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+[29253:5234649:1108/022137.832051:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[29253:5234649:1108/022137.832110:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+[28677:5231818:1108/022218.980293:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022218.980478:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022218.997804:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022218.997922:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022219.014036:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022219.014125:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022219.030924:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022219.031005:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022413.054043:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022413.054706:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.599027:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.599837:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.610593:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.611270:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.804795:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.805019:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.805165:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810262:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810456:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810589:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810707:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810809:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810906:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022419.810995:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022421.304787:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022421.309394:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022421.314647:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022421.340936:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022601.654933:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022601.656134:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022601.672655:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022601.672863:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.178464:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.179472:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.186244:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.186399:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.266584:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.266729:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.267376:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.267545:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.269980:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022623.270054:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.034575:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.034912:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.035310:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.035420:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.035490:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.053276:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022656.053368:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.618943:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.619601:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.633145:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.637207:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.649976:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.650063:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.666627:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022736.666842:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.381184:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.381861:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.397588:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.397758:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.413815:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.413884:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.430525:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28677:5231818:1108/022845.430605:ERROR:cc/tiles/tile_manager.cc:1046] WARNING: tile memory limits exceeded, some content may not draw
+[28665:5231608:1108/022846.464896:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:28:46.464] FIDO: fido_request_handler_base.cc:299 Cannot use Bluetooth because the responsible app for the process does not have Bluetooth metadata in its Info.plist. Launch from Finder to fix.
+[28665:5231608:1108/022846.475379:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:28:46.475] FIDO: fido_device_authenticator.cc:1493 CTAP error response code 46 received from VirtualFidoDevice-188D75C2117B94604B71D49DACB428520C00248E31D473397139B317CB083166
+[28665:5231608:1108/022846.475405:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:28:46.475] FIDO: get_assertion_request_handler.cc:675 Failing assertion request due to status 2 from VirtualFidoDevice-188D75C2117B94604B71D49DACB428520C00248E31D473397139B317CB083166
+[28665:5231608:1108/022934.105560:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:29:34.105] FIDO: fido_request_handler_base.cc:299 Cannot use Bluetooth because the responsible app for the process does not have Bluetooth metadata in its Info.plist. Launch from Finder to fix.
+[28665:5231608:1108/022934.112674:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:29:34.112] FIDO: fido_device_authenticator.cc:1493 CTAP error response code 46 received from VirtualFidoDevice-C2DFCA02EA5DE9F79D0585ACBC46BCA29FF62FF81F00F63CA007672FF48C314E
+[28665:5231608:1108/022934.112710:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:29:34.112] FIDO: get_assertion_request_handler.cc:675 Failing assertion request due to status 2 from VirtualFidoDevice-C2DFCA02EA5DE9F79D0585ACBC46BCA29FF62FF81F00F63CA007672FF48C314E
+[28665:5231608:1108/022940.198780:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:29:40.198] FIDO: fido_request_handler_base.cc:299 Cannot use Bluetooth because the responsible app for the process does not have Bluetooth metadata in its Info.plist. Launch from Finder to fix.
+[28665:5231608:1108/022943.333533:ERROR:components/device_event_log/device_event_log_impl.cc:211] [02:29:43.333] FIDO: fido_request_handler_base.cc:299 Cannot use Bluetooth because the responsible app for the process does not have Bluetooth metadata in its Info.plist. Launch from Finder to fix.

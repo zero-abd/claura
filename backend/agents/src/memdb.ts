@@ -103,14 +103,21 @@ export class MemClauraDb implements ClauraDb {
   async proposeAction(incidentId: bigint, agent: string, action: string, target: string, reason: string) {
     const inc = this.incident.get(incidentId);
     if (!inc) throw new Error(`unknown incident ${incidentId}`);
+    action = action.trim().toLowerCase();
+    target = target.trim();
     const pol = this.policy.get(action);
-    const mode = pol ? pol.mode : 'deny'; // unknown actions => deny
-    const status = mode === 'auto' ? 'executed' : mode === 'approval' ? 'pending_approval' : 'blocked';
+    const mode = pol ? pol.mode : 'deny'; // unknown actions => deny (fail closed)
+    // like the module: hallucinated hosts/vms must not silently "succeed"
+    const hostLevel = ['cordon_host', 'quarantine_host', 'failover_guests'].includes(action);
+    const badTarget = mode !== 'deny' && (hostLevel ? !this.host.has(target) : action === 'pause_guest' && !this.guest.has(target));
+    const status = mode === 'deny' || badTarget ? 'blocked' : mode === 'auto' ? 'executed' : 'pending_approval';
     this.proposal.set(this.seq.proposal, {
       id: this.seq.proposal++, incidentId, agent, action, target, reason, status, policyMode: mode,
-      atMs: this.now(), decidedBy: mode === 'auto' ? 'policy' : '',
+      atMs: this.now(), decidedBy: status === 'pending_approval' ? '' : 'policy',
     });
-    if (status === 'executed') {
+    if (badTarget) {
+      this.log(incidentId, 'blocked', agent, `BLOCKED ${action} on ${target}: unknown host or vm`);
+    } else if (status === 'executed') {
       this.log(incidentId, 'action', agent, `${action} -> ${target}: ${this.applyEffect(inc, action, target)}. Reason: ${reason}`);
     } else if (status === 'pending_approval') {
       inc.status = 'awaiting_approval';

@@ -15,10 +15,10 @@ export function tsToMs(ts: unknown): number {
 /**
  * Events belonging to one incident, oldest first. Signals that arrive before an
  * incident exists are logged with incident_id 0; they are part of every
- * incident's story, so they are included too.
+ * incident's story, so they are included too. Ordered by id, not by time.
  */
 export function eventsFor(all: EventRow[], incidentId: bigint): EventRow[] {
   return all
     .filter(e => e.incidentId === incidentId || (e.incidentId === 0n && e.kind === 'signal'))
-    .sort((a, b) => (a.atMs - b.atMs) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)); // ids are monotonic; ctx.timestamp is shared within one reducer call
 }

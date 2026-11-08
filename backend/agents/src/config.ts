@@ -21,7 +21,7 @@ export interface RunOptions {
   /** Give up waiting for approval after N seconds (0 = wait forever). */
   approvalTimeoutS: number;
   /** Red-team step: auto = only if the model did not try a denied action itself. */
-  redTeam: 'auto' | 'off' | 'force';
+  redTeam: 'auto' | 'off';
   /** Scales the telemetry replay schedule (2 = twice as slow). */
   telemetrySpeed: number;
   /** Pause between steps in --scripted so a dashboard can be watched live. */
@@ -85,7 +85,7 @@ export function parseArgs(argv: string[]): RunOptions {
       case '--db': { const [v, j] = takeValue(i, name); o.db = v; i = j; break; }
       case '--red-team': {
         const [v, j] = takeValue(i, name);
-        if (v !== 'auto' && v !== 'off' && v !== 'force') throw new Error('--red-team must be auto|off|force');
+        if (v !== 'auto' && v !== 'off') throw new Error('--red-team must be auto|off');
         o.redTeam = v; i = j; break;
       }
       case '--help': case '-h': throw new HelpRequested();
@@ -104,7 +104,7 @@ export const HELP = `Claura agent runner
   --scripted                 no model: canned text, same reducer sequence (live-demo backup)
   --auto-approve-after N     approve quarantine_host as operator "RK" after N seconds
   --approval-timeout S       stop waiting for a human after S seconds (default: wait forever)
-  --red-team auto|off|force  labelled red-team probe of a denied action (default auto:
+  --red-team auto|off        labelled red-team probe of a denied action (default auto:
                              only when the model did not try one itself)
   --mem                      in-process mirror of the contract instead of SpacetimeDB (dev/test)
   --uri ws://host:port       SpacetimeDB URI   (default ${STDB_URI}, env STDB_URI)

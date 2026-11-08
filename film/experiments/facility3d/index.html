@@ -1,61 +1,81 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-resolution="landscape">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
+    <!-- HyperFrames maps this pinned GSAP URL to its own vendored copy at render time. -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <style>
-      /* Placeholders: replace all three with the film's own palette and display face. */
+      /* Claura Liquid Glass wallpaper (tokens from the product's style.css: wallpaper section). */
       :root {
-        --ground: #000;
-        --ink: #ffffff;
-        --font-display: sans-serif;
+        --bg: #05070d;
+        --accent: #ff5a1f;
+        --safe: #2fbf71;
       }
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
         margin: 0;
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: var(--ground);
+        background: var(--bg);
       }
-      #root {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-display);
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+
+      #wallpaper {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: radial-gradient(120% 100% at 50% -10%, #0c1328 0%, #070a15 55%, #04060b 100%);
       }
-      #title {
-        color: var(--ink);
-        font-size: 72px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
+      .wp { position: absolute; border-radius: 50%; }
+      .wp.b1 { width: 1200px; height: 1000px; left: -380px; top: -380px;
+        background: radial-gradient(closest-side, rgba(38, 66, 214, 0.7), rgba(38, 66, 214, 0.28) 55%, transparent); }
+      .wp.b2 { width: 1100px; height: 1100px; right: -320px; top: -60px;
+        background: radial-gradient(closest-side, rgba(116, 52, 222, 0.56), rgba(116, 52, 222, 0.2) 58%, transparent); }
+      .wp.b3 { width: 1400px; height: 900px; left: 18%; bottom: -520px;
+        background: radial-gradient(closest-side, rgba(16, 156, 186, 0.46), rgba(16, 156, 186, 0.16) 60%, transparent); }
+      .wp.b4 { width: 800px; height: 800px; left: -200px; bottom: -260px;
+        background: radial-gradient(closest-side, rgba(200, 56, 132, 0.3), transparent); }
+      .wp.ember, .wp.green { width: 1100px; height: 820px; right: 2%; top: -260px; opacity: 0; }
+      .wp.ember { background: radial-gradient(closest-side, rgba(255, 90, 31, 0.5), rgba(255, 90, 31, 0.16) 55%, transparent); }
+      .wp.green { background: radial-gradient(closest-side, rgba(47, 191, 113, 0.38), rgba(47, 191, 113, 0.12) 55%, transparent); }
+      #grain {
+        position: absolute; inset: 0; opacity: 0.09; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      #vignette {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 85% 75% at 50% 42%, transparent 45%, rgba(0, 0, 0, 0.5) 100%);
       }
     </style>
   </head>
   <body>
-    <div
-      id="root"
-      data-composition-id="main"
-      data-start="0"
-      data-duration="10"
-      data-width="1920"
-      data-height="1080"
-    >
-      <h1 id="title" class="clip" data-start="0" data-duration="10" data-track-index="0">Title</h1>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1920" data-height="1080">
+      <div id="wallpaper" aria-hidden="true" data-layout-allow-overflow>
+        <i class="wp b1"></i><i class="wp b2"></i><i class="wp b3"></i><i class="wp b4"></i>
+        <i class="wp ember"></i><i class="wp green"></i>
+        <div id="grain"></div>
+        <div id="vignette"></div>
+      </div>
+      <!-- The 3D facility scene: transparent WebGL canvas + one glass chip, drawn from hf-seek. -->
+      <div id="facility3d" data-composition-id="facility3d" data-composition-src="compositions/facility3d.html"
+           data-start="0" data-duration="8" data-track-index="1" data-track-kind="graphics"
+           data-width="1920" data-height="1080" style="z-index: 2"></div>
     </div>
     <script>
+      window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
-      // Example: tl.fromTo("#title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0);
+      // Wallpaper drift: seekable GSAP tweens replace the product's infinite CSS keyframes.
+      tl.fromTo(".wp.b1", { x: 0, y: 0, scale: 1 }, { x: 110, y: 70, scale: 1.08, duration: 8, ease: "sine.inOut" }, 0);
+      tl.fromTo(".wp.b2", { x: 0, y: 0, scale: 1 }, { x: -100, y: 80, scale: 1.06, duration: 8, ease: "sine.inOut" }, 0);
+      tl.fromTo(".wp.b3", { x: 0, y: 0, scale: 1 }, { x: -130, y: -40, scale: 1.1, duration: 8, ease: "sine.inOut" }, 0);
+      tl.fromTo(".wp.b4", { x: 0, y: 0, scale: 1 }, { x: 120, y: -70, scale: 1.12, duration: 8, ease: "sine.inOut" }, 0);
+      // Tone follows the incident: ember glow from the breach, green glow once sealed (mirrors body[data-tone]).
+      tl.fromTo(".wp.ember", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power2.inOut" }, 1.4);
+      tl.to(".wp.ember", { opacity: 0, duration: 1.4, ease: "power2.inOut" }, 5.9);
+      tl.fromTo(".wp.green", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power2.inOut" }, 6.0);
       window.__timelines["main"] = tl;
-      tl.seek(0);
     </script>
   </body>
 </html>

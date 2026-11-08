@@ -10,7 +10,7 @@ export const policyState = {
 const prow = (a: PolicyAction, locked: boolean) => `<div class="prow">
   <span class="r-ico">${icon(a.icon)}</span>
   <span class="r-main"><b>${a.name}</b><em>${a.note}</em></span>
-  <span class="switch" role="switch" tabindex="${locked ? -1 : 0}" aria-label="${a.name}" aria-checked="false" data-pol="${a.id}"${locked ? ' data-locked="1" aria-disabled="true"' : ""}><i></i></span>
+  <span class="switch" role="switch" tabindex="${locked ? -1 : 0}" aria-label="${a.name}" aria-checked="false" data-pol="${a.id}" data-target="pol:${a.id}"${locked ? ' data-locked="1" aria-disabled="true"' : ""}><i></i></span>
 </div>`;
 
 export const policy = {
@@ -32,7 +32,7 @@ export const policy = {
         <div class="seg" id="presetSeg" role="tablist" aria-label="Autonomy">
           <i class="seg-lens"></i>
           ${Object.keys(POLICY_PRESETS)
-            .map((p) => `<button type="button" role="tab" data-preset="${p}" aria-selected="false">${p}</button>`)
+            .map((p) => `<button type="button" role="tab" data-preset="${p}" data-target="preset:${p}" aria-selected="false">${p}</button>`)
             .join("")}
         </div>
       </div>

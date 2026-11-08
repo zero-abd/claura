@@ -1,0 +1,134 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    /* The WebGL canvas is mounted here by the module (fixed 1920x1080, transparent clear colour). */
+    #f3-stage { position: absolute; inset: 0; }
+
+    /* One Liquid Glass chip over the canvas: proves backdrop-filter composites with a WebGL layer in the render. */
+    #f3-chip {
+      position: absolute;
+      left: 120px;
+      bottom: 120px;
+      width: 640px;
+      padding: 30px 38px 32px;
+      border-radius: 36px;
+      font-family: "Inter", sans-serif;
+      color: rgba(247, 249, 255, 0.96);
+      background:
+        linear-gradient(155deg, rgba(255, 255, 255, 0.115) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(255, 255, 255, 0.02) 100%),
+        rgba(16, 22, 46, 0.36);
+      -webkit-backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+      backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        0 20px 44px -16px rgba(0, 0, 0, 0.55);
+    }
+    #f3-chip .kick {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 250, 0.7);
+    }
+    #f3-chip .state {
+      position: relative;
+      height: 72px;
+      margin-top: 14px;
+      padding-left: 46px;
+    }
+    #f3-dot {
+      position: absolute;
+      left: 0;
+      top: 22px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(226, 232, 250, 0.7);
+    }
+    #f3-chip .s {
+      position: absolute;
+      left: 46px;
+      top: 0;
+      line-height: 72px;
+      font-size: 56px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      opacity: 0;
+    }
+  </style>
+
+  <div id="root" data-composition-id="facility3d" data-width="1920" data-height="1080">
+    <div id="f3-stage" data-layout-allow-overflow></div>
+    <div id="f3-chip">
+      <div class="kick">DFW-2 · Hall B · Rack 14</div>
+      <div class="state">
+        <span id="f3-dot"></span>
+        <span class="s" id="f3-s0">Nominal</span>
+        <span class="s" id="f3-s1">Breach detected</span>
+        <span class="s" id="f3-s2">Awaiting approval</span>
+        <span class="s" id="f3-s3">Contained</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- three.js r180 is bundled inside this file (no CDN, no importmap). Defines window.ClauraFacility. -->
+  <script src="assets/vendor/facility.global.min.js"></script>
+  <script>
+    // ---------------------------------------------------------------- the 8 s track (film API keys)
+    const DURATION = 8;
+    const TRACK = [
+      { t: 0.0, state: "nominal", cam: "facility" },              // establishing: whole DFW-2 site
+      { t: 1.4, state: "breach" },                                // B14 turns orange, link runs toward the BMC
+      { t: 3.1, state: "approval", cam: "rack14", fly: 1.7 },     // dive to rack 14; the cradle drops in (orange)
+      { t: 4.9, state: "contained" },                             // sealed: the orb turns green
+    ];
+
+    // ---------------------------------------------------------------- mount (fixed size, transparent, no UI)
+    const stage = document.getElementById("f3-stage");
+    const f = window.ClauraFacility.createFacility(stage, {
+      look: "lumen",
+      background: "transparent",
+      controls: false, // no pointer handlers, no wheel
+      pick: false,
+      width: 1920, // fixed size => no ResizeObserver, no layout dependence
+      height: 1080,
+      pixelRatio: 1,
+    });
+
+    // The module builds meshes and compiles shaders synchronously in createFacility(); f.ready resolves right after.
+    // HyperFrames wants buildReady to be a MAP of key -> promise (an object, not a bare promise).
+    window.__hf = window.__hf || {};
+    window.__hf.buildReady = window.__hf.buildReady || {};
+    window.__hf.buildReady["facility3d"] = f.ready;
+
+    // hf-seek carries the ROOT timeline time; this scene starts at its host's data-start.
+    const host = window.document.getElementById("facility3d");
+    const T0 = host ? Number(host.getAttribute("data-start")) || 0 : 0;
+    const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
+    function draw(rootTime) {
+      f.film.renderAt(clamp(rootTime - T0, 0, DURATION), TRACK); // pure: same t => same pixels
+    }
+    window.addEventListener("hf-seek", (e) => draw(e.detail.time));
+    draw(T0); // first frame now; the runtime's first seek will repeat it
+    window.__facility3d = { f, TRACK, draw, T0 }; // handle for tests
+
+    // ---------------------------------------------------------------- glass chip (plain GSAP, seekable)
+    const tl = gsap.timeline({ paused: true });
+    // chip in, then the status line follows the 3D state: nominal -> breach (1.4) -> awaiting approval (3.1) -> contained (6.2, as the orb goes green)
+    tl.fromTo("#f3-chip", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 0.3);
+    tl.fromTo("#f3-s0", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.4);
+    tl.to("#f3-s0", { opacity: 0, duration: 0.15, ease: "power2.in" }, 1.4);
+    tl.fromTo("#f3-s1", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.55);
+    tl.to("#f3-s1", { opacity: 0, duration: 0.15, ease: "power2.in" }, 3.1);
+    tl.fromTo("#f3-s2", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 3.25);
+    tl.to("#f3-s2", { opacity: 0, duration: 0.15, ease: "power2.in" }, 6.1);
+    tl.fromTo("#f3-s3", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 6.25);
+    tl.fromTo("#f3-dot", { backgroundColor: "rgba(226,232,250,0.7)" }, { backgroundColor: "#FF5A1F", duration: 0.3, ease: "power2.out" }, 1.4);
+    tl.to("#f3-dot", { backgroundColor: "#2FBF71", duration: 0.4, ease: "power2.inOut" }, 6.1);
+    window.__timelines["facility3d"] = tl;
+  </script>
+</template>

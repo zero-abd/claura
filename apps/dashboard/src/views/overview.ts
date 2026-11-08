@@ -34,7 +34,7 @@ export const overview = {
         </div>
       </div>
 
-      <button type="button" class="glass last" id="lastRow" data-go="reports">
+      <button type="button" class="glass last" id="lastRow" data-go="reports" data-target="last-incident">
         <span class="r-ico" id="lastIco">${icon("shieldCheck")}</span>
         <span class="last-main"><b id="lastTitle"></b><span id="lastSub"></span></span>
         <span class="when" id="lastWhen"></span>
@@ -63,7 +63,7 @@ export const overview = {
     }
     const act = $("#oActions");
     setHTML(act, inc ? "open" : "none", () =>
-      inc ? `<button type="button" class="btn-chip accent" data-go="incident">Open incident</button>` : "",
+      inc ? `<button type="button" class="btn-chip accent" data-go="incident" data-target="open-incident">Open incident</button>` : "",
     );
 
     // last incident row: live incident replaces the history line

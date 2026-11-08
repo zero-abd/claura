@@ -177,8 +177,10 @@ export async function proposeThroughGate(
 ): Promise<ProposalResult> {
   const before = new Set(env.db.proposals(incidentId).map(p => p.id));
   await env.db.proposeAction(incidentId, 'warden', action, target, reason);
+  // The module normalises action (trim + lower-case) and target (trim, empty -> incident default), so match on action only.
+  const act = action.trim().toLowerCase();
   const p = await waitFor(
-    () => env.db.proposals(incidentId).find(x => !before.has(x.id) && x.action === action && x.target === target),
+    () => env.db.proposals(incidentId).filter(x => !before.has(x.id) && x.action === act).at(-1),
     { timeoutMs: 5000, label: `proposal row for ${action}` },
   );
   let note: string;
@@ -186,7 +188,11 @@ export async function proposeThroughGate(
   else if (p.status === 'pending_approval') {
     note = 'Policy requires human approval. The incident is now awaiting approval from an operator. Do not propose this again.';
     env.marks.markOnce('pending_approval');
-  } else note = `BLOCKED by policy (mode: ${p.policyMode}). This action is not permitted. Do not retry it; continue with permitted containment steps.`;
+  } else if (p.policyMode === 'deny') {
+    note = 'BLOCKED by policy (mode: deny). This action is not permitted. Do not retry it; continue with permitted containment steps.';
+  } else {
+    note = `REJECTED by the gate: the target "${p.target}" is not a real host or vm for ${action}. Check the exact name from the incident and propose ${action} again with a valid target.`;
+  }
   env.log.info('policy', `${action} -> ${target}: ${p.status.toUpperCase()} (policy: ${p.policyMode})`);
   return { proposal_id: String(p.id), action, target, status: p.status, policy_mode: p.policyMode, note };
 }
@@ -217,6 +223,19 @@ export function wardenTools(env: Env, incidentId: bigint): Tool[] {
       },
       thought: a => `${a.action} -> ${a.target}: ${a.reason}`,
       async run(args) {
+        const action = String(args.action).trim().toLowerCase();
+        const target = String(args.target).trim();
+        // Models re-propose the same step with a reworded reason. Don't spam the gate: the first ruling stands.
+        // (A rejection for a bad target does not count: that step must be retried with a valid target.)
+        const prior = env.db.proposals(incidentId).find(
+          p => p.agent === 'warden' && p.action === action && p.target === target && (p.status !== 'blocked' || p.policyMode === 'deny'),
+        );
+        if (prior) {
+          return {
+            proposal_id: String(prior.id), action, target, status: prior.status, policy_mode: prior.policyMode,
+            note: 'You already proposed this exact action for this target; it was not repeated. Move on to the next step.',
+          };
+        }
         return proposeThroughGate(env, incidentId, String(args.action), String(args.target), String(args.reason));
       },
     },

@@ -31,14 +31,17 @@ Work through the guest-escape playbook in this order, ONE propose_action call pe
 5. capture_memory   target: the suspect VM
 6. failover_guests   target: the suspect host
 7. quarantine_host   target: the suspect host (always last)
-Give every step a reason of at most 15 words that cites evidence from the incident. If a result says BLOCKED, do not retry that action; carry on. When all steps have been proposed, reply with one short sentence.`;
+Give every step a reason of at most 10 words that cites evidence from the incident. If a result says BLOCKED, do not retry that action; carry on. When all steps have been proposed, reply with one short sentence.`;
 
 const targetOf = (inc: IncidentRow, step: PlaybookStep) =>
   step.on === 'vm' ? inc.vm : step.on === 'identity' ? SUSPECT_IDENTITY : inc.host;
 
 export async function runWarden(env: Env, inc: IncidentRow): Promise<AgentOutcome & { orderOk: boolean }> {
   const tools = wardenTools(env, inc.id);
-  const have = (action: string) => env.db.proposals(inc.id).some(p => p.agent === 'warden' && p.action === action);
+  // A step is handled once the gate has ruled on it. A proposal rejected for a bad target (blocked while the
+  // policy mode is auto/approval) is NOT handled: that step still has to be proposed with a valid target.
+  const have = (action: string) =>
+    env.db.proposals(inc.id).some(p => p.agent === 'warden' && p.action === action && (p.status !== 'blocked' || p.policyMode === 'deny'));
   const isDone = () => PLAYBOOK.every(s => have(s.action));
   const triage = env.db.findings(inc.id).filter(f => f.agent === 'triage').at(-1);
   const score = env.db.incidents().find(i => i.id === inc.id)?.blastScore ?? 0;

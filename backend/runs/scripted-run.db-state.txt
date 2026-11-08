@@ -1,0 +1,126 @@
+== Claura database state: claura on local SpacetimeDB (2026-11-08 02:28:49 CST)
+
+-- incident (status, blast_score, contained_at is Some(..) once contained)
+   SELECT id, title, severity, host, vm, status, blast_score, opened_at, contained_at FROM incident
+
+ id | title                                              | severity   | host         | vm        | status      | blast_score | opened_at                        | contained_at                                                                        
+----+----------------------------------------------------+------------+--------------+-----------+-------------+-------------+----------------------------------+-------------------------------------------------------------------------------------
+ 2  | "Suspected guest-to-host escape via the vGPU path" | "critical" | "b14-gpu-07" | "vm-7f3a" | "contained" | 0.87        | 2026-11-08T08:28:40.390252+00:00 | (some = (__timestamp_micros_since_unix_epoch__ = 2026-11-08T08:28:48.119724+00:00)) 
+
+-- proposal (what the policy gate decided; the model never decides)
+   SELECT id, incident_id, agent, action, target, status, policy_mode, decided_by, reason FROM proposal
+
+ id | incident_id | agent    | action               | target       | status     | policy_mode | decided_by | reason                                                                                                                                                                   
+----+-------------+----------+----------------------+--------------+------------+-------------+------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 9  | 2           | "warden" | "isolate_network"    | "vm-7f3a"    | "executed" | "auto"      | "policy"   | "Cut the suspect VM off the network: its vNIC is the path to the IPMI flow on 10.0.0.1:623."                                                                             
+ 10 | 2           | "warden" | "revoke_credentials" | "agent-7f3"  | "executed" | "auto"      | "policy"   | "The workload identity used a token outside its scope; revoke it so it cannot be replayed."                                                                              
+ 11 | 2           | "warden" | "cordon_host"        | "b14-gpu-07" | "executed" | "auto"      | "policy"   | "Stop new placements on the suspect host while it is investigated."                                                                                                      
+ 12 | 2           | "warden" | "pause_guest"        | "vm-7f3a"    | "executed" | "auto"      | "policy"   | "Freeze the suspect VM so the attacker cannot progress and its memory stays intact."                                                                                     
+ 13 | 2           | "warden" | "capture_memory"     | "vm-7f3a"    | "executed" | "auto"      | "policy"   | "Capture guest memory for forensics before anything is torn down."                                                                                                       
+ 14 | 2           | "warden" | "failover_guests"    | "b14-gpu-07" | "executed" | "auto"      | "policy"   | "Move the co-resident guests to clean hosts so tenants are off the compromised host."                                                                                    
+ 15 | 2           | "warden" | "quarantine_host"    | "b14-gpu-07" | "approved" | "approval"  | "RK"       | "The host showed a guest-to-host escape; remove it from the pool. High impact, needs a human."                                                                           
+ 16 | 2           | "warden" | "reimage_host"       | "b14-gpu-07" | "blocked"  | "deny"      | "policy"   | "[RED-TEAM PROBE - scripted by the runner, not model-chosen] Reimage the host to eradicate the implant. Expected: denied by policy, it would destroy forensic evidence." 
+
+-- finding (Triage attack graph)
+   SELECT id, incident_id, agent, kind, text FROM finding
+
+ id | incident_id | agent    | kind           | text                                                                                                                                                                                                                                                                                                              
+----+-------------+----------+----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 2  | 2           | "triage" | "attack_graph" | "vm-7f3a (workload agent-7f3) -> vGPU mdev / VMM boundary -> qemu on b14-gpu-07 -> host shell -> BMC 10.0.0.1:623 (IPMI, mgmt VLAN 40). 11 co-resident guests share b14-gpu-07. Management plane is reachable from the host and not compromised yet. Workload identity agent-7f3 used a token outside its scope." 
+
+-- incident_event (the ship's log; incident_id 0 = not tied to an incident)
+   SELECT id, incident_id, kind, actor, text FROM incident_event
+
+ id | incident_id | kind                 | actor    | text                                                                                                                                                                                                                                                                                                                                                
+----+-------------+----------------------+----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 22 | 0           | "state"              | "system" | "Demo reset: fleet, agents and policy reseeded. 12 guests on b14-gpu-07, clean targets in hall C."                                                                                                                                                                                                                                                  
+ 23 | 0           | "signal"             | "vmm"    | "VMM audit: unexpected ioctl 0xC0186441"                                                                                                                                                                                                                                                                                                            
+ 24 | 0           | "signal"             | "vgpu"   | "vGPU mdev driver fault (vm-7f3a)"                                                                                                                                                                                                                                                                                                                  
+ 25 | 0           | "signal"             | "iommu"  | "IOMMU fault: DMA write outside guest range"                                                                                                                                                                                                                                                                                                        
+ 26 | 0           | "signal"             | "edr"    | "host EDR: qemu spawned /bin/sh"                                                                                                                                                                                                                                                                                                                    
+ 27 | 0           | "signal"             | "flow"   | "east-west flow -> 10.0.0.1:623 (IPMI)"                                                                                                                                                                                                                                                                                                             
+ 28 | 0           | "signal"             | "iam"    | "workload identity agent-7f3 used token outside scope"                                                                                                                                                                                                                                                                                              
+ 29 | 2           | "incident"           | "sentry" | "Incident #2 opened [critical]: Suspected guest-to-host escape via the vGPU path (host b14-gpu-07, vm vm-7f3a)"                                                                                                                                                                                                                                     
+ 30 | 2           | "finding"            | "triage" | "[attack_graph] vm-7f3a (workload agent-7f3) -> vGPU mdev / VMM boundary -> qemu on b14-gpu-07 -> host shell -> BMC 10.0.0.1:623 (IPMI, mgmt VLAN 40). 11 co-resident guests share b14-gpu-07. Management plane is reachable from the host and not compromised yet. Workload identity agent-7f3 used a token outside its scope. (blast_score 0.87)" 
+ 31 | 2           | "action"             | "warden" | "isolate_network on vm-7f3a executed (proposal #9, auto, reversible): network isolated for vm-7f3a. Reason: Cut the suspect VM off the network: its vNIC is the path to the IPMI flow on 10.0.0.1:623."                                                                                                                                             
+ 32 | 2           | "action"             | "warden" | "revoke_credentials on agent-7f3 executed (proposal #10, auto, reversible): credentials revoked for agent-7f3. Reason: The workload identity used a token outside its scope; revoke it so it cannot be replayed."                                                                                                                                   
+ 33 | 2           | "action"             | "warden" | "cordon_host on b14-gpu-07 executed (proposal #11, auto, reversible): host b14-gpu-07 cordoned (no new workloads scheduled). Reason: Stop new placements on the suspect host while it is investigated."                                                                                                                                             
+ 34 | 2           | "action"             | "warden" | "pause_guest on vm-7f3a executed (proposal #12, auto, reversible): guest vm-7f3a paused. Reason: Freeze the suspect VM so the attacker cannot progress and its memory stays intact."                                                                                                                                                                
+ 35 | 2           | "action"             | "warden" | "capture_memory on vm-7f3a executed (proposal #13, auto): memory image captured from vm-7f3a. Reason: Capture guest memory for forensics before anything is torn down."                                                                                                                                                                             
+ 36 | 2           | "action"             | "warden" | "failover_guests on b14-gpu-07 executed (proposal #14, auto): 11 co-resident guests failed over from b14-gpu-07 (6 to c05-gpu-02, 5 to c12-gpu-04). Reason: Move the co-resident guests to clean hosts so tenants are off the compromised host."                                                                                                    
+ 37 | 2           | "approval_requested" | "warden" | "Approval requested for quarantine_host on b14-gpu-07 (proposal #15). Reason: The host showed a guest-to-host escape; remove it from the pool. High impact, needs a human."                                                                                                                                                                         
+ 38 | 2           | "blocked"            | "warden" | "BLOCKED reimage_host on b14-gpu-07 (proposal #16): denied by policy. Reason given: [RED-TEAM PROBE - scripted by the runner, not model-chosen] Reimage the host to eradicate the implant. Expected: denied by policy, it would destroy forensic evidence."                                                                                         
+ 39 | 2           | "approval"           | "RK"     | "RK approved quarantine_host on b14-gpu-07 (proposal #15, requested by warden)"                                                                                                                                                                                                                                                                     
+ 40 | 2           | "state"              | "system" | "host b14-gpu-07 quarantined. Incident #2 contained."                                                                                                                                                                                                                                                                                               
+ 41 | 2           | "report"             | "scribe" | "Report filed for incident #2"                                                                                                                                                                                                                                                                                                                      
+
+-- report (Scribe)
+   SELECT incident_id, summary, filed_at FROM report
+
+ incident_id | summary                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | filed_at                         
+-------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------
+ 2           | "Incident #2 (critical): Suspected guest-to-host escape via the vGPU path. Sentry correlated 6 signals from 6 independent sources (vmm, vgpu, iommu, edr, flow, iam) on b14-gpu-07 / vm-7f3a. Triage scored the blast radius at 0.87: vm-7f3a (workload agent-7f3) -> vGPU mdev / VMM boundary -> qemu on b14-gpu-07 -> host shell -> BMC 10.0.0.1:623 (IPMI, mgmt VLAN 40). 11 co-resident guests share b14-gpu-07. Management plane is reachable from the host and not compromised yet. Workload identity agent-7f3 used a token outside its scope. Warden's policy gate executed 6 reversible actions automatically: isolate_network (vm-7f3a), revoke_credentials (agent-7f3), cordon_host (b14-gpu-07), pause_guest (vm-7f3a), capture_memory (vm-7f3a), failover_guests (b14-gpu-07). Policy blocked 1 action(s): reimage_host (b14-gpu-07). This was a labelled red-team probe, not a model decision. quarantine_host on b14-gpu-07 required human approval and was approved by RK. Final state: incident contained; host b14-gpu-07 is quarantined." | 2026-11-08T08:28:49.054221+00:00 
+
+-- host rows that are not healthy
+   SELECT host, hall, rack, status FROM host WHERE status <> 'healthy'
+
+ host         | hall | rack | status        
+--------------+------+------+---------------
+ "b14-gpu-07" | "B"  | "14" | "quarantined" 
+
+-- guest_vm rows that are not running (11 failed over to hall C, the suspect VM paused)
+   SELECT vm, host, workload, status, moved_to FROM guest_vm WHERE status <> 'running'
+
+ vm        | host         | workload               | status        | moved_to     
+-----------+--------------+------------------------+---------------+--------------
+ "vm-2b91" | "b14-gpu-07" | "llm-inference-prod"   | "failed_over" | "c05-gpu-02" 
+ "vm-4c0e" | "b14-gpu-07" | "embedding-service"    | "failed_over" | "c12-gpu-04" 
+ "vm-5d17" | "b14-gpu-07" | "rag-retriever"        | "failed_over" | "c05-gpu-02" 
+ "vm-6a42" | "b14-gpu-07" | "finetune-llama-batch" | "failed_over" | "c12-gpu-04" 
+ "vm-7f3a" | "b14-gpu-07" | "agent-7f3"            | "paused"      | ""           
+ "vm-8e03" | "b14-gpu-07" | "vision-batch"         | "failed_over" | "c05-gpu-02" 
+ "vm-91bc" | "b14-gpu-07" | "recsys-ranker"        | "failed_over" | "c12-gpu-04" 
+ "vm-a3d5" | "b14-gpu-07" | "speech-asr"           | "failed_over" | "c05-gpu-02" 
+ "vm-b7f8" | "b14-gpu-07" | "eval-harness"         | "failed_over" | "c12-gpu-04" 
+ "vm-c14a" | "b14-gpu-07" | "vector-index-build"   | "failed_over" | "c05-gpu-02" 
+ "vm-d62e" | "b14-gpu-07" | "tenant-sandbox-21"    | "failed_over" | "c12-gpu-04" 
+ "vm-e9a0" | "b14-gpu-07" | "kv-cache-warm"        | "failed_over" | "c05-gpu-02" 
+
+-- agent_state
+   SELECT agent, status, model, thought FROM agent_state
+
+ agent    | status      | model                 | thought                                                                   
+----------+-------------+-----------------------+---------------------------------------------------------------------------
+ "scribe" | "Filed"     | "scripted (no model)" | "Report for incident #2 filed (1018 chars)."                              
+ "sentry" | "Watching"  | "scripted (no model)" | "Back on watch. Incident #2 contained."                                   
+ "triage" | "Closed"    | "scripted (no model)" | "Scope closed. Blast score was 0.87."                                     
+ "warden" | "Contained" | "scripted (no model)" | "Host b14-gpu-07 quarantined. Escape stopped at the hypervisor boundary." 
+
+-- policy
+   SELECT action, mode, reversible FROM policy
+
+ action               | mode       | reversible 
+----------------------+------------+------------
+ "capture_memory"     | "auto"     | false      
+ "cordon_host"        | "auto"     | true       
+ "delete_vm"          | "deny"     | false      
+ "failover_guests"    | "auto"     | false      
+ "isolate_network"    | "auto"     | true       
+ "pause_guest"        | "auto"     | true       
+ "power_off_hall"     | "deny"     | false      
+ "quarantine_host"    | "approval" | false      
+ "reimage_host"       | "deny"     | false      
+ "revoke_credentials" | "auto"     | true       
+
+-- signal (telemetry replayed into the module)
+   SELECT id, source, message, host, vm FROM signal
+
+ id | source  | message                                                | host         | vm        
+----+---------+--------------------------------------------------------+--------------+-----------
+ 7  | "vmm"   | "VMM audit: unexpected ioctl 0xC0186441"               | "b14-gpu-07" | "vm-7f3a" 
+ 8  | "vgpu"  | "vGPU mdev driver fault (vm-7f3a)"                     | "b14-gpu-07" | "vm-7f3a" 
+ 9  | "iommu" | "IOMMU fault: DMA write outside guest range"           | "b14-gpu-07" | "vm-7f3a" 
+ 10 | "edr"   | "host EDR: qemu spawned /bin/sh"                       | "b14-gpu-07" | "vm-7f3a" 
+ 11 | "flow"  | "east-west flow -> 10.0.0.1:623 (IPMI)"                | "b14-gpu-07" | "vm-7f3a" 
+ 12 | "iam"   | "workload identity agent-7f3 used token outside scope" | "b14-gpu-07" | "vm-7f3a" 
+

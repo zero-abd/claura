@@ -1,0 +1,25 @@
+{
+  "name": "@claura/ssh",
+  "version": "0.1.0",
+  "description": "Claura Secure Shell: just-in-time, short-lived, certificate-based SSH sessions in the browser, with passkey step-up, two-person approval and a hash-chained recording ledger.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node dev.mjs",
+    "start": "node dev.mjs",
+    "smoke": "node smoke.mjs"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.1.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "express": "^5.1.0",
+    "ws": "^8.18.0"
+  },
+  "optionalDependencies": {
+    "node-pty": "^1.1.0"
+  }
+}

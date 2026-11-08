@@ -435,7 +435,7 @@ body[data-tone="breach"] .nav-dot {
   height: 26px;
   padding: 0 11px;
   border-radius: 13px;
-  font: 500 13px/1 var(--font);
+  font: 500 13.5px/1 var(--font);
   color: var(--ink-3);
   background: var(--fill-1);
   box-shadow: inset 0 0 0 1px var(--hair);
@@ -800,10 +800,10 @@ body[data-tone="breach"] .pill-mark {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: 28px;
+  height: 29px;
   padding: 0 12px 0 10px;
-  border-radius: 14px;
-  font: 500 13.5px/1 var(--font);
+  border-radius: 14.5px;
+  font: 500 14px/1 var(--font);
   letter-spacing: -0.005em;
   white-space: nowrap;
   color: var(--ink-2);
@@ -1191,9 +1191,12 @@ body[data-tone="breach"] .pill-mark {
   align-items: center;
   gap: 18px;
   color: var(--ink-3);
-  font-size: 13.5px;
+  font-size: 14px;
   z-index: 3;
   pointer-events: none;
+}
+.stage-frame:has(#facility3d.has-3d) .stage-foot {
+  display: none;
 }
 .stage-foot i {
   display: inline-block;
@@ -1279,6 +1282,7 @@ body[data-tone="breach"] .pill-mark {
   z-index: 1;
   pointer-events: none;
   background:
+    radial-gradient(70% 90% at 22% 100%, rgba(6, 9, 20, 0.5), transparent 70%),
     linear-gradient(90deg, rgba(6, 9, 20, 0.74) 0%, rgba(6, 9, 20, 0.52) 46%, rgba(6, 9, 20, 0.2) 66%, rgba(6, 9, 20, 0.5) 100%);
 }
 .hero-body {
@@ -2177,7 +2181,7 @@ body[data-tone="contained"] .step[data-s="done"] .s-mark {
   color: var(--ink);
   word-break: break-word;
 }
-.tool code span {
+.tool code .res {
   display: block;
   color: var(--ink-3);
   font-weight: 400;
@@ -2904,7 +2908,7 @@ html[data-demo="1"] .devdock {
 }
 .side-sec h3 span {
   font-weight: 400;
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--ink-3);
 }
 .chs {
@@ -2992,7 +2996,7 @@ html[data-demo="1"] .devdock {
   align-items: center;
   gap: 5px;
   color: var(--ink-3);
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -3126,7 +3130,7 @@ html[data-demo="1"] .devdock {
 }
 .m-tag {
   align-self: center;
-  font: 500 12px/1 var(--font);
+  font: 500 13px/1 var(--font);
   color: var(--ink-3);
   padding: 4px 8px;
   border-radius: 8px;
@@ -3135,7 +3139,7 @@ html[data-demo="1"] .devdock {
 }
 .m-head time {
   color: var(--ink-4);
-  font-size: 13px;
+  font-size: 13.5px;
   font-variant-numeric: tabular-nums;
 }
 .m-main p {
@@ -3275,7 +3279,7 @@ html[data-demo="1"] .devdock {
   font-variant-numeric: tabular-nums;
 }
 .ob-big span {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--ink-3);
 }
 .ob > div > b {
@@ -3294,6 +3298,12 @@ html[data-demo="1"] .devdock {
 }
 .wr-pad .tag {
   margin-top: 2px;
+  height: auto;
+  min-height: 26px;
+  padding: 6px 12px;
+  line-height: 1.3;
+  white-space: normal;
+  border-radius: 14px;
 }
 
 /* ------------------------------------------------------------ hooks: tooltips, mic, hosts, shells */

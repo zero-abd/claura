@@ -1,0 +1,13 @@
+{
+ "pid": 37119,
+ "port": 4327,
+ "dir": "/Users/abd/repos/bulkhead",
+ "cmd": [
+  "/Users/abd/repos/bulkhead/node_modules/.bin/vite",
+  "--port",
+  "4327",
+  "--strictPort"
+ ],
+ "logFile": "/Users/abd/repos/bulkhead-film/capture/.run/serve-4327.log",
+ "startedAt": "2026-11-08T08:22:08.283Z"
+}

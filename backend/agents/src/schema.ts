@@ -64,7 +64,7 @@ export function validateArgs(schema: ObjectSchema, raw: unknown): ValidationResu
           problems.push(`"${key}" must be one of ${ps.enum.join('|')}`);
           break;
         }
-        if (ps.minLength !== undefined && s.length < ps.minLength) { problems.push(`"${key}" must be at least ${ps.minLength} characters`); break; }
+        if (ps.minLength !== undefined && s.length < ps.minLength) { problems.push(`"${key}" is too short (${s.length} characters, minimum ${ps.minLength}); rewrite it longer, as complete sentences with concrete facts`); break; }
         if (ps.maxLength !== undefined && s.length > ps.maxLength) { out[key] = s.slice(0, ps.maxLength); break; }
         if (ps.pattern && !new RegExp(ps.pattern).test(s)) { problems.push(`"${key}" must match ${ps.pattern}`); break; }
         out[key] = s;
@@ -75,8 +75,8 @@ export function validateArgs(schema: ObjectSchema, raw: unknown): ValidationResu
         const n = typeof v === 'string' ? Number(v.trim()) : v;
         if (typeof n !== 'number' || !Number.isFinite(n)) { problems.push(`"${key}" must be a number`); break; }
         if (ps.type === 'integer' && !Number.isInteger(n)) { problems.push(`"${key}" must be an integer`); break; }
-        if (ps.minimum !== undefined && n < ps.minimum) { problems.push(`"${key}" must be >= ${ps.minimum}`); break; }
-        if (ps.maximum !== undefined && n > ps.maximum) { problems.push(`"${key}" must be <= ${ps.maximum}`); break; }
+        if (ps.minimum !== undefined && n < ps.minimum) { problems.push(`"${key}" is ${n}, which is below the minimum ${ps.minimum}`); break; }
+        if (ps.maximum !== undefined && n > ps.maximum) { problems.push(`"${key}" is ${n}, which is above the maximum ${ps.maximum}`); break; }
         out[key] = n;
         break;
       }

@@ -24,7 +24,7 @@ import {
 } from "./engine";
 import { $, $$, installSprings, setAttr, syncDisclosures } from "./dom";
 import { FacilityMap } from "./map";
-import { mountFacility3D, nudgeFacilityResize, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
+import { mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
 import { renderSheet, renderShell, shellHTML, sheetWanted } from "./shell";
 import { parseHost } from "./hosts";
 import { overview } from "./views/overview";
@@ -86,6 +86,7 @@ function setView(v: View, animate: boolean) {
   S.view = v;
   for (const el of $$(".view")) el.dataset.active = el.dataset.view === v ? "1" : "0";
   const slot = document.querySelector(`.stage-slot[data-slot="${v}"]`);
+  setFacilityVisible(!!slot);
   if (slot) {
     if (stageEl.parentElement !== slot) slot.appendChild(stageEl);
     map.mode = v === "incident" ? "ambient" : "stage";
@@ -114,6 +115,7 @@ function refreshTips() {
   if (play) setAttr(play, "data-tip", hasPlay ? "Play brief" : "Play brief · voice module not loaded");
 }
 
+let lastHost: string | null = null;
 function render() {
   const ph = phase();
   document.body.dataset.phase = ph;
@@ -124,6 +126,10 @@ function render() {
   renderSheet(ph);
   if (S.view === "overview" || S.view === "incident") map.draw({ amb: S.amb, started: S.started, r: S.started ? S.r : -1e9, u: U() });
   syncFacility3D(ph, S.r);
+  if (S.hostSheet !== lastHost) {
+    lastHost = S.hostSheet;
+    setFacilitySelection(lastHost); // outline the host in the 3D scene while its sheet is open
+  }
   if (ph !== lastPhase) {
     lastPhase = ph;
     window.dispatchEvent(new CustomEvent("bulkhead:phase", { detail: ph }));
@@ -172,6 +178,21 @@ function ownerView(key: string): View | null {
   const el = document.querySelector(`.disc[data-key="${key}"]`);
   const v = el?.closest(".view") as HTMLElement | null;
   return v ? (v.dataset.view as View) : null;
+}
+/** Scroll an expanded card into view if it is not fully visible. Smooth for API calls, instant for URL params. */
+function reveal(key: string, smooth: boolean) {
+  const el = document.querySelector(`.disc[data-key="${key}"]`) as HTMLElement | null;
+  if (!el) return;
+  const target = (el.closest(".agent-card, .rep") as HTMLElement | null) ?? el;
+  const sc = $("#scroll");
+  const run = () => {
+    const sr = sc.getBoundingClientRect();
+    const r = target.getBoundingClientRect();
+    if (r.top >= sr.top + 90 && r.bottom <= sr.bottom - 12) return;
+    sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - 100), behavior: smooth ? "smooth" : "auto" });
+  };
+  if (smooth) window.setTimeout(run, 280);
+  else run();
 }
 function knownKey(key: string) {
   return !!document.querySelector(`.disc[data-key="${key}"]`);
@@ -264,12 +285,13 @@ const api = {
   },
   /** Open a disclosure by key: 'signals' | 'evidence' | 'blast' | 'details' | 'map' | 'step:1'..'step:7' |
    *  'agent:sentry|triage|warden|scribe' | 'report:INC-0419' (+ older ids) | 'authorized' | 'files'. */
-  expand(key: string) {
+  expand(key: string, opts: { scroll?: boolean } = {}) {
     if (!knownKey(key)) return false;
     const owner = ownerView(key);
     if (owner && owner !== S.view && document.body.dataset.sheet !== "1") api.go(owner);
     setOpen(key, true);
     syncDisclosures();
+    if (opts.scroll) reveal(key, true); // optional: bring a tall card into view
     return true;
   },
   collapse(key: string) {
@@ -301,6 +323,8 @@ const api = {
     if (sheetWanted(phase())) return false;
     S.hostSheet = id;
     S.shellNote = false;
+    const p = parseHost(id)!;
+    map.sel = { hall: p.hall, rack: p.rack }; // the 2D map follows, so its elevation shows this host's rack
     render();
     return true;
   },
@@ -330,19 +354,19 @@ const api = {
       if (!el) return;
       const r = el.getBoundingClientRect();
       const inert = !!el.closest("[inert]");
-      out[name] = {
+      const entry = {
         x: Math.round(r.x + r.width / 2),
         y: Math.round(r.y + r.height / 2),
         w: Math.round(r.width),
         h: Math.round(r.height),
         visible: r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && !inert,
       };
+      const prev = out[name];
+      if (prev?.visible && !entry.visible) return; // a key can exist twice (sheet + page): keep the one you can click
+      out[name] = entry;
     };
     for (const el of $$("[data-target]")) add(el.dataset.target!, el);
-    for (const el of $$("[data-disc]")) {
-      const k = `disc:${el.dataset.disc}`;
-      if (!out[k] || el.getBoundingClientRect().width > 0) add(k, el);
-    }
+    for (const el of $$("[data-disc]")) add(`disc:${el.dataset.disc}`, el);
     for (const el of $$(".arow[data-agent]")) add(`agent-row:${el.dataset.agent}`, el);
     for (const el of $$("#wrInput")) add("composer", el);
     const seen = new Set<string>();
@@ -551,8 +575,15 @@ else api.reset();
 const expand = params.get("expand");
 if (expand)
   settle(() => {
-    for (const k of expand.split(",").filter(Boolean)) setOpen(k, true);
+    const keys = expand.split(",").filter(Boolean);
+    for (const k of keys) setOpen(k, true);
+    syncDisclosures();
+    if (keys[0]) reveal(keys[0], false);
   });
+const channelParam = params.get("channel"); // ?channel=exec (or %23exec)
+if (channelParam) selectChannel(channelParam);
+const hostParam = params.get("host"); // ?host=b14-gpu-07 opens its Host sheet
+if (hostParam) settle(() => void api.openHost(hostParam));
 if (params.get("play") === "1") api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });
 
 document.fonts.ready.then(() => {

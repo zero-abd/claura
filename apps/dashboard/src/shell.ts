@@ -64,7 +64,7 @@ export function shellHTML(views: string): string {
   </div>
 
   <div class="scrim" id="scrim" data-open="0"></div>
-  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" data-open="0" data-s="request">
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" data-open="0" data-s="request" inert>
     <div class="sheet-pane sheet-req">
       <span class="sheet-ico">${icon("shieldLock")}</span>
       <h2 id="sheetTitle">Quarantine ${INCIDENT.host}?</h2>

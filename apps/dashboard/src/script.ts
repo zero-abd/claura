@@ -1,4 +1,4 @@
-// Scripted, fictional demo data for the Bulkhead prototype.
+// Scripted, fictional demo data for the Claura prototype.
 // Times are seconds of script time since play().
 //  - `t`  : absolute time, before the approval gate.
 //  - `u`  : seconds after the human approval (approve()).

@@ -1,0 +1,26 @@
+{
+  "name": "claura-voice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Claura Voice: ElevenLabs speech (text to speech, speech to text, sound effects) plus local NVIDIA Nemotron answers for the incident console.",
+  "main": "server.mjs",
+  "exports": {
+    ".": "./server.mjs",
+    "./server": "./server.mjs",
+    "./ui": "./ui.js"
+  },
+  "scripts": {
+    "dev": "node dev.mjs",
+    "start": "node dev.mjs",
+    "smoke": "node smoke.mjs",
+    "warm": "node scripts/warm.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}

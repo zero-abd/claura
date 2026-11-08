@@ -34,29 +34,29 @@ import {
 } from "spacetimedb";
 
 // Import all reducer arg schemas
-import ApproveReducer from "./approve_reducer";
-import FileReportReducer from "./file_report_reducer";
-import IngestSignalReducer from "./ingest_signal_reducer";
-import OpenIncidentReducer from "./open_incident_reducer";
-import ProposeActionReducer from "./propose_action_reducer";
-import RecordFindingReducer from "./record_finding_reducer";
-import ResetDemoReducer from "./reset_demo_reducer";
-import SetAgentStateReducer from "./set_agent_state_reducer";
-import SetPolicyReducer from "./set_policy_reducer";
+import ApproveReducer from "./approve_reducer.ts";
+import FileReportReducer from "./file_report_reducer.ts";
+import IngestSignalReducer from "./ingest_signal_reducer.ts";
+import OpenIncidentReducer from "./open_incident_reducer.ts";
+import ProposeActionReducer from "./propose_action_reducer.ts";
+import RecordFindingReducer from "./record_finding_reducer.ts";
+import ResetDemoReducer from "./reset_demo_reducer.ts";
+import SetAgentStateReducer from "./set_agent_state_reducer.ts";
+import SetPolicyReducer from "./set_policy_reducer.ts";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
-import AgentStateRow from "./agent_state_table";
-import FindingRow from "./finding_table";
-import GuestVmRow from "./guest_vm_table";
-import HostRow from "./host_table";
-import IncidentRow from "./incident_table";
-import IncidentEventRow from "./incident_event_table";
-import PolicyRow from "./policy_table";
-import ProposalRow from "./proposal_table";
-import ReportRow from "./report_table";
-import SignalRow from "./signal_table";
+import AgentStateRow from "./agent_state_table.ts";
+import FindingRow from "./finding_table.ts";
+import GuestVmRow from "./guest_vm_table.ts";
+import HostRow from "./host_table.ts";
+import IncidentRow from "./incident_table.ts";
+import IncidentEventRow from "./incident_event_table.ts";
+import PolicyRow from "./policy_table.ts";
+import ProposalRow from "./proposal_table.ts";
+import ReportRow from "./report_table.ts";
+import SignalRow from "./signal_table.ts";
 
 /** Type-only namespace exports for generated type groups. */
 
