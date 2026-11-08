@@ -2,7 +2,7 @@ import type { Logger } from './log.ts';
 
 export type MarkName =
   | 'first_signal' | 'incident_open' | 'triage_done' | 'pending_approval'
-  | 'approved' | 'contained' | 'report_filed';
+  | 'approved' | 'contained' | 'report_filed' | 'brief_filed' | 'handoff_posted';
 
 /** Wall-clock marks on the run's monotonic clock (ms since runner start). */
 export class Marks {

@@ -148,7 +148,9 @@ export async function issueUserCert(ca, opts) {
   const key = path.join(sessDir, 'id_ed25519');
   await keygen(['-q', '-t', 'ed25519', '-N', '', '-C', `claura-ephemeral ${requestId}`, '-f', key]);
 
-  const validity = ttlSeconds % 60 === 0 ? `+${ttlSeconds / 60}m` : `+${ttlSeconds}s`;
+  // Explicit window. A bare "+10m" lets ssh-keygen round the start down by up to two minutes; we want
+  // "5 seconds ago" (clock-skew allowance) to "now + ttl" so the lifetime on the certificate is the lifetime granted.
+  const validity = `-5s:+${ttlSeconds}s`;
   const args = [
     '-q', '-s', ca.user.priv,
     '-I', `${operator}|${requestId}`,

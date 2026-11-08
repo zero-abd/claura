@@ -13,8 +13,10 @@ import {
 import { hash } from "./util";
 
 export type Phase = "nominal" | "breach" | "approval" | "isolating" | "contained" | "report";
-export type View = "overview" | "incident" | "warroom" | "shells" | "agents" | "policy" | "reports";
-export const VIEWS: View[] = ["overview", "incident", "warroom", "shells", "agents", "policy", "reports"];
+export type View = "overview" | "incident" | "warroom" | "scope" | "shells" | "agents" | "policy" | "reports" | "access";
+export const VIEWS: View[] = ["overview", "incident", "warroom", "scope", "shells", "agents", "policy", "reports", "access"];
+/** Floating panels that are not sheets: the "Isolated · out-of-band" popover. */
+export type Popover = "isolation";
 
 export const S = {
   started: false,
@@ -35,6 +37,7 @@ export const S = {
   shellNote: false, // "Secure shell module not loaded" note is showing
   micOn: false,
   demo: false,
+  popover: null as Popover | null,
 };
 
 export const CPS = 66; // typewriter characters per second

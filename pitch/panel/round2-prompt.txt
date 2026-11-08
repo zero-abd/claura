@@ -1,0 +1,35 @@
+You are the same panel of 8 hackathon judges at HackUTD 2026 who reviewed four pitch drafts for "Claura" (claura.tech) in round 1. The team merged them into one final package. Review these three files fully (read-only; do not modify any file):
+
+/Users/abd/repos/claura/pitch/FINAL-PITCH.md
+/Users/abd/repos/claura/pitch/VIDEO-SCRIPT.md
+/Users/abd/repos/claura/pitch/DEVPOST.md
+
+For reference only, your round-1 review is at /Users/abd/repos/claura/pitch/panel/round1-final.md. Round 1 recommended: open with the Crime Scene hook ("The attacker is reading your email"), use the Immune System as the category and closing metaphor, use Agents-vs-Agents to prove Nemotron's necessity, borrow only "seal the compartment" from Bulkheads, and above all keep claims matched to what is live.
+
+WHAT THE TEAM SAYS WILL BE LIVE AT DEMO TIME (treat as true; flag any line in the files that claims MORE than this): Liquid Glass operator console (Overview with a real-time clickable 3D data center; Incident with attack path, agents, containment; one-card human approval with Cmd+Enter; War Room with channels, plain-language brief "what we know / what we don't know yet", tasks, decision log; People & Access where the admin adds people via single-use break-glass enrollment codes, no email/phones/SSO; Data Scope with every data asset's status: intact / accessed / exfil suspected / exfil confirmed / locked by ransomware / restored / evidence preserved; incident documentation structured to NIST SP 800-61 with live phase status, chain of custody with SHA-256, PDF export; Secure Shell: click a host -> just-in-time short-lived OpenSSH user certificate + CA-signed host certificate (no trust-on-first-use), passkey/Touch ID step-up, two-person approval for a suspect host, read-only forensic mode, every session recorded and hash-chained; the target hosts are simulated sshd sandboxes). Backend: SpacetimeDB on Maincloud holds all incident state, access control (operator identities, admin-only reducers), the policy gate in reducers (auto / needs approval / denied), War Room messages, data scope; every console subscribes live. Agents: NVIDIA Nemotron (nemotron-3-nano:4b) runs on-prem (local) and drives multi-step tool-calling agents (Sentry correlates signals and opens the incident; Triage queries inventory and reachability and records the blast radius; Warden proposes containment through the policy gate, and a labelled red-team "reimage host" proposal gets blocked; Scribe writes the brief and the shift handoff). Logged live runs: 15 model turns, 14 tool calls, 0 malformed, about a minute of machine time on a laptop. Telemetry is a replayed fixture; containment effects are simulated in the database; demo numbers (9.4 s, 61,207 agents, 2,048 hosts) are illustrative. Voice ("Ask Claura", ElevenLabs) may not ship: it must stay out of the video and appear only as bonus/roadmap.
+
+Tracks: Winstead PC "Cyber Incident Response Dashboard" (required: (1) highly secure, isolated system inside potentially compromised networks; (2) access control with admin ability to add individuals; (3) documentation to cyber-incident standards with real-time updating and status; (4) scope of compromised data and its status (locked for ransomware, exfiltrated...); (5) real-time comms inside the system; judged on security assuming the attacker has all internal systems, ease of use under stress, creativity), NMC2 "Keep the World Running" (missed warnings, unclear handoffs, wrong information at the wrong time), NVIDIA "Use Nemotron Beyond a Chatbot" (multi-step, tool integration, real-world), Spacetime "Build on Spacetime" (majority of backend on SpacetimeDB, public repo). Science-fair judging, about 3-4 minutes per table; the video must be under 2 minutes, and its narration must stay 240-265 words (100-115 s spoken), one idea per line, hook in under 3 s. The owner wants a bold pitch that sells the vision (clearly labelled as roadmap) while showing what is live as live.
+
+Judge personas (same as round 1):
+1. CISO / veteran security engineer (skeptical of AI hype; false positives, blast radius, auditability, chain of custody, isolation boundary)
+2. Seed-stage VC partner (market, why now, wedge, moat, venture scale)
+3. Winstead PC attorney (cyber incident response and privacy; the 5 required components; comms when email/phones are down; privilege; notification obligations)
+4. NMC2 data-center operations lead (uptime, NOC workflow, handoffs, would my team use it)
+5. NVIDIA developer-relations engineer (genuine Nemotron multi-step tool use, on-prem/sovereign AI, depth)
+6. Clockwork Labs SpacetimeDB engineer (is Spacetime essential: state, reducers, subscriptions, real-time multi-user)
+7. MLH generalist judge (clear in 15 s, wow demo, polish, memorable)
+8. Non-technical first-year student judge (do I understand and remember it)
+
+OUTPUT (markdown, brutally honest and specific):
+For EACH persona:
+- Score 1-10 for the package as a whole, plus sub-scores for FINAL-PITCH.md, VIDEO-SCRIPT.md and DEVPOST.md.
+- A one-sentence verdict.
+- The top 3 fixes, each with exact example wording (a drop-in replacement line, and which file and section it replaces).
+- The single weakest line in the package for that judge: quote it verbatim, say why, and give the replacement.
+
+Then a final section "SYNTHESIS" with:
+- A table of all 8 scores, the average, and the lowest-scoring persona.
+- Any claim in the three files that outruns the live list above, or any number that looks invented or unsourced (quote it).
+- The 10 highest-value edits ranked, preferring edits that lift the lowest-scoring judges without hurting the others; give drop-in wording for each. If an edit touches the video narration, keep the total within 240-265 words and say the new word count.
+- Conflicts between judges (where one judge's fix would hurt another) and how to resolve them.
+Do not modify any files.

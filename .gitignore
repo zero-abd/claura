@@ -21,3 +21,5 @@ ssh-ca/
 **/shots-raw/
 **/.cache/
 recordings/
+*.wav
+experiments/**/frames/

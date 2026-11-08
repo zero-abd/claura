@@ -55,6 +55,8 @@ export function validateArgs(schema: ObjectSchema, raw: unknown): ValidationResu
     }
     switch (ps.type) {
       case 'string': {
+        // Small models sometimes send a list where a multi-line string is wanted: one item per line.
+        if (Array.isArray(v) && v.every(x => typeof x === 'string' || typeof x === 'number')) v = v.map(String).join('\n');
         if (typeof v === 'number' || typeof v === 'boolean') v = String(v);
         if (typeof v !== 'string') { problems.push(`"${key}" must be a string`); break; }
         const s = v.trim();

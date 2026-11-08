@@ -7,6 +7,7 @@ import { runDemo } from '../src/demo.ts';
 import { Logger } from '../src/log.ts';
 import { MemClauraDb } from '../src/memdb.ts';
 import { PLAYBOOK } from '../src/agents/warden.ts';
+import { claimProblems, plainify } from '../src/room.ts';
 import { AgentFakeLlm, call, toolMsgs, type FakeTurn } from './helpers.ts';
 
 const opts = (o: Partial<RunOptions> = {}): RunOptions => ({
@@ -29,7 +30,18 @@ test('--scripted: full reducer sequence with no model, ends contained with a rep
   assert.equal(s.redTeam, 'scripted-probe');
   assert.ok(db.proposals(id).find(p => p.action === 'reimage_host')!.reason.includes('RED-TEAM'));
   assert.equal(db.incidents()[0]!.blastScore, 0.87);
+  assert.equal(db.incidents()[0]!.nistPhase, 'post_incident');
+  assert.ok(db.assets(id).filter(a => a.updatedBy !== 'seed').length >= 3, 'triage scoped the assets');
+  assert.ok(db.briefs().some(b => b.incidentId === id && b.author === 'scribe'));
+  {
+    const b = db.briefs().find(x => x.incidentId === id)!;
+    const all = `${b.text}\n${b.known}\n${b.unknown}`;
+    assert.equal(claimProblems(all, db.assets(id)), null, 'the deterministic brief makes no false reassurance');
+    assert.equal(plainify(all), all, 'and uses no jargon (plainify has nothing to change)');
+    assert.equal(claimProblems(db.messages(id).find(m => m.text.startsWith('SHIFT HANDOFF'))!.text, db.assets(id)), null);
+  }
   // dashboard-facing state: every agent row carries the honest "no model" label
+  // (Scribe briefly says "template text" while an interim brief is written, but ends on the scripted label)
   assert.ok(db.agentStates().every(a => a.model.startsWith('scripted')));
   for (const m of ['first_signal', 'incident_open', 'pending_approval', 'contained', 'report_filed'] as const) {
     assert.ok(s.marks.get(m) !== undefined, `mark ${m}`);
@@ -61,6 +73,8 @@ function goodModel(extra: { wardenExtra?: FakeTurn } = {}) {
     { calls: [call('get_host_inventory', { host: 'b14-gpu-07' })] },
     { calls: [call('check_reachability', { host: 'b14-gpu-07' })] },
     { calls: [call('record_finding', { kind: 'attack_graph', text: 'vm-7f3a -> hypervisor -> b14-gpu-07 -> BMC 10.0.0.1:623, 11 co-resident guests', blast_score: '0.9' })] },
+    { calls: [call('record_scope', { asset: 'Workload tokens', status: 'exfil_suspected', note: 'IAM shows a token of agent-7f3 used outside its scope.' })] },
+    { calls: [call('record_scope', { asset: 'Tenant model weights', status: 'accessed', note: 'The guest is the suspected pivot for the weights it holds.' })] },
   ];
   const wardenTurns: FakeTurn[] = [
     ...PLAYBOOK.map(s => ({
@@ -74,7 +88,13 @@ function goodModel(extra: { wardenExtra?: FakeTurn } = {}) {
   ];
   const scribeTurns: FakeTurn[] = [
     { calls: [call('list_events', {})] },
+    { calls: [call('set_brief', {
+      text: 'A suspected escape from an AI workload was stopped at the edge of its virtual machine. The server is out of service.',
+      known: ['It started on one server', 'Evidence is captured'],
+      unknown: 'Whether any data was read before containment',
+    })] },
     { calls: [call('file_report', { summary: 'The incident was detected from six signals. '.repeat(4) })] },
+    { calls: [call('post_handoff', { text: 'Status: contained, phase containment. Done: reversible steps ran, tenants moved. Open: legal and comms tasks. Scope: billing DB accessed, FIN-02 locked. Next: confirm data exposure and keep the host out of service. '.repeat(1) })] },
   ];
   const idx = { sentry: 0, triage: 0, warden: 0, scribe: 0 };
   const next = (k: keyof typeof idx, turns: FakeTurn[]): FakeTurn => turns[idx[k]++] ?? { content: 'Done.' };
@@ -95,6 +115,48 @@ test('model mode with a well-behaved model: every agent completes by itself', as
   assert.equal((s.outcomes[2] as { orderOk: boolean }).orderOk, true);
   assert.equal(db.incidents()[0]!.blastScore, 0.9); // "0.9" string was coerced
   assert.ok(db.agentStates().every(a => a.model === MODEL_LABEL), 'dashboard shows the on-prem model label for every agent');
+  // the war room: scope, phase, brief, handoff, agents speaking in #command
+  const id = s.incidentId!;
+  const asset = (n: string) => db.assets(id).find(a => a.name === n)!;
+  assert.equal(asset('Workload tokens').status, 'exfil_suspected');
+  assert.equal(asset('Tenant model weights').status, 'evidence_preserved'); // accessed by Triage, then frozen by pause_guest
+  assert.equal(asset('Guest memory image').status, 'evidence_preserved');
+  assert.equal(asset('Corporate file share FIN-02').status, 'locked_ransomware', 'the parallel ransomware asset is left alone');
+  assert.equal(db.incidents()[0]!.nistPhase, 'post_incident');
+  assert.ok(db.briefs().find(b => b.incidentId === id)!.text.includes('stopped at the edge'), 'the model-written brief replaced the interim template');
+  const speakers = new Set(db.messages(id).filter(m => m.channel === '#command' && m.kind === 'agent').map(m => m.authorName));
+  assert.deepEqual([...speakers].sort(), ['scribe', 'sentry', 'triage', 'warden']);
+  assert.ok(db.messages(id).some(m => m.authorName === 'scribe' && m.text.startsWith('SHIFT HANDOFF')));
+  assert.ok(db.messages(id).some(m => m.channel === '#exec'), 'the brief reaches the executive channel');
+  assert.match(db.incidents()[0]!.functionalImpact, /^Medium: .*FIN-02/, 'NIST functional impact reflects the ransomware lock');
+});
+
+test('Triage: a model that scopes the wrong assets or statuses is corrected by the fallback, and says so', async () => {
+  const db = new MemClauraDb();
+  const good = goodModel();
+  let t = 0;
+  const llm = new AgentFakeLlm({
+    sentry: r => (good as any).handlers.sentry(r),
+    triage: r => {
+      t++;
+      if (t === 1) return { calls: [call('get_host_inventory', { host: 'b14-gpu-07' })] };
+      if (t === 2) return { calls: [call('check_reachability', { host: 'b14-gpu-07' })] };
+      if (t === 3) return { calls: [call('record_finding', { kind: 'attack_graph', text: 'vm-7f3a -> hypervisor -> b14-gpu-07 -> BMC 10.0.0.1:623, 11 co-resident guests', blast_score: 0.9 })] };
+      // wrong: marks the weights intact and the management plane accessed, never touches the tokens
+      if (t === 4) return { calls: [call('record_scope', { asset: 'Tenant model weights', status: 'intact', note: 'Looks fine to me, nothing seen here.' })] };
+      if (t === 5) return { calls: [call('record_scope', { asset: 'Management plane credentials', status: 'accessed', note: 'Nothing wrong with the management plane yet.' })] };
+      return { content: 'Done.' };
+    },
+    warden: r => (good as any).handlers.warden(r),
+    scribe: r => (good as any).handlers.scribe(r),
+  });
+  const s = await runDemo(opts(), { db, llm, log: quiet() });
+  const triage = s.outcomes.find(o => o.agent === 'triage')!;
+  assert.equal(triage.mode, 'model+fallback');
+  const id = s.incidentId!;
+  assert.equal(db.assets(id).find(a => a.name === 'Workload tokens')!.status, 'exfil_suspected');
+  assert.notEqual(db.assets(id).find(a => a.name === 'Tenant model weights')!.status, 'intact'); // accessed, then frozen as evidence by pause_guest
+  assert.ok(s.contained);
 });
 
 test('a denied action chosen by the MODEL is blocked by the gate and no red-team probe runs', async () => {

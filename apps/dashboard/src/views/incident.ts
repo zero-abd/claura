@@ -2,7 +2,6 @@ import {
   AGENTS,
   APPROVER,
   CANON_APPROVE,
-  EVIDENCE,
   FINAL_STEP,
   FLEET,
   INCIDENT,
@@ -37,6 +36,9 @@ import {
 import { pathHTML, updatePath } from "../path";
 import { fmtT } from "../util";
 import { onlineCount } from "./warroom";
+import { scopeCard } from "./scope";
+import { phaseRailHTML, phaseSteps } from "./phases";
+import { data, roster } from "../data";
 
 const rowHead = (ico: string, title: string, valId: string, val = "") =>
   `<span class="r-ico">${icon(ico)}</span><span class="r-title">${title}</span><span class="r-val" id="${valId}">${val}</span>`;
@@ -108,12 +110,15 @@ export const incident = {
             <div class="ttc-cap"><b id="ttcLabel">Mean time to contain</b><span id="ttcSub">last 30 days</span></div>
           </div>
         </div>
+        <div class="hero-phases" id="heroPhases"></div>
       </div>
 
       <div class="glass card path-card">
         <div class="card-head"><h2 id="pathHead">All boundaries intact</h2></div>
         ${pathHTML()}
       </div>
+
+      ${scopeCard.html()}
 
       <div class="two">
         <div class="glass card">
@@ -154,6 +159,8 @@ export const incident = {
             <div><dt>Location</dt><dd>${INCIDENT.where}</dd></div>
             <div><dt>Opened</dt><dd>02:14:07 ${TIMEZONE}</dd></div>
             <div><dt>Playbook</dt><dd>guest-escape v3</dd></div>
+            <div><dt>Category</dt><dd id="dtCat">–</dd></div>
+            <div><dt>Commander</dt><dd id="dtCmd">–</dd></div>
             <div><dt>Fleet mean to contain</dt><dd>${FLEET.meanTtc} s · ${FLEET.incidents30d} incidents</dd></div>
             <div><dt>Fleet</dt><dd>${FLEET.hosts} hosts · ${FLEET.vms} VMs</dd></div>
           </dl></div>`,
@@ -198,6 +205,15 @@ export const incident = {
       );
       setText($("#ttcNum"), t.toFixed(1));
     }
+
+    // ---- NIST phase rail along the bottom of the hero, and the data scope card
+    const dd = data();
+    setHTML($("#heroPhases"), `p${dd.version()}:${S.started}`, () => phaseRailHTML(phaseSteps(), S.started));
+    scopeCard.render();
+    const incRow = dd.incident();
+    const cmd = roster(dd).find((p) => p.role === "admin" && p.kind === "operator");
+    setText($("#dtCat"), incRow?.category ?? "–");
+    setText($("#dtCmd"), cmd ? `${cmd.name} · ${cmd.title}` : "–");
 
     // ---- attack path
     setText($("#pathHead"), updatePath($("#path"), { started: S.started, r: S.r, u: U() }, S.amb));
@@ -279,13 +295,14 @@ export const incident = {
     setText($("#sigVal"), !S.started ? "all quiet" : correlated >= 6 ? "6 correlated" : `${correlated} so far`);
 
     // ---- evidence: files land as Scribe hashes them
-    const landed = !S.started ? 0 : S.r >= 5.3 ? 3 : S.r >= 5.0 ? 2 : S.r >= 4.6 ? 1 : 0;
-    setText($("#evVal"), landed === 0 ? "none yet" : `${landed} file${landed > 1 ? "s" : ""}`);
-    setHTML($("#evFiles"), "f" + landed, () =>
+    const ev = data().evidence();
+    const landed = ev.length;
+    setText($("#evVal"), landed === 0 ? "none yet" : `${landed} file${landed > 1 ? "s" : ""} · hashed`);
+    setHTML($("#evFiles"), "f" + landed + ":" + ev.reduce((n2, e) => n2 + e.custody.length, 0), () =>
       landed === 0
         ? `<p class="row-note" style="margin:0">Scribe has not captured anything yet.</p>`
-        : EVIDENCE.slice(0, landed)
-            .map((e) => `<div class="file">${icon("file")}<b>${e.name}</b><em>${e.meta}</em></div>`)
+        : ev
+            .map((e) => `<div class="file">${icon("file")}<b>${e.name}</b><em>${e.size} · sha256 ${e.sha256.slice(0, 4)}…${e.sha256.slice(-4)} · ${e.custody.length} custody steps</em></div>`)
             .join(""),
     );
 

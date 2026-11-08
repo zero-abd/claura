@@ -4,6 +4,7 @@
 
 import type { Env } from './agents/common.ts';
 import { reachabilityFixture } from './fixtures.ts';
+import { claimProblems, plainify } from './room.ts';
 import { validateArgs } from './schema.ts';
 import type { Tool } from './toolLoop.ts';
 import { clip, waitFor } from './util.ts';
@@ -13,6 +14,16 @@ export const KNOWN_ACTIONS = [
   'isolate_network', 'revoke_credentials', 'cordon_host', 'pause_guest', 'capture_memory',
   'failover_guests', 'quarantine_host', 'reimage_host', 'power_off_hall', 'delete_vm',
 ] as const;
+
+/** First line of the shift-handoff message Scribe posts in #command (also how we recognise it). */
+export const HANDOFF_PREFIX = 'SHIFT HANDOFF';
+
+/** The assets Triage scopes. The corporate assets (FIN-02, billing DB) belong to another team; the memory image is Warden's evidence. */
+export const TRIAGE_ASSETS = ['Workload tokens', 'Tenant model weights', 'Management plane credentials'];
+
+/** Statuses an agent may set on a data asset, and the ones it must never overwrite (a human set them). */
+export const AGENT_SCOPE_STATUSES = ['intact', 'accessed', 'exfil_suspected'] as const;
+const HUMAN_SET = ['exfil_confirmed', 'restored', 'locked_ransomware'];
 
 /** Run a tool the way the loop does (validate, then run). Used by deterministic routines. */
 export async function callTool(tools: Tool[], name: string, args: Record<string, unknown>): Promise<unknown> {
@@ -148,9 +159,40 @@ export function triageTools(env: Env, incidentId: bigint): Tool[] {
       thought: a => `Recording ${a.kind} finding, blast score ${a.blast_score}.`,
       async run(args) {
         const score = Number(args.blast_score);
+        if (String(args.kind) === 'attack_graph' && env.db.findings(incidentId).some(f => f.agent === 'triage' && f.kind === 'attack_graph')) {
+          return { recorded: false, note: 'The attack graph is already recorded. Continue with record_scope for the data assets.' };
+        }
         await env.db.recordFinding(incidentId, 'triage', String(args.kind), String(args.text), score);
         env.marks.markOnce('triage_done');
         return { recorded: true, kind: args.kind, blast_score: score };
+      },
+    },
+    {
+      name: 'record_scope',
+      description:
+        'Record how far the attacker got into ONE data asset of this incident (its scope). status: accessed = the attacker could reach or touch it; exfil_suspected = data may have left; intact = checked, no sign of access. Use the exact asset name from the scope list. You can suspect exfiltration but cannot confirm it: a human does that.',
+      parameters: {
+        type: 'object',
+        properties: {
+          asset: str('the asset to scope', { enum: TRIAGE_ASSETS }),
+          status: str('scope status', { enum: [...AGENT_SCOPE_STATUSES] }),
+          note: str('one or two sentences of evidence for this status', { minLength: 20, maxLength: 300 }),
+        },
+        required: ['asset', 'status', 'note'],
+      },
+      thought: a => `Scoping "${a.asset}": ${a.status}.`,
+      async run(args) {
+        const want = String(args.asset).trim().toLowerCase();
+        const list = env.db.assets(incidentId);
+        const a =
+          list.find(x => x.name.toLowerCase() === want) ??
+          list.find(x => x.name.toLowerCase().includes(want) || want.includes(x.name.toLowerCase()));
+        if (!a) throw new Error(`unknown asset "${args.asset}". Assets in scope: ${list.map(x => x.name).join('; ')}`);
+        if (HUMAN_SET.includes(a.status)) {
+          return { recorded: false, asset: a.name, status: a.status, note: 'A human already ruled on this asset; it was left as is.' };
+        }
+        await env.db.setAssetStatus(a.id, String(args.status), `Triage: ${String(args.note)}`);
+        return { recorded: true, asset: a.name, status: args.status };
       },
     },
   ];
@@ -271,9 +313,55 @@ export function scribeTools(env: Env, incidentId: bigint): Tool[] {
       },
       thought: () => 'Writing the incident report.',
       async run(args) {
+        const bad = claimProblems(String(args.summary), env.db.assets(incidentId));
+        if (bad) throw new Error(bad);
         await env.db.fileReport(incidentId, String(args.summary));
         env.marks.markOnce('report_filed');
         return { filed: true, length: String(args.summary).length };
+      },
+    },
+    {
+      name: 'set_brief',
+      description:
+        'Publish the plain-language brief for stakeholders who are not engineers (executives, lawyers, PR). text: 2 to 4 short sentences, no jargon. known: 3 to 5 facts we know, one per line. unknown: 2 to 4 open questions we cannot answer yet, one per line.',
+      parameters: {
+        type: 'object',
+        properties: {
+          text: str('2 to 4 short plain sentences: what happened, what is contained, what it means for customers', { minLength: 80, maxLength: 900 }),
+          known: str('what we know, 3 to 5 facts, one per line', { minLength: 20, maxLength: 900 }),
+          unknown: str('what we do not know yet, 2 to 4 questions, one per line', { minLength: 10, maxLength: 700 }),
+        },
+        required: ['text', 'known', 'unknown'],
+      },
+      thought: () => 'Writing the plain-language brief for stakeholders.',
+      async run(args) {
+        const text = plainify(String(args.text));
+        const known = plainify(String(args.known));
+        const unknown = plainify(String(args.unknown));
+        const bad = claimProblems(`${text}\n${known}\n${unknown}`, env.db.assets(incidentId));
+        if (bad) throw new Error(bad);
+        await env.db.setBrief(incidentId, text, known, unknown);
+        env.final.brief = true;
+        env.marks.markOnce('brief_filed');
+        return { published: true };
+      },
+    },
+    {
+      name: 'post_handoff',
+      description:
+        'Post the shift-handoff summary to #command for the next incident commander: 5 to 8 short lines covering status and NIST phase, what is done, what is still open (tasks, pending decisions), scope that needs a human, and the first thing the next shift should do.',
+      parameters: {
+        type: 'object',
+        properties: { text: str('the handoff, 5 to 8 short lines', { minLength: 150, maxLength: 1500 }) },
+        required: ['text'],
+      },
+      thought: () => 'Writing the shift handoff.',
+      async run(args) {
+        const bad = claimProblems(String(args.text), env.db.assets(incidentId));
+        if (bad) throw new Error(bad);
+        await env.db.postAgentMessage(incidentId, '#command', 'scribe', `${HANDOFF_PREFIX}\n${String(args.text)}`);
+        env.marks.markOnce('handoff_posted');
+        return { posted: true };
       },
     },
   ];

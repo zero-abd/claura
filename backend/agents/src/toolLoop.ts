@@ -47,8 +47,8 @@ export interface LoopConfig {
   maxToolCalls: number;
   /** Objective completion check against backend state. */
   isDone: () => boolean;
-  /** Sent as a user message when the model stops talking without being done. */
-  nudge: string;
+  /** Sent as a user message when the model stops talking without being done. A function is evaluated at that moment (so it can name what is still missing). */
+  nudge: string | (() => string);
   /**
    * When isDone() becomes true after a tool batch, give the model ONE more
    * neutral turn (no nudge) instead of stopping at once. Lets the model say it
@@ -182,7 +182,7 @@ export async function runToolLoop(cfg: LoopConfig): Promise<LoopResult> {
       }
       if (nudges < 2) {
         nudges++;
-        messages.push({ role: 'user', content: cfg.nudge });
+        messages.push({ role: 'user', content: typeof cfg.nudge === 'function' ? cfg.nudge() : cfg.nudge });
         continue;
       }
       return finish('no_tool_calls', 'model stopped calling tools before the task was complete');

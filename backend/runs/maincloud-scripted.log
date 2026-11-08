@@ -1,0 +1,24 @@
+resetting claura on maincloud (as the database owner) ...
+
++  0.00s RUNNER    SCRIPTED mode (no model); backend: SpacetimeDB wss://maincloud.spacetimedb.com db "claura"
++  0.37s RUNNER    signed in as "Claura agent runner" (role agent, identity c2008631f02c…)
++  0.48s SENTRY    [Watching] Watching the fleet. Syscall baselines steady.
++  0.52s TRIAGE    [Standing by] No open incidents. Blast-radius model warm.
++  0.56s WARDEN    [Standing by] Holding. Containment playbook loaded; policy gate enforces what I may do.
++  0.60s SCRIBE    [Idle] No open incidents.
++  0.60s RUNNER    replaying 6 telemetry signals
++  0.64s TELEMETRY vmm    VMM audit: unexpected ioctl 0xC0186441
++  0.79s TELEMETRY vgpu   vGPU mdev driver fault (vm-7f3a)
++  1.00s TELEMETRY iommu  IOMMU fault: DMA write outside guest range
++  1.15s TELEMETRY edr    host EDR: qemu spawned /bin/sh
++  1.35s TELEMETRY flow   east-west flow -> 10.0.0.1:623 (IPMI)
++  1.53s TELEMETRY iam    workload identity agent-7f3 used token outside scope
++  1.57s SENTRY    [Correlating] Telemetry burst received. Correlating signals across sources.
++  2.08s SENTRY    [Correlating] 6 signals from 6 independent sources point at b14-gpu-07 / vm-7f3a: VMM ioctl, device fault, DMA fault, qemu spawned a shell. Pattern matches a guest-to-host escape.
++  2.63s SENTRY    [Escalated] Incident #2 opened (critical): Suspected guest-to-host escape via the vGPU path
++  2.63s SENTRY    incident #2 open (1.95s after first signal)
++  2.71s SCRIBE    [Recording] Logging each step as it lands.
++  2.75s SCRIBE    [Recording] Updating the stakeholder brief from the current facts.
++  2.84s TRIAGE    [Scoring] Mapping blast radius for b14-gpu-07: co-resident guests, exposed credentials, management-plane reachability.
++  3.33s TRIAGE    [Scoring] b14-gpu-07 (hall B, rack 14) runs 12 guests; 11 are co-resident with vm-7f3a.
++  3.83s TRIAGE    [Scoring] Management plane is reachable from b14-gpu-07; no sign it is compromised.

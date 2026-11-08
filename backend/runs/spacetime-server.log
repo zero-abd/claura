@@ -517,3 +517,748 @@ database running in data directory /Users/abd/.local/share/spacetime/data
 2026-11-08T10:07:41.449641Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
 2026-11-08T10:12:41.450599Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
 2026-11-08T10:16:00.089286Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:17:41.452703Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:30.815993Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:30.816159Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:30.816176Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:30.817838Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:30.817858Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:30.817866Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:30.834440Z  INFO crates/engine/src/relational_db.rs:303: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: durable_tx_offset is None
+2026-11-08T10:20:30.834521Z  INFO crates/engine/src/relational_db.rs:727: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:20:30.835811Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: applying transaction history...
+2026-11-08T10:20:30.835840Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: applied transaction history
+2026-11-08T10:20:30.836022Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: rebuilt state after replay
+2026-11-08T10:20:30.836206Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 replica=0 program=1f2d5c92186ee2712078852a5782231fd2997e1f1ea34256843ca19bbce6b25b host_type=Js
+2026-11-08T10:20:30.860633Z DEBUG crates/core/src/host/module_host.rs:671: init database
+2026-11-08T10:20:30.878904Z  INFO crates/durability/src/imp/local.rs:135: open local durability
+2026-11-08T10:20:30.879119Z DEBUG crates/fs-utils/src/lockfile.rs:216: Acquired lock on /Users/abd/.local/share/spacetime/data/replicas/2000003/db.lock
+2026-11-08T10:20:30.882929Z  INFO crates/commitlog/src/commitlog.rs:80: repo /Users/abd/.local/share/spacetime/data/replicas/2000003/clog: starting fresh log
+2026-11-08T10:20:30.883033Z DEBUG crates/fs-utils/src/lockfile.rs:216: Acquired lock on /Users/abd/.local/share/spacetime/data/replicas/2000003/clog/00000000000000000000.stdb.lock
+2026-11-08T10:20:30.894823Z DEBUG crates/fs-utils/src/lockfile.rs:274: Released lock on /Users/abd/.local/share/spacetime/data/replicas/2000003/clog/00000000000000000000.stdb.lock
+2026-11-08T10:20:30.894967Z  INFO crates/durability/src/imp/local.rs:270: starting durability actor
+2026-11-08T10:20:30.894797Z  WARN crates/engine/src/snapshot.rs:209: database=c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 SnapshotWorker: database state not set, call `SnapshotWorker::set_state`
+2026-11-08T10:20:30.895125Z  INFO crates/engine/src/relational_db.rs:303: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: durable_tx_offset is None
+2026-11-08T10:20:30.895136Z  INFO crates/engine/src/relational_db.rs:727: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:20:30.895500Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: applying transaction history...
+2026-11-08T10:20:30.899780Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: applied transaction history
+2026-11-08T10:20:30.900001Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] DATABASE: rebuilt state after replay
+2026-11-08T10:20:30.900476Z  INFO crates/core/src/host/host_controller.rs:1340: loading program 1f2d5c92186ee2712078852a5782231fd2997e1f1ea34256843ca19bbce6b25b from external storage host-type=Js
+2026-11-08T10:20:30.902693Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 replica=2000003 program=1f2d5c92186ee2712078852a5782231fd2997e1f1ea34256843ca19bbce6b25b host_type=Js
+2026-11-08T10:20:30.924498Z DEBUG crates/core/src/host/module_host.rs:671: init database
+2026-11-08T10:20:30.927534Z  INFO crates/datastore/src/locking_tx_datastore/datastore.rs:290: Capturing snapshot of database Identity(c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19) at TX offset 1
+2026-11-08T10:20:30.933135Z  INFO crates/snapshot/src/lib.rs:937: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19] SNAPSHOT 00000000000000000001: Hardlinked 0 objects and wrote 13 objects
+2026-11-08T10:20:30.933471Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:20:30.962776Z  INFO crates/engine/src/snapshot.rs:256: Captured snapshot of database c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 at TX offset 1 in 35.249709ms
+2026-11-08T10:20:30.962898Z  INFO crates/engine/src/snapshot.rs:382: Compressed snapshot range 0..1 of database c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 in 50.459µs
+2026-11-08T10:20:53.628689Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:20:53.628825Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2009d298213c7ab304325e32424b3d1a6328bbc28142f8ab9425fd0d3a1ca12 and ConnectionId 6ebfa0180b21253c19ced52553650070
+2026-11-08T10:20:53.629136Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2009d298213c7ab304325e32424b3d1a6328bbc28142f8ab9425fd0d3a1ca12 and ConnectionId 6ebfa0180b21253c19ced52553650070
+2026-11-08T10:20:53.629158Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2009d298213c7ab304325e32424b3d1a6328bbc28142f8ab9425fd0d3a1ca12 and ConnectionId 6ebfa0180b21253c19ced52553650070; spawning ws_client_actor and ClientConnection
+2026-11-08T10:20:53.652049Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:53.652113Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:53.652122Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:53.652929Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:53.652944Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:53.652951Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:53.673938Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:53.673974Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:53.673985Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:53.674451Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:53.674466Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:53.674472Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:53.694131Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:53.694165Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:53.694175Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:53.694638Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:53.694648Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:53.694654Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:54.730716Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:54.730760Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:54.730771Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:54.731791Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:54.731836Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:54.731892Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:55.260564Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:55.260609Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:55.260626Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:55.261213Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:55.261236Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:55.261245Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:55.790485Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:55.790535Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:55.790549Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:55.791167Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:55.791184Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:55.791192Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:56.313615Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:56.313726Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:56.313740Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:20:56.314390Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:20:56.314411Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:20:56.314419Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:22:41.452655Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:26:00.092815Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:26:04.046938Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:26:04.046974Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:26:04.046988Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:26:04.069513Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:26:04.069581Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:26:04.069597Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:26:04.098719Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:26:04.098776Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:26:04.098783Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:26:04.119042Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:26:04.119102Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:26:04.119110Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:26:04.160154Z DEBUG crates/client-api/src/lib.rs:171: SQL request rejected
+2026-11-08T10:27:03.897456Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:27:03.897498Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:27:03.897506Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:27:03.898531Z DEBUG crates/client-api/src/routes/database.rs:1651: planning migration for database c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19
+2026-11-08T10:27:03.902490Z  INFO crates/engine/src/relational_db.rs:303: [000000000000000000000000000000000000000000000000000000000000abcd] DATABASE: durable_tx_offset is None
+2026-11-08T10:27:03.902543Z  INFO crates/engine/src/relational_db.rs:727: [000000000000000000000000000000000000000000000000000000000000abcd] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:27:03.902926Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [000000000000000000000000000000000000000000000000000000000000abcd] DATABASE: applying transaction history...
+2026-11-08T10:27:03.902942Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [000000000000000000000000000000000000000000000000000000000000abcd] DATABASE: applied transaction history
+2026-11-08T10:27:03.903083Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [000000000000000000000000000000000000000000000000000000000000abcd] DATABASE: rebuilt state after replay
+2026-11-08T10:27:03.903268Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=000000000000000000000000000000000000000000000000000000000000abcd replica=0 program=2f61f6f25740b3fd3668941bbe0c6c12a940e22c54a68275b30cb5cc2b97fdf0 host_type=Js
+2026-11-08T10:27:03.917898Z DEBUG crates/client-api/src/routes/database.rs:1675: planned auto-migration of database c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 from 1f2d5c92186ee2712078852a5782231fd2997e1f1ea34256843ca19bbce6b25b to 2f61f6f25740b3fd3668941bbe0c6c12a940e22c54a68275b30cb5cc2b97fdf0
+2026-11-08T10:27:03.918492Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:27:03.918557Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:27:03.918574Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:27:03.933289Z  INFO crates/core/src/host/host_controller.rs:1204: publishing `c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19` from 1f2d5c92186ee2712078852a5782231fd2997e1f1ea34256843ca19bbce6b25b to 2f61f6f25740b3fd3668941bbe0c6c12a940e22c54a68275b30cb5cc2b97fdf0
+2026-11-08T10:27:03.935496Z  INFO crates/engine/src/update.rs:213: Running database update prechecks: c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19
+2026-11-08T10:27:03.935533Z  INFO crates/engine/src/update.rs:262: Running database update steps: c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19
+2026-11-08T10:27:03.935672Z  INFO crates/engine/src/update.rs:663: Database update complete
+2026-11-08T10:27:03.935692Z  INFO crates/core/src/host/wasm_common/module_host_actor.rs:813: Database updated, c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 host-type=Js
+2026-11-08T10:27:03.938662Z DEBUG crates/standalone/src/lib.rs:593: Desired replica count 1 for database c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19 already satisfied
+2026-11-08T10:27:04.344245Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:27:04.344278Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:27:04.344285Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:27:41.453123Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:30:30.937726Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19]: Traversed 4 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:31:04.266721Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:31:04.266764Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:31:04.266773Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:31:04.269824Z  INFO crates/engine/src/relational_db.rs:303: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: durable_tx_offset is None
+2026-11-08T10:31:04.269851Z  INFO crates/engine/src/relational_db.rs:727: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:31:04.270142Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applying transaction history...
+2026-11-08T10:31:04.270151Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applied transaction history
+2026-11-08T10:31:04.270283Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: rebuilt state after replay
+2026-11-08T10:31:04.270421Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f replica=0 program=b7f3881feff6461989361faaaca90b436fd0981b65f048286628a45a17a79722 host_type=Js
+2026-11-08T10:31:04.288228Z DEBUG crates/core/src/host/module_host.rs:671: init database
+2026-11-08T10:31:04.301273Z  INFO crates/core/src/host/host_controller.rs:825: replica=2000001 database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f exiting module
+2026-11-08T10:31:04.301515Z  INFO crates/core/src/host/host_controller.rs:827: replica=2000001 database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f exiting database
+2026-11-08T10:31:04.301526Z  INFO crates/durability/src/imp/local.rs:367: close local durability
+2026-11-08T10:31:04.301541Z  INFO crates/durability/src/imp/local.rs:317: exiting durability actor
+2026-11-08T10:31:04.301552Z DEBUG crates/fs-utils/src/lockfile.rs:274: Released lock on /Users/abd/.local/share/spacetime/data/replicas/2000001/db.lock
+2026-11-08T10:31:04.301566Z  INFO crates/core/src/host/host_controller.rs:829: replica=2000001 database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f module host exited
+2026-11-08T10:31:04.301814Z  INFO crates/core/src/host/host_controller.rs:1729: dropping host c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f/2000001
+2026-11-08T10:31:04.302526Z  INFO crates/durability/src/imp/local.rs:367: close local durability
+2026-11-08T10:31:04.305358Z  INFO crates/engine/src/durability.rs:44: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] durability shut down at tx offset: Some(444)
+2026-11-08T10:31:04.305699Z  INFO crates/durability/src/imp/local.rs:135: open local durability
+2026-11-08T10:31:04.305750Z DEBUG crates/fs-utils/src/lockfile.rs:216: Acquired lock on /Users/abd/.local/share/spacetime/data/replicas/2000004/db.lock
+2026-11-08T10:31:04.309355Z  INFO crates/commitlog/src/commitlog.rs:80: repo /Users/abd/.local/share/spacetime/data/replicas/2000004/clog: starting fresh log
+2026-11-08T10:31:04.309577Z DEBUG crates/fs-utils/src/lockfile.rs:216: Acquired lock on /Users/abd/.local/share/spacetime/data/replicas/2000004/clog/00000000000000000000.stdb.lock
+2026-11-08T10:31:04.320303Z  WARN crates/engine/src/snapshot.rs:209: database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f SnapshotWorker: database state not set, call `SnapshotWorker::set_state`
+2026-11-08T10:31:04.320354Z DEBUG crates/fs-utils/src/lockfile.rs:274: Released lock on /Users/abd/.local/share/spacetime/data/replicas/2000004/clog/00000000000000000000.stdb.lock
+2026-11-08T10:31:04.320496Z  INFO crates/durability/src/imp/local.rs:270: starting durability actor
+2026-11-08T10:31:04.320512Z  INFO crates/engine/src/relational_db.rs:303: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: durable_tx_offset is None
+2026-11-08T10:31:04.320531Z  INFO crates/engine/src/relational_db.rs:727: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:31:04.320820Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applying transaction history...
+2026-11-08T10:31:04.324228Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applied transaction history
+2026-11-08T10:31:04.324375Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: rebuilt state after replay
+2026-11-08T10:31:04.324575Z  INFO crates/core/src/host/host_controller.rs:1340: loading program b7f3881feff6461989361faaaca90b436fd0981b65f048286628a45a17a79722 from external storage host-type=Js
+2026-11-08T10:31:04.327472Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f replica=2000004 program=b7f3881feff6461989361faaaca90b436fd0981b65f048286628a45a17a79722 host_type=Js
+2026-11-08T10:31:04.348748Z DEBUG crates/core/src/host/module_host.rs:671: init database
+2026-11-08T10:31:04.354459Z  INFO crates/datastore/src/locking_tx_datastore/datastore.rs:290: Capturing snapshot of database Identity(c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f) at TX offset 1
+2026-11-08T10:31:04.362480Z  INFO crates/snapshot/src/lib.rs:937: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] SNAPSHOT 00000000000000000001: Hardlinked 0 objects and wrote 22 objects
+2026-11-08T10:31:04.362658Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:31:04.374229Z  INFO crates/engine/src/snapshot.rs:256: Captured snapshot of database c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f at TX offset 1 in 19.834583ms
+2026-11-08T10:31:04.374344Z  INFO crates/engine/src/snapshot.rs:382: Compressed snapshot range 0..1 of database c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f in 87.458µs
+2026-11-08T10:31:08.682898Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:31:08.682950Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:31:08.682959Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:31:08.704184Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:31:08.704238Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:31:08.704246Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:31:08.724896Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:31:08.724947Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:31:08.724961Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:31:08.745476Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:31:08.745529Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:31:08.745537Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:31:08.767301Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:31:08.767339Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:31:08.767347Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:31:08.930018Z DEBUG crates/client-api/src/lib.rs:171: SQL request rejected
+2026-11-08T10:32:41.455690Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.223863Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:03.223988Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200c1360d2ce4b1c7c8196ca22bf1fbb509d49cceacf19facfc1692f2793e0a and ConnectionId 5a2229e987399914b12a92bbe14ac00c
+2026-11-08T10:33:03.224060Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200c1360d2ce4b1c7c8196ca22bf1fbb509d49cceacf19facfc1692f2793e0a and ConnectionId 5a2229e987399914b12a92bbe14ac00c
+2026-11-08T10:33:03.224076Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200c1360d2ce4b1c7c8196ca22bf1fbb509d49cceacf19facfc1692f2793e0a and ConnectionId 5a2229e987399914b12a92bbe14ac00c; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:03.784357Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.784408Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.784420Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.785593Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.785617Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.785628Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.807641Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.807762Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.807776Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.808787Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.808811Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.808882Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.821339Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.821385Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.821394Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.822462Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.822509Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.822517Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.825842Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:03.826430Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2008577990eba1d59e5f94ffe37b7fb2e789f00ce6d3cfdba2026277c024118 and ConnectionId a7d9d004c0c5be27294f7497dfbf9acd
+2026-11-08T10:33:03.826487Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2008577990eba1d59e5f94ffe37b7fb2e789f00ce6d3cfdba2026277c024118 and ConnectionId a7d9d004c0c5be27294f7497dfbf9acd
+2026-11-08T10:33:03.826534Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2008577990eba1d59e5f94ffe37b7fb2e789f00ce6d3cfdba2026277c024118 and ConnectionId a7d9d004c0c5be27294f7497dfbf9acd; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:03.858536Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.858623Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.858632Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.874812Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.874938Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.874949Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.875932Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.875953Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.875960Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.897370Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.897406Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.897418Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.898248Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.898265Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.898271Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.909389Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:03.910427Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2005e4794fbd83679dc9215da1a73220817e5668dc65e15c2e916f9bedb321e and ConnectionId a0c0e952706f89a36c57379fa1ec064d
+2026-11-08T10:33:03.910474Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2005e4794fbd83679dc9215da1a73220817e5668dc65e15c2e916f9bedb321e and ConnectionId a0c0e952706f89a36c57379fa1ec064d
+2026-11-08T10:33:03.910490Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2005e4794fbd83679dc9215da1a73220817e5668dc65e15c2e916f9bedb321e and ConnectionId a0c0e952706f89a36c57379fa1ec064d; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:03.926511Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.926602Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.926609Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.927536Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.927561Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.927569Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.945181Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:03.945267Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c20036df4c50ce6435a0d5e82d8f87bf17947a3a08dfd2a023cb464275586bef and ConnectionId d5e6a7dd79f1d30ba38b3864e537b4e3
+2026-11-08T10:33:03.945316Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c20036df4c50ce6435a0d5e82d8f87bf17947a3a08dfd2a023cb464275586bef and ConnectionId d5e6a7dd79f1d30ba38b3864e537b4e3
+2026-11-08T10:33:03.945326Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c20036df4c50ce6435a0d5e82d8f87bf17947a3a08dfd2a023cb464275586bef and ConnectionId d5e6a7dd79f1d30ba38b3864e537b4e3; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:03.961819Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.961891Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.961901Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.962763Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:03.962776Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:03.962782Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:03.989528Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:03.989675Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200085f8329540097acaa28eeac51621bfa3dd3e0a92e60ef0c0bffa43cef16 and ConnectionId 5a29e4beedc6bb1fa717696a4b3bb954
+2026-11-08T10:33:03.989762Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200085f8329540097acaa28eeac51621bfa3dd3e0a92e60ef0c0bffa43cef16 and ConnectionId 5a29e4beedc6bb1fa717696a4b3bb954
+2026-11-08T10:33:03.989780Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200085f8329540097acaa28eeac51621bfa3dd3e0a92e60ef0c0bffa43cef16 and ConnectionId 5a29e4beedc6bb1fa717696a4b3bb954; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:04.004630Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:04.004674Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:04.004685Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:04.005737Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:04.005776Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:04.005783Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:04.022179Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:04.022316Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200dddc79cc12dc0705c07b52928df3af74ee4f0e088ca47109dce4ed9015d6 and ConnectionId 9fbe71b55ff889558d75cad0226628e6
+2026-11-08T10:33:04.022373Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200dddc79cc12dc0705c07b52928df3af74ee4f0e088ca47109dce4ed9015d6 and ConnectionId 9fbe71b55ff889558d75cad0226628e6
+2026-11-08T10:33:04.022382Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200dddc79cc12dc0705c07b52928df3af74ee4f0e088ca47109dce4ed9015d6 and ConnectionId 9fbe71b55ff889558d75cad0226628e6; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:04.037509Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:04.037588Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:04.037598Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:04.038659Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:04.038695Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:04.038704Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:04.058677Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:04.058824Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c20025f1886df412e927b0040406f6276b10bdd117c28bcbebced7b45c382ea9 and ConnectionId 31ecd9f9af3cf208975bcc88bfe454ed
+2026-11-08T10:33:04.058927Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c20025f1886df412e927b0040406f6276b10bdd117c28bcbebced7b45c382ea9 and ConnectionId 31ecd9f9af3cf208975bcc88bfe454ed
+2026-11-08T10:33:04.058963Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c20025f1886df412e927b0040406f6276b10bdd117c28bcbebced7b45c382ea9 and ConnectionId 31ecd9f9af3cf208975bcc88bfe454ed; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:04.076258Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:04.076293Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:04.076301Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:04.077259Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:04.077280Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:04.077287Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.118283Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.118343Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.118354Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.119470Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.119487Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.119494Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.129898Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:05.131502Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2003f5bf779db2ae654448174740410ee27b0c9a9b17aad28d6f706373eabb1 and ConnectionId 619c3a49f433521a2bc403c785cc0872
+2026-11-08T10:33:05.131559Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2003f5bf779db2ae654448174740410ee27b0c9a9b17aad28d6f706373eabb1 and ConnectionId 619c3a49f433521a2bc403c785cc0872
+2026-11-08T10:33:05.131571Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2003f5bf779db2ae654448174740410ee27b0c9a9b17aad28d6f706373eabb1 and ConnectionId 619c3a49f433521a2bc403c785cc0872; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:05.149112Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.149148Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.149164Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.150127Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.150143Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.150150Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.169589Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.169630Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.169645Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.170814Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.170848Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.170857Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.369479Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.369520Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.369536Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.376313Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:33:05.377520Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200ad60a701608135f0364217654b51c439e8b634097168e16d3a083ac0e7bb and ConnectionId a17070513033bd5d2e269c7370c254f0
+2026-11-08T10:33:05.377582Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200ad60a701608135f0364217654b51c439e8b634097168e16d3a083ac0e7bb and ConnectionId a17070513033bd5d2e269c7370c254f0
+2026-11-08T10:33:05.377591Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200ad60a701608135f0364217654b51c439e8b634097168e16d3a083ac0e7bb and ConnectionId a17070513033bd5d2e269c7370c254f0; spawning ws_client_actor and ClientConnection
+2026-11-08T10:33:05.394375Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.394415Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.394432Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.395347Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.395362Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.395368Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.464138Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.464182Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.464198Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.465138Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.465164Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.465173Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.531601Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.531639Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.531647Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.548653Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.548690Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.548701Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.549556Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.549567Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.549573Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.578490Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.578539Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.578547Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.579455Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.579473Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.579480Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.599010Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.599043Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.599052Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.615740Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.615773Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.615784Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.616603Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.616619Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.616625Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.630023Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.630068Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.630076Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.630976Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.630993Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.631000Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.644192Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.644249Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.644261Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.645132Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.645150Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.645158Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.657285Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.657408Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.657418Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.658414Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.658430Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.658437Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.721371Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.721438Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.721454Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.736627Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.736662Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.736673Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.737847Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.737928Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.737940Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.757232Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.757291Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.757299Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.758245Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.758282Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.758290Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.779189Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.779231Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.779242Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.780513Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.780527Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.780533Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.799501Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.799534Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.799546Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.800369Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.800380Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.800385Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.818988Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.819028Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.819042Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.819888Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.819900Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.819905Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.839080Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.839157Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.839168Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:33:05.840130Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:33:05.840150Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:33:05.840158Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.211480Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:25.211588Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2001b4834c9bdc9f536ef3eb4d6d8dbdccf12c7da0fc71e904214ada18ec520 and ConnectionId 1a739812fa07d06e6b0531975eb4edfb
+2026-11-08T10:34:25.211661Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2001b4834c9bdc9f536ef3eb4d6d8dbdccf12c7da0fc71e904214ada18ec520 and ConnectionId 1a739812fa07d06e6b0531975eb4edfb
+2026-11-08T10:34:25.211682Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2001b4834c9bdc9f536ef3eb4d6d8dbdccf12c7da0fc71e904214ada18ec520 and ConnectionId 1a739812fa07d06e6b0531975eb4edfb; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:25.775040Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.775107Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.775125Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.776474Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.779731Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.779746Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.802761Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.802874Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.802886Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.804054Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.804074Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.804080Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.816946Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.816984Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.816999Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.818525Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.818564Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.818572Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.822050Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:25.822546Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c20022d3d2e51ef68162866b97969ea686cd1e5001c0945c82178d0fffd81e85 and ConnectionId 35cd3427b9d8b0453823eac65cb92e40
+2026-11-08T10:34:25.822753Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c20022d3d2e51ef68162866b97969ea686cd1e5001c0945c82178d0fffd81e85 and ConnectionId 35cd3427b9d8b0453823eac65cb92e40
+2026-11-08T10:34:25.822764Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c20022d3d2e51ef68162866b97969ea686cd1e5001c0945c82178d0fffd81e85 and ConnectionId 35cd3427b9d8b0453823eac65cb92e40; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:25.852608Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.852650Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.852658Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.869911Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.869980Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.869989Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.871018Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.871041Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.871049Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.891261Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.891296Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.891307Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.892197Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.892218Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.892225Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.903950Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:25.904653Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c20071587684507df4ef843e71cb91900dcb7651358dbc0222ede550cc557b3c and ConnectionId ef0a59c6be379becb434617af76f6736
+2026-11-08T10:34:25.904701Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c20071587684507df4ef843e71cb91900dcb7651358dbc0222ede550cc557b3c and ConnectionId ef0a59c6be379becb434617af76f6736
+2026-11-08T10:34:25.904710Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c20071587684507df4ef843e71cb91900dcb7651358dbc0222ede550cc557b3c and ConnectionId ef0a59c6be379becb434617af76f6736; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:25.919051Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.919129Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.919138Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.920222Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.920261Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.920268Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.938666Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:25.938768Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200c1cc0e7dcfa97c9b4deed431bfb777cb86555900917f2623c2d79509f463 and ConnectionId 4a047607a40149c7ec461998fe062cd4
+2026-11-08T10:34:25.938822Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200c1cc0e7dcfa97c9b4deed431bfb777cb86555900917f2623c2d79509f463 and ConnectionId 4a047607a40149c7ec461998fe062cd4
+2026-11-08T10:34:25.938831Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200c1cc0e7dcfa97c9b4deed431bfb777cb86555900917f2623c2d79509f463 and ConnectionId 4a047607a40149c7ec461998fe062cd4; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:25.953585Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.953655Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.953662Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.954709Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.954745Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.954752Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.971461Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:25.971591Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2007a3b227dc574c21009c8a82316317b7e92582f2a8d28bc9bd18df872f103 and ConnectionId 790e0a82ca9a90bacb8b53c28c04e0b6
+2026-11-08T10:34:25.971698Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2007a3b227dc574c21009c8a82316317b7e92582f2a8d28bc9bd18df872f103 and ConnectionId 790e0a82ca9a90bacb8b53c28c04e0b6
+2026-11-08T10:34:25.971715Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2007a3b227dc574c21009c8a82316317b7e92582f2a8d28bc9bd18df872f103 and ConnectionId 790e0a82ca9a90bacb8b53c28c04e0b6; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:25.986305Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.986375Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.986384Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:25.987594Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:25.987629Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:25.987637Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:26.004409Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:26.004587Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200d2c94c0739316b91c64427d88b0fbc8bbe7141b94d3477fe7e8fc2175de3 and ConnectionId 2e51d84c4fa6b82369d419be433ac02f
+2026-11-08T10:34:26.004660Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200d2c94c0739316b91c64427d88b0fbc8bbe7141b94d3477fe7e8fc2175de3 and ConnectionId 2e51d84c4fa6b82369d419be433ac02f
+2026-11-08T10:34:26.004676Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200d2c94c0739316b91c64427d88b0fbc8bbe7141b94d3477fe7e8fc2175de3 and ConnectionId 2e51d84c4fa6b82369d419be433ac02f; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:26.020075Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:26.020137Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:26.020144Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:26.021179Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:26.021201Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:26.021207Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:26.038600Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:26.038766Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2003699c4a1f6cd9701c61cdf51f80456bd1caffc9e267d4b32de799f1feef0 and ConnectionId a0417f158a5bf5a6990a080d02bc6b49
+2026-11-08T10:34:26.038820Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2003699c4a1f6cd9701c61cdf51f80456bd1caffc9e267d4b32de799f1feef0 and ConnectionId a0417f158a5bf5a6990a080d02bc6b49
+2026-11-08T10:34:26.038828Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2003699c4a1f6cd9701c61cdf51f80456bd1caffc9e267d4b32de799f1feef0 and ConnectionId a0417f158a5bf5a6990a080d02bc6b49; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:26.053398Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:26.053479Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:26.053487Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:26.054598Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:26.054616Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:26.054623Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.053096Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.053173Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.053184Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.054640Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.054719Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.054728Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.064937Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:27.065699Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c20050b2b17686ec41fa04aa03f14a3cd04533a567b0c7993c61946399ff5f73 and ConnectionId 147f766d268258d0a75884dce2c57c36
+2026-11-08T10:34:27.065737Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c20050b2b17686ec41fa04aa03f14a3cd04533a567b0c7993c61946399ff5f73 and ConnectionId 147f766d268258d0a75884dce2c57c36
+2026-11-08T10:34:27.065744Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c20050b2b17686ec41fa04aa03f14a3cd04533a567b0c7993c61946399ff5f73 and ConnectionId 147f766d268258d0a75884dce2c57c36; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:27.082291Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.082319Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.082327Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.083229Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.083238Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.083243Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.105556Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.105596Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.105602Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.106587Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.106625Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.106631Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.348168Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.348202Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.348212Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.355896Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:34:27.356775Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200cd3cb4a342f267ffc317f89e3b2781256ec5d1bcf7ec84c3118c8dbf1cc0 and ConnectionId 50fa03b6a15f0045d313db308b046eb1
+2026-11-08T10:34:27.356827Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200cd3cb4a342f267ffc317f89e3b2781256ec5d1bcf7ec84c3118c8dbf1cc0 and ConnectionId 50fa03b6a15f0045d313db308b046eb1
+2026-11-08T10:34:27.356834Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200cd3cb4a342f267ffc317f89e3b2781256ec5d1bcf7ec84c3118c8dbf1cc0 and ConnectionId 50fa03b6a15f0045d313db308b046eb1; spawning ws_client_actor and ClientConnection
+2026-11-08T10:34:27.374196Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.374238Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.374250Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.375276Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.375299Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.375306Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.448554Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.448588Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.448598Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.449510Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.449521Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.449526Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.514539Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.514573Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.514580Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.532436Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.532469Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.532478Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.533389Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.533400Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.533404Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.562717Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.562751Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.562760Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.563647Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.563664Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.563670Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.583090Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.583120Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.583129Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.598392Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.598421Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.598430Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.599268Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.599277Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.599281Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.612491Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.612516Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.612524Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.613327Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.613343Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.613349Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.626262Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.626313Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.626320Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.627155Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.627167Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.627173Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.639642Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.639679Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.639688Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.640621Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.640638Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.640643Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.704207Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.704307Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.704406Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.721512Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.721603Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.721622Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.722552Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.722576Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.722584Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.744147Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.744182Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.744197Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.745047Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.745061Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.745067Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.764919Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.764954Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.764964Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.765792Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.765804Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.765810Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.786811Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.786900Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.786956Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.788113Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.788158Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.788257Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.812252Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.812285Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.812300Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.813101Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.813113Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.813119Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.832142Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.832180Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.832191Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:34:27.833023Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:34:27.833036Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:34:27.833042Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:37:41.455283Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:40:30.940394Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19]: Traversed 0 unexpired views to collect and delete a batch of 4 expired views
+2026-11-08T10:41:04.367033Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 338 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:42:38.033852Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.035496Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.035503Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.038187Z  INFO crates/engine/src/relational_db.rs:303: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: durable_tx_offset is None
+2026-11-08T10:42:38.038213Z  INFO crates/engine/src/relational_db.rs:727: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:42:38.038477Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applying transaction history...
+2026-11-08T10:42:38.038486Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applied transaction history
+2026-11-08T10:42:38.038639Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: rebuilt state after replay
+2026-11-08T10:42:38.038773Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f replica=0 program=b7f3881feff6461989361faaaca90b436fd0981b65f048286628a45a17a79722 host_type=Js
+2026-11-08T10:42:38.054199Z DEBUG crates/core/src/host/module_host.rs:671: init database
+2026-11-08T10:42:38.066840Z  INFO crates/core/src/host/host_controller.rs:825: replica=2000004 database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f exiting module
+2026-11-08T10:42:38.066877Z  INFO crates/core/src/host/host_controller.rs:827: replica=2000004 database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f exiting database
+2026-11-08T10:42:38.066902Z  INFO crates/durability/src/imp/local.rs:367: close local durability
+2026-11-08T10:42:38.066916Z  INFO crates/durability/src/imp/local.rs:317: exiting durability actor
+2026-11-08T10:42:38.066924Z DEBUG crates/fs-utils/src/lockfile.rs:274: Released lock on /Users/abd/.local/share/spacetime/data/replicas/2000004/db.lock
+2026-11-08T10:42:38.066937Z  INFO crates/core/src/host/host_controller.rs:829: replica=2000004 database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f module host exited
+2026-11-08T10:42:38.066968Z  INFO crates/core/src/host/host_controller.rs:1729: dropping host c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f/2000004
+2026-11-08T10:42:38.067235Z  INFO crates/durability/src/imp/local.rs:367: close local durability
+2026-11-08T10:42:38.067258Z  INFO crates/engine/src/durability.rs:44: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] durability shut down at tx offset: Some(309)
+2026-11-08T10:42:38.071046Z  INFO crates/durability/src/imp/local.rs:135: open local durability
+2026-11-08T10:42:38.071089Z DEBUG crates/fs-utils/src/lockfile.rs:216: Acquired lock on /Users/abd/.local/share/spacetime/data/replicas/2000005/db.lock
+2026-11-08T10:42:38.075803Z  INFO crates/commitlog/src/commitlog.rs:80: repo /Users/abd/.local/share/spacetime/data/replicas/2000005/clog: starting fresh log
+2026-11-08T10:42:38.075867Z DEBUG crates/fs-utils/src/lockfile.rs:216: Acquired lock on /Users/abd/.local/share/spacetime/data/replicas/2000005/clog/00000000000000000000.stdb.lock
+2026-11-08T10:42:38.087585Z DEBUG crates/fs-utils/src/lockfile.rs:274: Released lock on /Users/abd/.local/share/spacetime/data/replicas/2000005/clog/00000000000000000000.stdb.lock
+2026-11-08T10:42:38.087595Z  WARN crates/engine/src/snapshot.rs:209: database=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f SnapshotWorker: database state not set, call `SnapshotWorker::set_state`
+2026-11-08T10:42:38.087755Z  INFO crates/durability/src/imp/local.rs:270: starting durability actor
+2026-11-08T10:42:38.087770Z  INFO crates/engine/src/relational_db.rs:303: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: durable_tx_offset is None
+2026-11-08T10:42:38.087785Z  INFO crates/engine/src/relational_db.rs:727: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: no usable snapshot in snapshot repo
+2026-11-08T10:42:38.088066Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:42: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applying transaction history...
+2026-11-08T10:42:38.091630Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:86: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: applied transaction history
+2026-11-08T10:42:38.091793Z  INFO crates/datastore/src/locking_tx_datastore/replay.rs:88: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] DATABASE: rebuilt state after replay
+2026-11-08T10:42:38.091987Z  INFO crates/core/src/host/host_controller.rs:1340: loading program b7f3881feff6461989361faaaca90b436fd0981b65f048286628a45a17a79722 from external storage host-type=Js
+2026-11-08T10:42:38.094292Z  INFO crates/core/src/host/host_controller.rs:1112: launching module db=c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f replica=2000005 program=b7f3881feff6461989361faaaca90b436fd0981b65f048286628a45a17a79722 host_type=Js
+2026-11-08T10:42:38.111937Z DEBUG crates/core/src/host/module_host.rs:671: init database
+2026-11-08T10:42:38.117452Z  INFO crates/datastore/src/locking_tx_datastore/datastore.rs:290: Capturing snapshot of database Identity(c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f) at TX offset 1
+2026-11-08T10:42:38.123897Z  INFO crates/snapshot/src/lib.rs:937: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f] SNAPSHOT 00000000000000000001: Hardlinked 0 objects and wrote 22 objects
+2026-11-08T10:42:38.124051Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:42:38.135503Z  INFO crates/engine/src/snapshot.rs:256: Captured snapshot of database c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f at TX offset 1 in 18.0915ms
+2026-11-08T10:42:38.135626Z  INFO crates/engine/src/snapshot.rs:382: Compressed snapshot range 0..1 of database c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f in 47µs
+2026-11-08T10:42:38.169231Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.169270Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.169282Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.170524Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.170543Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.170549Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.215266Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.215304Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.215319Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.216151Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.216163Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.216169Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.261763Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.261800Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.261809Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.262610Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.262621Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.262626Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.293166Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.293198Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.293205Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:38.311916Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:38.311958Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:38.311972Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:40.757465Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:40.757503Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:40.757513Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:40.758544Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:40.758569Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:40.758578Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:42:40.951666Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:42:40.951808Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 66ce4187b045fee2bb21248e067c56ee
+2026-11-08T10:42:40.951879Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 66ce4187b045fee2bb21248e067c56ee
+2026-11-08T10:42:40.951888Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 66ce4187b045fee2bb21248e067c56ee; spawning ws_client_actor and ClientConnection
+2026-11-08T10:42:41.457928Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:44.190421Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:42:44.190728Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 5adab5a93f80c5eaf2e0ce3097ba2197
+2026-11-08T10:42:44.190869Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 5adab5a93f80c5eaf2e0ce3097ba2197
+2026-11-08T10:42:44.190913Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 5adab5a93f80c5eaf2e0ce3097ba2197; spawning ws_client_actor and ClientConnection
+2026-11-08T10:42:52.757494Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:42:52.757538Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:42:52.757547Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:43:07.370893Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:43:07.370956Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:43:07.370964Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:43:07.371967Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:43:07.372064Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:43:07.372087Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:43:07.578856Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:43:07.578949Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 07d234dcdf491022adfa488a004dfc80
+2026-11-08T10:43:07.579011Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 07d234dcdf491022adfa488a004dfc80
+2026-11-08T10:43:07.579022Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 07d234dcdf491022adfa488a004dfc80; spawning ws_client_actor and ClientConnection
+2026-11-08T10:43:43.708295Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:43:43.708686Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 9151099df14d6172c278ad2df6493c18
+2026-11-08T10:43:43.708764Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 9151099df14d6172c278ad2df6493c18
+2026-11-08T10:43:43.708775Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 9151099df14d6172c278ad2df6493c18; spawning ws_client_actor and ClientConnection
+2026-11-08T10:44:25.627334Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:44:25.627391Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:44:25.627405Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:44:25.650481Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:44:25.650517Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:44:25.650524Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:44:25.671534Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:44:25.671579Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:44:25.671586Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:46:04.293170Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:46:04.293230Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:46:04.293240Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:46:04.298408Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:46:04.298433Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:46:04.298441Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:46:04.512333Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:46:04.512444Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 46facc767d3eeef95af63a9cece2df37
+2026-11-08T10:46:04.512512Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 46facc767d3eeef95af63a9cece2df37
+2026-11-08T10:46:04.512520Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId 46facc767d3eeef95af63a9cece2df37; spawning ws_client_actor and ClientConnection
+2026-11-08T10:46:46.441685Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:46:46.441986Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId a09bbdc3367a8efcec45a976a5263eb3
+2026-11-08T10:46:46.442126Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId a09bbdc3367a8efcec45a976a5263eb3
+2026-11-08T10:46:46.442213Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId a09bbdc3367a8efcec45a976a5263eb3; spawning ws_client_actor and ClientConnection
+2026-11-08T10:47:41.456604Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com
+2026-11-08T10:48:03.339498Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:48:03.341635Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId dd2b681096984500147b10903058bedb
+2026-11-08T10:48:03.341853Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId dd2b681096984500147b10903058bedb
+2026-11-08T10:48:03.341869Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId dd2b681096984500147b10903058bedb; spawning ws_client_actor and ClientConnection
+2026-11-08T10:49:15.339833Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:49:15.339911Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:49:15.339928Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:49:15.345818Z DEBUG crates/core/src/auth/token_validation.rs:242: Getting validator for issuer https://auth.spacetimedb.com
+2026-11-08T10:49:15.345859Z DEBUG crates/core/src/auth/token_validation.rs:316: No key id in header. Trying all keys.
+2026-11-08T10:49:15.345868Z DEBUG crates/core/src/auth/token_validation.rs:322: Trying key 0
+2026-11-08T10:49:15.568766Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:49:15.569114Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId dd11f1ca999e5798dbdbab0c87c56703
+2026-11-08T10:49:15.569216Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId dd11f1ca999e5798dbdbab0c87c56703
+2026-11-08T10:49:15.569227Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c200f8fe0352913545b177cf9aa659f20a74eba65aa195fb53ababd383b19bcc and ConnectionId dd11f1ca999e5798dbdbab0c87c56703; spawning ws_client_actor and ClientConnection
+2026-11-08T10:49:50.427908Z DEBUG crates/client-api/src/routes/subscribe.rs:169: The connection_id query parameter to the subscribe HTTP endpoint is internal and will be removed in a future version of SpacetimeDB.
+2026-11-08T10:49:50.428148Z DEBUG crates/client-api/src/routes/subscribe.rs:292: websocket: New client connected from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 01613e2f7b8474f56ca8eda582964d6e
+2026-11-08T10:49:50.428269Z DEBUG crates/client-api/src/routes/subscribe.rs:327: websocket: client_connected returned Ok for unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 01613e2f7b8474f56ca8eda582964d6e
+2026-11-08T10:49:50.428306Z DEBUG crates/client-api/src/routes/subscribe.rs:352: websocket: Database accepted connection from unknown ip with Identity c2003b2305d071cf7b92768011d9ccb8c8d42fdfefdbc3494befaaa997f4ca28 and ConnectionId 01613e2f7b8474f56ca8eda582964d6e; spawning ws_client_actor and ClientConnection
+2026-11-08T10:50:30.943461Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c2006c1d607394e5f11f9beb3a938111fb4cb7db8ec5c7576c58a4b712767c19]: Traversed 0 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:52:38.123439Z  INFO crates/datastore/src/locking_tx_datastore/mut_tx.rs:3344: [c200789d6a491dc38266e90b80fb2d062be2d91dd4e9973d69afc466b9b83c0f]: Traversed 24 unexpired views to collect and delete a batch of 0 expired views
+2026-11-08T10:52:41.455046Z  INFO crates/core/src/auth/token_validation.rs:220: Fetching key for issuer https://auth.spacetimedb.com

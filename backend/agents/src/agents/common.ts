@@ -1,4 +1,4 @@
-import { FALLBACK_LABEL, MODEL_LABEL, SCRIPTED_LABEL, type RunOptions } from '../config.ts';
+import { FALLBACK_LABEL, MODEL_LABEL, SCRIPTED_LABEL, TEMPLATE_LABEL, type RunOptions } from '../config.ts';
 import type { Logger } from '../log.ts';
 import type { LlmClient } from '../ollama.ts';
 import type { Marks } from '../timeline.ts';
@@ -15,6 +15,8 @@ export interface Env {
   llm: LlmClient | null;
   /** Why llm is null (when it is not --scripted). */
   modelUnavailable?: string;
+  /** Set by the tools right after the backend accepted the write (the interim template brief does not set it). */
+  final: { brief: boolean };
 }
 
 /** How an agent actually got its work done, reported in the final summary. */
@@ -41,7 +43,7 @@ export interface AgentSpec {
   deadlineMs: number;
   /** Objective completion check against backend state. */
   isDone: () => boolean;
-  nudge: string;
+  nudge: string | (() => string);
   /** See LoopConfig.allowFinalTurn. */
   allowFinalTurn?: boolean;
   /** See LoopConfig.salvageProse. */
@@ -56,9 +58,9 @@ export interface AgentSpec {
   deterministic: (pace: () => Promise<void>) => Promise<void>;
 }
 
-export type ModelLabelKind = 'model' | 'scripted' | 'fallback';
+export type ModelLabelKind = 'model' | 'scripted' | 'fallback' | 'template';
 export const labelFor = (k: ModelLabelKind) =>
-  k === 'model' ? MODEL_LABEL : k === 'scripted' ? SCRIPTED_LABEL : FALLBACK_LABEL;
+  k === 'model' ? MODEL_LABEL : k === 'scripted' ? SCRIPTED_LABEL : k === 'template' ? TEMPLATE_LABEL : FALLBACK_LABEL;
 
 /** Update agent_state (the dashboard's live thought). Never throws. */
 export async function setState(

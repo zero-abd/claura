@@ -33,7 +33,7 @@ const DESTS = [
 ];
 
 function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  const k = Math.min(r, w / 2, h / 2);
+  const k = Math.max(0, Math.min(r, w / 2, h / 2)); // a tiny or zero-size canvas must never feed arcTo a negative radius
   ctx.beginPath();
   ctx.moveTo(x + k, y);
   ctx.arcTo(x + w, y, x + w, y + h, k);

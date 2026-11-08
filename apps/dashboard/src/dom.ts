@@ -59,10 +59,11 @@ export function installSprings() {
 }
 
 // ---------------------------------------------------------------- disclosure
-/** Markup for an animated disclosure. State lives in engine.S.open / S.stepOv, keyed by `key`. */
-export function disc(key: string, head: string, body: string, cls = ""): string {
+/** Markup for an animated disclosure. State lives in engine.S.open / S.stepOv, keyed by `key`.
+ *  `actions` is markup that sits beside the header (not inside it: a button cannot contain a button). */
+export function disc(key: string, head: string, body: string, cls = "", actions = ""): string {
   return `<div class="disc ${cls}" data-key="${key}" data-open="0">
-    <button type="button" class="disc-head" data-disc="${key}" aria-expanded="false">${head}${chev()}</button>
+    <button type="button" class="disc-head" data-disc="${key}" aria-expanded="false">${head}${chev()}</button>${actions ? `<div class="row-actions">${actions}</div>` : ""}
     <div class="disc-body" inert><div class="disc-inner">${body}</div></div>
   </div>`;
 }

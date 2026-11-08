@@ -1,0 +1,29 @@
+[tense] The attacker is reading your email.
+Your phones are down. Ransomware has the file share.
+In your data center, an AI workload is breaking out of its virtual machine.
+An I. O. M. M. U. fault. A G. P. U. driver fault. A shell where no shell should be.
+Six warnings in six tools. No playbook for this attack.
+Nobody has the whole picture.
+[confident] This is Claura, the immune system for AI data centers.
+Its command center runs outside your network, with its own identities.
+Its agents run NVIDIA Nemotron on-prem, calling tools step by step.
+Sentry connects the signals and opens the incident.
+Triage checks inventory and reachability: one host, eleven neighbors.
+Warden proposes containment, reversible steps first.
+Every proposal hits a policy gate. Policy, not the model, decides.
+Our red-team probe tries to reimage the host. Denied.
+Quarantine needs a human. Evidence, scope, rollback, one card.
+Command-Enter.
+[relieved] Contained. Nine point four seconds, in our simulation.
+Then the people.
+The War Room puts legal, executives and engineers in one live channel.
+Scribe's brief: what we know, and what we don't know yet.
+Outside counsel joins with a single-use break-glass code. No email. No S. S. O.
+Data scope tracks every asset: intact, exfiltrated, or locked by ransomware.
+The record follows N. I. S. T., with live phase status and a hashed chain of custody.
+Need hands on a host? Click it.
+A short-lived certificate, Touch ID, a second approver. Every session recorded.
+And every screen updates live, through Spacetime D. B. subscriptions.
+Next: an immune system for every AI cloud, sharing attack fingerprints, never tenant data.
+[warmly] Claura.
+Your network is compromised. Your command isn't.

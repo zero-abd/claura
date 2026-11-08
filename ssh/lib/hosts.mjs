@@ -24,17 +24,24 @@ export const hostById = (id) => HOSTS.find((h) => h.id === id) ?? null;
 
 export const STATUSES = ['healthy', 'suspect', 'cordoned', 'quarantined'];
 
-/** Demo directory. Production: identities come from the console's authenticated session (SSO + passkey). */
+/**
+ * Demo directory. Production: identities come from the console's authenticated session (SSO + passkey) through
+ * ctx.ssh.identity(req), and the roles from the console's access-control list.
+ *   operator  may request a shell
+ *   approver  may approve or deny someone else's request (never their own)
+ *   commander may revoke a live session
+ */
 export const PEOPLE = [
-  { id: 'jt', initials: 'JT', name: 'JT', title: 'Platform on-call' },
-  { id: 'rk', initials: 'RK', name: 'RK', title: 'Shift lead' },
-  { id: 'al', initials: 'AL', name: 'AL', title: 'Incident Commander' },
+  { id: 'jt', initials: 'JT', name: 'JT', title: 'Network on-call', roles: ['operator'] },
+  { id: 'al', initials: 'AL', name: 'AL', title: 'Platform on-call', roles: ['operator', 'approver'] },
+  { id: 'rk', initials: 'RK', name: 'RK', title: 'Incident Commander', roles: ['operator', 'approver', 'commander'] },
 ];
 export const personById = (id) => PEOPLE.find((p) => p.id === id) ?? null;
 
 export const POLICY_CLASSES = {
-  // A host under investigation: strongest controls, and a session that cannot change anything.
-  suspect: { label: 'Suspect or quarantined host', stepUp: true, approvals: 2, role: 'forensics', mode: 'forensic', readOnly: true, defaultMinutes: 10 },
+  // A host under investigation: two-person rule (the requester can never approve) + a passkey step-up by the
+  // requester, and a session that cannot change anything. Raise approvals to 2 for a three-person rule.
+  suspect: { label: 'Suspect or quarantined host', stepUp: true, approvals: 1, role: 'forensics', mode: 'forensic', readOnly: true, defaultMinutes: 10 },
   // The management plane (BMC): the classic pivot target, so it gets a passkey step-up too.
   management: { label: 'Management plane', stepUp: true, approvals: 1, role: 'operator', mode: 'ops', readOnly: false, defaultMinutes: 15 },
   // Ordinary healthy hosts.
@@ -62,4 +69,13 @@ export function policyFor(host, status) {
     maxMinutes: MAX_MINUTES,
     defaultMinutes: p.defaultMinutes,
   };
+}
+
+export const INCIDENT_ID = 'INC-0419';
+
+/** The reason the sheet pre-fills, so under stress the operator only has to confirm. */
+export function reasonHint(host) {
+  if (host.profile === 'gpu-suspect') return `${INCIDENT_ID}: forensic review of ${host.id} (guest vm-7f3a, suspected vGPU escape)`;
+  if (host.profile === 'bmc') return `${INCIDENT_ID}: confirm no IPMI session from 10.0.14.7 reached ${host.id}`;
+  return `${INCIDENT_ID}: verify failed-over guests on ${host.id}`;
 }

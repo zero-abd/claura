@@ -17,7 +17,9 @@ import { HOST_META, INCIDENT_ID, buildWorld } from './world.mjs';
 import * as F from './fmt.mjs';
 
 const [hostId, t0Arg, stateDir] = process.argv.slice(2);
-const out = (s) => process.stdout.write(s);
+// The sshd pty keeps ONLCR on (libuv raw mode does not clear it), so on a tty every "\n" already becomes CR LF.
+// Collapse our CR LF to LF there, otherwise the stream carries "\r\r\n" (harmless on screen, untidy in a recording).
+const out = (s) => process.stdout.write(process.stdout.isTTY ? s.replace(/\r\n/g, '\n') : s);
 const crlf = (s) => s.replace(/\r?\n/g, '\r\n');
 const die = (msg, code = 1) => {
   out(crlf(`\x1b[1;31mClaura: access denied: ${msg}\x1b[0m\n`));

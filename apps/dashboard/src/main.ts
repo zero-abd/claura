@@ -24,7 +24,7 @@ import {
 } from "./engine";
 import { $, $$, installSprings, setAttr, syncDisclosures } from "./dom";
 import { FacilityMap } from "./map";
-import { mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
+import { flyFacility, mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
 import { renderSheet, renderShell, shellHTML, sheetWanted } from "./shell";
 import { parseHost } from "./hosts";
 import { overview } from "./views/overview";
@@ -32,10 +32,14 @@ import { incident } from "./views/incident";
 import { agents } from "./views/agents";
 import { policy } from "./views/policy";
 import { reports } from "./views/reports";
-import { selectChannel, warroom } from "./views/warroom";
+import { cycleTask, selectChannel, warroom } from "./views/warroom";
 import { shells } from "./views/shells";
+import { scope, applyAssetStatus, setScopeFilter } from "./views/scope";
+import { access, cancelCode, closePerson, copyCode, issueCode, openPerson, pickRole, personSheetOpen, revoke, showCode } from "./views/access";
+import { exportReport } from "./views/reports";
+import { canApprove, data, scriptedSource, selectSource, setDataSource, type AssetStatus, type DataSource, type OperatorRole } from "./data";
 
-const VIEW_MODULES = { overview, incident, warroom, shells, agents, policy, reports } as const;
+const VIEW_MODULES = { overview, incident, warroom, scope, shells, agents, policy, reports, access } as const;
 
 // ------------------------------------------------------------------ boot DOM
 let map!: FacilityMap;
@@ -124,8 +128,8 @@ function render() {
   VIEW_MODULES[S.view].render(ph);
   syncDisclosures();
   renderSheet(ph);
-  if (S.view === "overview" || S.view === "incident") map.draw({ amb: S.amb, started: S.started, r: S.started ? S.r : -1e9, u: U() });
-  syncFacility3D(ph, S.r);
+  if ((S.view === "overview" || S.view === "incident") && stageMode() !== "mounted") map.draw({ amb: S.amb, started: S.started, r: S.started ? S.r : -1e9, u: U() });
+  syncFacility3D(ph, S.r, S.view === "incident");
   if (S.hostSheet !== lastHost) {
     lastHost = S.hostSheet;
     setFacilitySelection(lastHost); // outline the host in the 3D scene while its sheet is open
@@ -195,7 +199,7 @@ function reveal(key: string, smooth: boolean) {
   else run();
 }
 function knownKey(key: string) {
-  return !!document.querySelector(`.disc[data-key="${key}"]`);
+  return key === "isolation" || !!document.querySelector(`.disc[data-key="${key}"]`);
 }
 
 const api = {
@@ -209,7 +213,10 @@ const api = {
       S.ambFrozen = null;
       S.stepOv.clear();
       S.sheetDismissed = false;
+      S.popover = null;
       clearStream();
+      data().reset?.();
+      closePerson();
     });
   },
   /** Run the incident from T+0. Optional { approveAt } auto-approves at that script time (canonical 7.4). */
@@ -228,6 +235,7 @@ const api = {
   /** Approve the quarantine step (same as the button or ⌘↵). */
   approve() {
     if (!S.started || S.A !== null) return false;
+    if (!canApprove(data().me().role)) return false; // backend: approve() needs admin or commander
     if (S.r < APPROVAL_AT) {
       S.autoApprove = APPROVAL_AT; // queue: approve the moment the gate opens
       return true;
@@ -274,7 +282,7 @@ const api = {
   },
 
   // ---- navigation + disclosures (new)
-  /** 'overview' | 'incident' | 'agents' | 'policy' | 'reports' */
+  /** 'overview' | 'incident' | 'warroom' | 'scope' | 'shells' | 'agents' | 'policy' | 'reports' | 'access' */
   go(view: View) {
     if (!VIEWS.includes(view)) return false;
     if (view === S.view) return true;
@@ -287,6 +295,7 @@ const api = {
    *  'agent:sentry|triage|warden|scribe' | 'report:INC-0419' (+ older ids) | 'authorized' | 'files'. */
   expand(key: string, opts: { scroll?: boolean } = {}) {
     if (!knownKey(key)) return false;
+    if (key === "isolation") return api.popover("isolation");
     const owner = ownerView(key);
     if (owner && owner !== S.view && document.body.dataset.sheet !== "1") api.go(owner);
     setOpen(key, true);
@@ -296,6 +305,7 @@ const api = {
   },
   collapse(key: string) {
     if (!knownKey(key)) return false;
+    if (key === "isolation") return api.popover(null);
     setOpen(key, false);
     syncDisclosures();
     return true;
@@ -304,7 +314,7 @@ const api = {
     return isOpen(key) ? api.collapse(key) : api.expand(key);
   },
   isOpen(key: string) {
-    return isOpen(key);
+    return key === "isolation" ? S.popover === "isolation" : isOpen(key);
   },
   keys() {
     return Array.from(new Set($$(".disc[data-key]").map((e) => e.dataset.key!)));
@@ -347,6 +357,61 @@ const api = {
     render();
     return true;
   },
+  // ---- access control, scope, documentation (new)
+  /** Open or close the "Isolated · out-of-band" popover: popover('isolation') | popover(null). */
+  popover(name: "isolation" | null) {
+    S.popover = name;
+    render();
+    return true;
+  },
+  /** Open the Add person sheet (admins only). { name, role } prefill it; { issue: true } issues the code at once. */
+  addPerson(opts: { name?: string; role?: OperatorRole; issue?: boolean } = {}) {
+    if (S.view !== "access") api.go("access");
+    const ok = openPerson(opts);
+    render();
+    return ok;
+  },
+  closePerson() {
+    const ok = closePerson();
+    render();
+    return ok;
+  },
+  /** Print INC-0419 as a clean PDF (window.print with the print stylesheet). */
+  exportReport() {
+    return exportReport();
+  },
+  /** Sign in as someone else in the scripted data to see the console with their role: 'JT', 'legal', 'AL'... */
+  as(who: string) {
+    const ok = scriptedSource.setIdentity(who);
+    render();
+    return ok;
+  },
+  /** Scripted only: the person behind the newest unused break-glass code enrolls on their own device. */
+  simulateEnroll(code?: string) {
+    const r = scriptedSource.simulateEnroll(code);
+    render();
+    return r.ok;
+  },
+  /** Swap the data source (a LiveSource) without touching any view. */
+  setDataSource(src: DataSource) {
+    setDataSource(src);
+    render();
+  },
+  /** Pick a registered source by name ('scripted', or 'live' once a LiveSource registers itself). */
+  async useSource(name: string) {
+    const ok = await selectSource(name);
+    if (ok) render();
+    return ok;
+  },
+  /** Fly the 3D camera by hand: fly3d('hallB') or fly3d({ preset: 'rack14', w: 8, h: 6.3 }). Holds until the phase changes. */
+  fly3d(cam: Parameters<typeof flyFacility>[0]) {
+    return flyFacility(cam);
+  },
+  /** The active data source, for recorders and tests: window.claura.data.assets() ... */
+  get data(): DataSource {
+    return data();
+  },
+
   /** Click targets in CSS px (centre + size) for driving a real cursor. visible=false when off-screen or hidden. */
   targets() {
     const out: Record<string, { x: number; y: number; w: number; h: number; visible: boolean }> = {};
@@ -471,9 +536,41 @@ function voiceCall(fn: "toggle" | "playBrief", btn: HTMLElement) {
   return true;
 }
 
+/** Print the break-glass card for the code on screen (the print stylesheet shows only #printCard). */
+function printCard() {
+  document.body.dataset.print = "card";
+  const off = () => {
+    delete document.body.dataset.print;
+    window.removeEventListener("afterprint", off);
+  };
+  window.addEventListener("afterprint", off);
+  window.requestAnimationFrame(() => window.print());
+}
+
 // ------------------------------------------------------------------ input
 document.addEventListener("click", (e) => {
   const t = e.target as HTMLElement;
+
+  // popovers close on any click outside them (the click itself still goes through)
+  if (S.popover && !t.closest("#isoPop") && !t.closest("#isoBtn")) S.popover = null;
+  if (t.closest("#isoBtn")) return void (S.popover = S.popover === "isolation" ? null : "isolation");
+
+  // access control, data scope and tasks
+  const roleOpt = t.closest("[data-role-pick]") as HTMLElement | null;
+  if (roleOpt) return void pickRole(roleOpt.dataset.rolePick!);
+  const setSt = t.closest("[data-set-status]") as HTMLElement | null;
+  if (setSt) {
+    const note = setSt.closest(".as-set")?.querySelector(".as-note-in") as HTMLInputElement | null;
+    return void applyAssetStatus(+setSt.dataset.asset!, setSt.dataset.setStatus as AssetStatus, note);
+  }
+  const filt = t.closest("[data-sc-filter]") as HTMLElement | null;
+  if (filt) return void setScopeFilter(filt.dataset.scFilter!);
+  const taskSt = t.closest(".task-st[data-task]") as HTMLElement | null;
+  if (taskSt) return void cycleTask(+taskSt.dataset.task!);
+  if (t.closest("#issueBtn")) return void issueCode();
+  if (t.closest("#personCancel") || t.closest("#codeDone")) return void closePerson();
+  if (t.closest("#copyBtn")) return void copyCode();
+  if (t.closest("#printBtn")) return void printCard();
 
   const hostEl = t.closest("[data-host]") as HTMLElement | null;
   if (hostEl) return void api.openHost(hostEl.dataset.host!);
@@ -494,6 +591,12 @@ document.addEventListener("click", (e) => {
       api.go("incident");
       api.play();
     } else if (a === "reset") api.reset();
+    else if (a === "add-person") api.addPerson();
+    else if (a === "show-code") void showCode(act.dataset.code!);
+    else if (a === "cancel-code") void cancelCode(act.dataset.code!);
+    else if (a === "revoke") void revoke(act.dataset.key!);
+    else if (a === "sim-enroll") api.simulateEnroll();
+    else if (a === "export") void exportReport();
     return;
   }
 
@@ -540,7 +643,15 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     api.approve();
   } else if (e.key === "Escape") {
-    if (!api.closeHost()) api.closeApproval();
+    if (S.popover) S.popover = null;
+    else if (personSheetOpen()) closePerson();
+    else if (!api.closeHost()) api.closeApproval();
+  } else if (e.key === "Enter" && (e.target as HTMLElement).id === "pName") {
+    e.preventDefault();
+    issueCode();
+  } else if ((e.key === "Enter" || e.key === " ") && (e.target as HTMLElement).matches?.("[data-go][role=link]")) {
+    e.preventDefault();
+    (e.target as HTMLElement).click();
   } else if ((e.key === "Enter" || e.key === " ") && (e.target as HTMLElement).classList?.contains("switch")) {
     e.preventDefault();
     (e.target as HTMLElement).click();
@@ -556,6 +667,10 @@ void mountFacility3D(stageEl);
 
 const params = new URLSearchParams(location.search);
 S.demo = params.get("demo") === "1";
+const asParam = params.get("as"); // ?as=JT (or legal, AL, ...): see the console with that person's role
+if (asParam) scriptedSource.setIdentity(asParam);
+const sourceParam = params.get("source"); // ?source=live once a LiveSource has registered itself
+if (sourceParam && sourceParam !== "scripted") void selectSource(sourceParam);
 S.amb = 6.0; // fixed ambient start so first frames are identical every load
 
 const want = params.get("phase");
@@ -582,6 +697,10 @@ if (expand)
   });
 const channelParam = params.get("channel"); // ?channel=exec (or %23exec)
 if (channelParam) selectChannel(channelParam);
+if (params.get("pop") === "isolation") S.popover = "isolation"; // ?pop=isolation
+const sheetParam = params.get("sheet"); // ?sheet=person (form) | person-code (code issued)
+if (sheetParam === "person" || sheetParam === "person-code")
+  settle(() => void api.addPerson({ name: "Forensics lead", role: "responder", issue: sheetParam === "person-code" }));
 const hostParam = params.get("host"); // ?host=b14-gpu-07 opens its Host sheet
 if (hostParam) settle(() => void api.openHost(hostParam));
 if (params.get("play") === "1") api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });

@@ -1,22 +1,56 @@
-import { APPROVER, CANON_APPROVE, EVIDENCE, FACILITY, FINAL_STEP, INCIDENT, ISOLATE_DUR, OPERATORS } from "./script";
+import { APPROVER, CANON_APPROVE, EVIDENCE, FACILITY, FINAL_STEP, INCIDENT, ISOLATE_DUR } from "./script";
 import { icon } from "./icons";
-import { logoSVG } from "./logo";
+import { faviconURL, logoSVG } from "./logo";
 import { $, $$, disc, setAttr, setHTML, setText } from "./dom";
 import { S, U, VIEWS, tone, type Phase, type View } from "./engine";
-import { hostInfo } from "./hosts";
+import { esc, hostInfo } from "./hosts";
 import { fmtT } from "./util";
+import { avatarStyle, canApprove, data, roleLabel, roster, summarize } from "./data";
+import { closePerson, personSheetHTML, personSheetOpen, renderPersonSheet } from "./views/access";
+import { scopeBadge } from "./views/scope";
 
 const NAV: Record<View, { label: string; icon: string }> = {
   overview: { label: "Overview", icon: "overview" },
   incident: { label: "Incident", icon: "incident" },
   warroom: { label: "War Room", icon: "warroom" },
+  scope: { label: "Data scope", icon: "database" },
   shells: { label: "Shells", icon: "terminal" },
   agents: { label: "Agents", icon: "agents" },
   policy: { label: "Policy", icon: "policy" },
   reports: { label: "Reports", icon: "reports" },
+  access: { label: "People & Access", icon: "users" },
 };
 
 const [FAC_ID, FAC_NAME] = FACILITY.split(" · ");
+
+/** The "Isolated · out-of-band" popover: how Claura stays usable when the attacker owns the corporate network. */
+function isolationHTML(): string {
+  const no = ["Corporate email", "Phones and SMS", "Corporate SSO", "Corporate DNS and VPN"];
+  return `<section class="iso-pop glass" id="isoPop" role="dialog" aria-label="Isolation and deployment" data-open="0" inert>
+    <header>
+      <span class="sheet-ico ok">${icon("shieldLock")}</span>
+      <div><h3>Isolated by design</h3><p>Assume the attacker already owns the corporate network. Email, chat, phones and SSO are untrusted. Claura runs on its own trust root.</p></div>
+    </header>
+    <div class="iso-modes">
+      <div class="mode" data-active="0">
+        <span class="mode-ico">${icon("laptop")}</span>
+        <b>Sealed appliance</b>
+        <p>Runs on an isolated laptop network. No uplink, no corporate DNS, nothing to phish.</p>
+        <span class="tag">Air-gapped</span>
+      </div>
+      <div class="mode" data-active="1">
+        <span class="mode-ico">${icon("cloud")}</span>
+        <b>Out-of-band cloud</b>
+        <p>A dedicated SpacetimeDB database, reached from any clean device on its own TLS endpoint.</p>
+        <span class="tag on">This session</span>
+      </div>
+    </div>
+    <div class="iso-no"><span class="iso-l">Does not depend on</span><div>${no.map((t) => `<span class="no-chip">${icon("x")}${t}</span>`).join("")}</div></div>
+    <div class="iso-row">${icon("key")}<div><b>Passkey or hardware-key sign-in</b><p>No passwords to steal. New people join with a single-use break-glass code, issued in person.</p></div></div>
+    <div class="iso-row">${icon("seal")}<div><b>Every action is on the record</b><p>Messages, approvals and status changes are appended and attributed. Nobody edits the past.</p></div></div>
+    <footer><i></i>SpacetimeDB · live sync<span id="isoWho"></span></footer>
+  </section>`;
+}
 
 export function shellHTML(views: string): string {
   return `
@@ -34,7 +68,7 @@ export function shellHTML(views: string): string {
         <i class="nav-lens"></i>
         ${VIEWS.map(
           (v) => `<button type="button" class="nav-item" data-view="${v}" data-target="nav:${v}">
-            ${icon(NAV[v].icon)}<span>${NAV[v].label}</span>${v === "incident" ? `<i class="nav-dot"></i>` : ""}
+            ${icon(NAV[v].icon)}<span>${esc(NAV[v].label)}</span>${v === "incident" ? `<i class="nav-dot"></i>` : ""}${v === "scope" ? `<i class="nav-badge" id="navScope" data-n="0"></i>` : ""}${v === "access" ? `<i class="nav-tag" title="Admins only">${icon("key")}</i>` : ""}
           </button>`,
         ).join("")}
       </nav>
@@ -52,10 +86,11 @@ export function shellHTML(views: string): string {
         <span class="tb-grow"></span>
         <button type="button" class="tb-btn" id="micBtn" data-act="voice" data-tip="Ask Claura" aria-label="Ask Claura" aria-pressed="false" data-target="mic">${icon("mic")}</button>
         <div class="presence">
-          <div class="avatars">${OPERATORS.map((o, i) => `<span class="av av${i}" id="av${i}" title="${o.initials} · ${o.role}">${o.initials}</span>`).join("")}</div>
-          <span class="sync"><i></i><span><b>synced</b> · SpacetimeDB</span></span>
+          <div class="avatars" id="avatars"></div>
+          <button type="button" class="iso" id="isoBtn" data-act="isolation" aria-haspopup="dialog" aria-expanded="false" data-target="isolation"><i class="iso-dot"></i>${icon("lock")}<span>Isolated · out-of-band</span></button>
         </div>
       </header>
+      ${isolationHTML()}
       <div class="scroll" id="scroll">
         <div class="page" id="page">${views}</div>
       </div>
@@ -83,7 +118,7 @@ export function shellHTML(views: string): string {
         <button type="button" class="btn-primary" id="approveBtn" data-target="approve"><span>${FINAL_STEP.button}</span><kbd>⌘↵</kbd></button>
         <button type="button" class="btn-text" id="notNow" data-target="not-now">Not now</button>
       </div>
-      <p class="sheet-note">Warden cannot quarantine a host on its own.</p>
+      <p class="sheet-note" id="approveNote">Warden cannot quarantine a host on its own.</p>
     </div>
     <div class="sheet-pane sheet-done">
       <span class="sheet-ico ok">${icon("check")}</span>
@@ -115,9 +150,12 @@ export function shellHTML(views: string): string {
     </div>
   </section>
 
+  ${personSheetHTML()}
+
   <div class="devdock" id="devdock">
     <button type="button" class="btn-chip" data-act="sim">${icon("bolt")}Simulate breach</button>
     <button type="button" class="btn-chip" data-act="reset">${icon("reset")}Reset</button>
+    <button type="button" class="btn-chip" data-act="sim-enroll">${icon("userPlus")}Simulate enrollment</button>
   </div>`;
 }
 
@@ -126,12 +164,15 @@ const SUB: Record<View, (ph: Phase) => string> = {
   overview: (ph) => (ph === "nominal" ? "All clear" : ph === "contained" || ph === "report" ? "Contained" : "Breach in progress"),
   incident: (ph) => (ph === "nominal" ? "No open incident" : INCIDENT.id),
   warroom: () => "Out-of-band · SpacetimeDB cloud",
+  scope: (ph) => (ph === "nominal" ? "No open incident" : "What was reachable, and its state"),
   shells: () => "Secure shells",
   agents: () => "Sentry, Triage, Warden, Scribe",
   policy: () => "Playbook guest-escape v3",
-  reports: () => "Filed by Scribe",
+  reports: () => "NIST SP 800-61 · filed by Scribe",
+  access: () => "Admin · break-glass enrollment",
 };
 
+let lastOrb = "";
 export function renderShell(ph: Phase) {
   const t = tone(ph);
   setAttr(document.body, "data-tone", t);
@@ -141,7 +182,48 @@ export function renderShell(ph: Phase) {
   setText($("#tbTitle"), NAV[S.view].label);
   setText($("#tbSub"), SUB[S.view](ph));
 
-  setAttr($("#av0"), "data-s", ph === "approval" ? "looking" : ph === "isolating" ? "approved" : "");
+  // the tab icon and title follow the incident, so a stakeholder switching tabs sees the state
+  const orb = t === "contained" ? "#2FBF71" : "#FF5A1F";
+  if (lastOrb !== orb) {
+    lastOrb = orb;
+    (document.getElementById("favicon") as HTMLLinkElement | null)?.setAttribute("href", faviconURL(orb));
+  }
+  const title = ph === "nominal" ? "Claura" : ph === "contained" || ph === "report" ? "Contained · Claura" : ph === "approval" ? "Needs approval · Claura" : "Breach in progress · Claura";
+  if (document.title !== title) document.title = title;
+
+  // who is here: the first three people online (admin first), then a count
+  const d = data();
+  const people = roster(d).filter((p) => p.kind !== "pending" && p.active);
+  const online = people.filter((p) => p.online);
+  const shown = online.slice(0, 3);
+  setHTML($("#avatars"), `av:${d.version()}`, () =>
+    shown.map((p, i) => `<span class="av" id="av${i}" style="${avatarStyle(p.initials)}" title="${esc(p.name)} · ${esc(p.title)}${p.admin ? " · admin" : ""}">${esc(p.initials.slice(0, 2))}</span>`).join("") +
+    (online.length > 3 ? `<span class="av more" title="${online.length - 3} more online">+${online.length - 3}</span>` : ""),
+  );
+  setAttr(document.getElementById("av0"), "data-s", ph === "approval" ? "looking" : ph === "isolating" ? "approved" : "");
+
+  // Data scope badge: how many assets need a person (red when any is locked or exfiltrated)
+  const sb = scopeBadge();
+  const badge = $("#navScope");
+  setText(badge, sb.n ? String(sb.n) : "");
+  setAttr(badge, "data-n", String(sb.n));
+  setAttr(badge, "data-hard", sb.hard ? "1" : "0");
+
+  // People & Access is for admins: everyone else does not see it
+  const me = d.me();
+  const accessBtn = $('.nav-item[data-view="access"]');
+  accessBtn.hidden = me.role !== "admin";
+
+  // the isolation popover
+  const popOpen = S.popover === "isolation";
+  const pop = $("#isoPop");
+  if (pop.dataset.open !== (popOpen ? "1" : "0")) {
+    pop.dataset.open = popOpen ? "1" : "0";
+    pop.toggleAttribute("inert", !popOpen);
+    pop.setAttribute("aria-hidden", String(!popOpen));
+    setAttr($("#isoBtn"), "aria-expanded", String(popOpen));
+  }
+  setText($("#isoWho"), ` · you are ${me.name}, ${roleLabel(me.role).toLowerCase()} · ${summarize(roster(d)).online} online`);
 
   // nav lens follows the selected item
   const nav = $("#nav");
@@ -197,12 +279,20 @@ export function renderSheet(ph: Phase) {
     sheet.toggleAttribute("inert", !open);
   }
   renderHostSheet(host);
-  const any = open || host ? "1" : "0";
+  if (open && personSheetOpen()) closePersonQuiet(); // the approval always comes first
+  renderPersonSheet();
+  const any = open || host || personSheetOpen() ? "1" : "0";
   if (scrim.dataset.open !== any) {
     scrim.dataset.open = any;
     document.body.dataset.sheet = any;
     $("#appRoot").toggleAttribute("inert", any === "1");
   }
+  // only an admin or the Incident Commander can approve: everyone else sees why the button is off
+  const me = data().me();
+  const may = canApprove(me.role);
+  const btn = $("#approveBtn") as HTMLButtonElement;
+  if (btn.disabled !== !may) btn.disabled = !may;
+  setText($("#approveNote"), may ? "Warden cannot quarantine a host on its own." : `${me.name} (${me.title}) cannot approve. Only the Incident Commander or an admin can.`);
   const approved = S.A !== null;
   setAttr(sheet, "data-s", approved ? "approved" : "request");
   if (approved) {
@@ -213,3 +303,5 @@ export function renderSheet(ph: Phase) {
   }
 }
 
+
+const closePersonQuiet = () => void closePerson();

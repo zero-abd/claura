@@ -57,12 +57,14 @@ export class Ledger {
    * actor, host, requestId, sessionId and a human sentence in `text`.
    */
   append(fields) {
+    // Deep copy: the stored entry must be exactly what was hashed, whatever the caller does with its object afterwards.
+    const own = JSON.parse(JSON.stringify(fields));
     const p = this.queue.then(async () => {
       const prev = this.head().hash;
       const entry = {
         seq: this.entries.length + 1,
         ts: Date.now(),
-        ...fields,
+        ...own,
         prev,
       };
       entry.hash = sha256hex(`${prev}\n${Ledger.body(entry)}`);

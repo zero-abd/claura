@@ -20,4 +20,9 @@ export default __t.row({
   openedAt: __t.timestamp().name("opened_at"),
   containedAt: __t.option(__t.timestamp()).name("contained_at"),
   blastScore: __t.f64().name("blast_score"),
+  category: __t.string(),
+  nistPhase: __t.string().name("nist_phase"),
+  functionalImpact: __t.string().name("functional_impact"),
+  informationImpact: __t.string().name("information_impact"),
+  recoverability: __t.string(),
 });
