@@ -12,14 +12,14 @@
 # Default target is Maincloud (~/.config/claura/.env); --local targets the isolated appliance (~/.config/claura/local.env).
 set -euo pipefail
 
-S=${SPACETIME:-/Users/abd/.local/bin/spacetime}
+S=${SPACETIME:-$(command -v spacetime || echo "$HOME/.local/bin/spacetime")}
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 ENVF=${CLAURA_ENV_FILE:-$HOME/.config/claura/.env}
 if [ "${1:-}" = "--local" ]; then ENVF=${CLAURA_ENV_FILE:-$HOME/.config/claura/local.env}; shift; fi
 getvar() { grep -E "^$1=" "$ENVF" 2>/dev/null | head -1 | cut -d= -f2- | tr -d "\"'"; }
 URI=$(getvar CLAURA_STDB_URI); URI=${URI:-ws://127.0.0.1:3000}
 DB=$(getvar CLAURA_STDB_DB);   DB=${DB:-claura}
-case "$URI" in *maincloud*) SERVER=maincloud ;; *) SERVER=local ;; esac
+case "$URI" in *maincloud*) SERVER=maincloud ;; *) SERVER=http://${URI#ws://} ;; esac
 call() { "$S" call --server "$SERVER" "$DB" "$@" 2>&1 | grep -v WARNING || true; }
 js() { printf '"%s"' "$1"; }
 
