@@ -81,8 +81,8 @@ export const agents = {
         setHTML($(`#tr-${a.id}`), `lt:${sees}:${ltr.map((r) => r.time + r.text.length).join()}`, () =>
           ltr.map((r) => `<li><time>${r.time}</time><span>${linkHosts(r.text)}</span></li>`).join("") || `<li><time></time><span>${sees ? "No activity yet." : "The agents' reasoning is shown to the response team."}</span></li>`,
         );
-        setHTML($(`#tl-${a.id}`), `lc:${sees}:${ltc.map((c) => c.time + c.call + c.result.length).join()}`, () =>
-          ltc.map((c) => `<div class="tool"><time>${c.time}</time><code>${linkHosts(c.call)}<span class="res">→ ${linkHosts(c.result)}</span></code></div>`).join("") ||
+        setHTML($(`#tl-${a.id}`), `lc:${sees}:${ltc.map((c) => c.time + c.call + c.result.length + c.tag).join()}`, () =>
+          ltc.map((c) => `<div class="tool"><time>${c.time}</time><code>${linkHosts(c.call)}${c.tag ? `<span class="tool-tag" data-m="${c.tag}">${c.tag}</span>` : ""}<span class="res">→ ${linkHosts(c.result)}</span></code></div>`).join("") ||
           `<div class="tool"><time></time><code><span class="res">${sees ? "No calls yet." : "Tool calls are shown to the response team."}</span></code></div>`,
         );
         setText($(`#tl-${a.id}`).previousElementSibling?.querySelector(".tag") ?? null, LV.modelLabel());

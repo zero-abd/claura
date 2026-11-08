@@ -382,20 +382,26 @@ export function trace(agentId: string): { time: string; text: string }[] {
   rows.sort((a, b) => a.at - b.at);
   return rows.map((r) => ({ time: sn.inc ? fmtT(rel(sn, r.at)) : fmtClock(r.at), text: r.text }));
 }
-/** Tool-call rows for an Agents card, from the structured tables (proposals, findings, the report), never parsed text. */
-export function tools(agentId: string): { time: string; call: string; result: string }[] {
+/** "fallback" or "scripted" for a call the model did not make; "" for one it did (the card's header already names the model). */
+const callTag = (model: string): string => (/^scripted/i.test(model) ? "scripted" : /fallback/i.test(model) ? "fallback" : "");
+
+/** Tool-call rows for an Agents card. The calls that write a row of their own (the incident, a finding, a proposal, the report, the
+ *  brief) come from those structured tables; the rest (get_host_inventory, check_reachability, list_recent_signals, record_scope,
+ *  get_policy, list_events, post_handoff) come from the runner's own log of each call (the module's record_tool_call). */
+export function tools(agentId: string): { time: string; call: string; result: string; tag: string }[] {
   const sn = snap();
   const d = src!;
-  const rows: { at: number; call: string; result: string }[] = [];
-  if (sn.inc && agentId === "sentry") rows.push({ at: sn.inc.openedAt, call: `open_incident(severity=${sn.inc.severity})`, result: src!.incidentLabel() });
-  for (const f of d.findings()) if (f.agent === agentId) rows.push({ at: f.at, call: `record_finding(${f.kind})`, result: clip(f.text, 90) });
-  for (const p of sn.props) if (p.agent.toLowerCase() === agentId) rows.push({ at: p.at, call: `propose_action(${p.action}, ${p.target})`, result: statusText(p) });
+  const rows: { at: number; call: string; result: string; tag: string }[] = [];
+  if (sn.inc && agentId === "sentry") rows.push({ at: sn.inc.openedAt, call: `open_incident(severity=${sn.inc.severity})`, result: src!.incidentLabel(), tag: "" });
+  for (const f of d.findings()) if (f.agent === agentId) rows.push({ at: f.at, call: `record_finding(${f.kind})`, result: clip(f.text, 90), tag: "" });
+  for (const p of sn.props) if (p.agent.toLowerCase() === agentId) rows.push({ at: p.at, call: `propose_action(${p.action}, ${p.target})`, result: statusText(p), tag: "" });
   const rep = d.report();
-  if (agentId === "scribe" && rep) rows.push({ at: rep.filedAt, call: "file_report()", result: `filed · ${rep.summary.length} characters` });
+  if (agentId === "scribe" && rep) rows.push({ at: rep.filedAt, call: "file_report()", result: `filed · ${rep.summary.length} characters`, tag: "" });
   const b = d.brief();
-  if (agentId === "scribe" && b && b.incidentId !== 0 && /scribe/i.test(b.author)) rows.push({ at: b.updatedAt, call: "set_brief()", result: "plain-language brief updated" });
+  if (agentId === "scribe" && b && b.incidentId !== 0 && /scribe/i.test(b.author)) rows.push({ at: b.updatedAt, call: "set_brief()", result: "plain-language brief updated", tag: "" });
+  for (const c of d.toolCalls()) if (c.agent === agentId) rows.push({ at: c.at, call: `${c.tool}(${clip(c.args, 120)})`, result: clip(c.result, 200), tag: callTag(c.model) });
   rows.sort((a, b2) => a.at - b2.at);
-  return rows.map((r) => ({ time: sn.inc ? fmtT(rel(sn, r.at)) : fmtClock(r.at), call: r.call, result: r.result }));
+  return rows.map((r) => ({ time: sn.inc ? fmtT(rel(sn, r.at)) : fmtClock(r.at), call: r.call, result: r.result, tag: r.tag }));
 }
 /** The policy table's own words for an action ("Cut network for the suspect guest. Undo by restoring the security group."). */
 export const policyNote = (action: string): string => src?.policies().find((p) => p.action === action)?.note ?? "";

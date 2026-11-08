@@ -24,7 +24,8 @@ export interface Tool {
   parameters: ObjectSchema;
   /** One line used as the agent's live "thought" when the model picks this tool. */
   thought?: (args: Record<string, unknown>) => string;
-  run(args: Record<string, unknown>): Promise<unknown>;
+  /** `how.routine` is set when a deterministic routine (fallback or --scripted) calls the tool instead of the model (see trace.ts). */
+  run(args: Record<string, unknown>, how?: { routine?: boolean }): Promise<unknown>;
 }
 
 export interface LoopLog {

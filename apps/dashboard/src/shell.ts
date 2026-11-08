@@ -52,6 +52,7 @@ function isolationHTML(): string {
     <div class="iso-row">${icon("key")}<div><b>Passkey or hardware-key sign-in</b><p>No passwords to steal. New people join with a single-use break-glass code, issued in person.</p></div></div>
     <div class="iso-row">${icon("seal")}<div><b>Every action is on the record</b><p>Messages, approvals and status changes are appended and attributed. Nobody edits the past.</p></div></div>
     <div class="src-row" id="srcRow" data-src="replay"><i></i><b id="srcLabel">Replay</b><span id="srcSub">Scripted data. Nothing is read from or written to a server.</span></div>
+    <button type="button" class="iso-replay" id="isoReplay" data-act="replay" data-target="replay-incident" title="Play the scripted incident from the first signal (key P)">${icon("play")}<span>Replay the incident</span><kbd>P</kbd></button>
     <footer><i></i>SpacetimeDB · live sync<span id="isoWho"></span></footer>
   </section>`;
 }

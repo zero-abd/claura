@@ -170,6 +170,18 @@ export interface FindingRow {
   text: string;
   at: Ts;
 }
+/** One tool call an agent made, as the runner logged it (the module's record_tool_call): what it asked for and what came back. */
+export interface ToolCallRow {
+  id: number;
+  at: Ts;
+  /** lower case: sentry | triage | warden | scribe */
+  agent: string;
+  tool: string;
+  args: string;
+  result: string;
+  /** the model label the runner wrote ("nemotron-3-nano:4b (local, on-prem)", "scripted (no model)", "deterministic fallback ...") */
+  model: string;
+}
 export interface PolicyRow {
   action: string;
   mode: string;
@@ -534,15 +546,38 @@ export class LiveSource implements DataSource {
     const i = this.incident();
     return i ? `INC-${String(i.id).padStart(4, "0")}` : "";
   }
-  events(): IncidentEvent[] {
-    return this.memo("events", () => {
+  /** Every incident_event of the live incident, the agents' tool-call rows (kind "tool") included, plus the signals and tool calls
+   *  logged before it existed (incident_id 0, in the two minutes before it opened). */
+  private incidentEvents(): IncidentEvent[] {
+    return this.memo("allEvents", () => {
       const inc = this.latest();
       if (!inc) return [];
       const from = tsMs(inc.openedAt) - 120_000;
       return this.all("incidentEvent")
-        .filter((e) => e.incidentId === inc.id || (e.incidentId === 0n && e.kind === "signal" && tsMs(e.at) >= from))
+        .filter((e) => e.incidentId === inc.id || (e.incidentId === 0n && (e.kind === "signal" || e.kind === "tool") && tsMs(e.at) >= from))
         .sort((a, b) => (a.id < b.id ? -1 : 1))
         .map((e) => this.mapEvent(e, num(inc.id)));
+    });
+  }
+  /** The incident log as the record shows it: the tool-call rows are the Agents trace's, not part of the story (timeline, evidence hash). */
+  events(): IncidentEvent[] {
+    return this.memo("events", () => this.incidentEvents().filter((e) => e.kind !== "tool"));
+  }
+  /** What the agents called: get_host_inventory, check_reachability and the other calls that leave no row of their own. */
+  toolCalls(): ToolCallRow[] {
+    return this.memo("toolCalls", () => {
+      const out: ToolCallRow[] = [];
+      for (const e of this.incidentEvents()) {
+        if (e.kind !== "tool") continue;
+        try {
+          const j = JSON.parse(e.text) as Record<string, unknown>;
+          if (typeof j.tool !== "string" || !j.tool) continue;
+          out.push({ id: e.id, at: e.at, agent: e.actor.toLowerCase(), tool: j.tool, args: String(j.args ?? ""), result: String(j.result ?? ""), model: String(j.model ?? "") });
+        } catch {
+          /* not a row the runner wrote */
+        }
+      }
+      return out;
     });
   }
   private mapEvent(e: Raw, incId: number): IncidentEvent {

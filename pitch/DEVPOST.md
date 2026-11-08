@@ -8,7 +8,7 @@
 
 **Tracks:** Winstead PC (Cyber Incident Response Dashboard) · Spacetime (Build on Spacetime) · NVIDIA (Use Nemotron Beyond a Chatbot). Built with NMC²'s "Keep the World Running" problems in mind too: missed warnings, unclear handoffs, wrong information at the wrong time.
 
-> **What's live and what's simulated.** Live: the console, the SpacetimeDB module on Maincloud (all incident state, identities and roles, the policy gate, War Room, data scope, documentation), four agents driven by Nemotron running locally, and the Secure Shell certificate flow. Simulated: the attack telemetry is a replayed fixture, containment changes state in the database rather than touching real hypervisors, and the shell targets are real OpenSSH daemons in sandboxes standing in for GPU hosts. The 9.4 s, 2,048 hosts and 61,207 agent sandboxes on screen are illustrative.
+> **What's live and what's simulated.** Live: the console, the SpacetimeDB module on Maincloud (database `claura`: all incident state, identities and roles, the policy gate, War Room, data scope, documentation), four agents driven by Nemotron running locally, and the Secure Shell certificate flow. Simulated: the attack telemetry is a replayed fixture, containment changes state in the database rather than touching real hypervisors, and the shell targets are real OpenSSH daemons in sandboxes standing in for GPU hosts. Evidence anchoring on Solana devnet is built and tested, but our devnet wallet is not funded yet, so the console shows "Simulated anchor" and writes nothing to the chain (pending funding). The 9.4 s of the scripted replay, 2,048 hosts and 61,207 agent sandboxes on screen are illustrative. Measured, on a laptop with a local 4B model against Maincloud: live runs took about 38 to 50 s from first signal to contained, a human approval included, and a click on one console reached the other's screen in about 335 ms.
 
 ---
 
@@ -42,6 +42,8 @@ Claura is the immune system for AI data centers. It turns a scattered attack int
 
 **Secure Shell.** Click a host and Claura's own SSH certificate authority mints a just-in-time OpenSSH user certificate that expires within minutes. The host presents a CA-signed host certificate, so there's no trust-on-first-use. A passkey or Touch ID step-up is required, a suspect host needs a second approver and accepts only a read-only forensic principal, and every session is recorded into a hash-chained ledger.
 
+**Also built, outside the two-minute demo.** *Ask Claura* is push-to-talk voice in the console: local Nemotron answers from the incident record and ElevenLabs speaks it (read-only: it can't approve anything, and it runs in mock mode without a key). *Evidence anchoring* writes the SHA-256 of the incident record to a Solana **devnet** Memo transaction and can re-read the chain to verify it. The code and its checks are done; the live send is pending devnet funding, so until then the console labels the anchor "Simulated", shows no Explorer link and keeps it out of the PDF.
+
 ## How we built it
 
 ```
@@ -58,8 +60,8 @@ Claura is the immune system for AI data centers. It turns a scattered attack int
                                                      Liquid Glass consoles (every operator, every device)
 ```
 
-- **SpacetimeDB is the backend.** One TypeScript module on Maincloud holds every piece of incident state, plus operator identities, roles and the War Room. The policy gate lives in the `propose_action` reducer: in one transaction it reads the policy row and validates the target, then commits the proposal as executed, pending approval, or blocked. A blocked proposal stays in the record for audit and live sync, but its action is never applied. Admin-only reducers handle enrollment and policy changes, and every console is a live subscription, which is how two laptops show the same incident at the same moment. The only processes outside SpacetimeDB are the two that must sit next to hardware: the on-prem agent runner and the SSH gateway.
-- **Nemotron agents, beyond a chatbot.** A Node and TypeScript runner drives NVIDIA Nemotron 3 Nano (`nemotron-3-nano:4b`, 2.9 GB) through Ollama on local hardware. No model API sits in the loop. Four agents share nine tools (`list_recent_signals`, `open_incident`, `get_host_inventory`, `check_reachability`, `record_finding`, `get_policy`, `propose_action`, `list_events`, `file_report`), and every effect is a reducer call. The loop has real guardrails: JSON-schema validation of every argument, one retry with the error fed back to the model, stall detection, step and time limits, completion judged by database state rather than by the model's say-so, and a deterministic fallback per agent. Every output is tagged `model`, `model+fallback` or `fallback`, so you can always see what Nemotron did.
+- **SpacetimeDB is the backend.** One TypeScript module on Maincloud (database `claura`; 18 tables, 18 role-gated views, 24 reducers) holds every piece of incident state, plus operator identities, roles and the War Room. The policy gate lives in the `propose_action` reducer: in one transaction it reads the policy row and validates the target, then commits the proposal as executed, pending approval, or blocked. A blocked proposal stays in the record for audit and live sync, but its action is never applied. Admin-only reducers handle enrollment and policy changes, and every console is a live subscription, which is how two laptops show the same incident at the same moment. The only processes outside SpacetimeDB are the two that must sit next to hardware: the on-prem agent runner and the SSH gateway.
+- **Nemotron agents, beyond a chatbot.** A Node and TypeScript runner drives NVIDIA Nemotron 3 Nano (`nemotron-3-nano:4b`, 2.9 GB) through Ollama on local hardware. No model API sits in the loop. Four agents share twelve tools (`list_recent_signals`, `open_incident`, `get_host_inventory`, `check_reachability`, `record_finding`, `record_scope`, `get_policy`, `propose_action`, `list_events`, `set_brief`, `file_report`, `post_handoff`), and every effect is a reducer call. The loop has real guardrails: JSON-schema validation of every argument, one retry with the error fed back to the model, stall detection, step and time limits, completion judged by database state rather than by the model's say-so, and a deterministic fallback per agent. Every output is tagged `model`, `model+fallback` or `fallback`, so you can always see what Nemotron did.
 - **The console.** TypeScript and Vite, with a Liquid Glass design and progressive disclosure: calm when nothing is wrong, one card when it needs you. The 3D data center is three.js and deterministic, so the film and the live view match.
 - **Secure Shell.** A Node, Express and WebSocket gateway with xterm.js in the browser, passkeys through SimpleWebAuthn, and OpenSSH certificates signed by `ssh-keygen`: one principal per user certificate and a 15-minute maximum. Each target `sshd` accepts only the principals in its `AuthorizedPrincipalsFile` (no keys, no passwords), and presents a host certificate signed by Claura's host CA, which the client trusts instead of trusting on first use. The session ledger chains each entry to the previous one with SHA-256, so editing history breaks every hash after it.
 - **Brand and film.** claura.tech and the mark (a C-shaped aura ring whose seal bar closes the gap), and a demo film built with HyperFrames.
@@ -74,10 +76,11 @@ Claura is the immune system for AI data centers. It turns a scattered attack int
 
 ## Accomplishments that we're proud of
 
-- The decision loop runs live on a laptop: in one logged run Nemotron made 15 turns and 14 tool calls with zero malformed calls, every proposal was ruled by the policy gate, and after a human approval the simulated containment state committed in SpacetimeDB (`backend/runs/`).
+- The decision loop runs live on a laptop: in one logged run Nemotron made 15 turns and 14 tool calls (Sentry, Triage and Warden; 19 and 18 with Scribe) with zero malformed calls, every proposal was ruled by the policy gate, and after a human approval the simulated containment state committed in SpacetimeDB (`backend/runs/`).
+- Measured, not imagined: in our dress-rehearsal live runs (Maincloud, a 4B model on a laptop) the breach showed on screen about 8 s after the start and the approval card at a median of about 45 s. First signal to contained took about 38 to 50 s with a human approval, and the time-to-contain counter read 33 to 47 s. Scribe's brief landed about 21 s after the approval and the filed report about 33 s after it. The 9.4 s on the scripted replay is a demo clock, and we label it as one.
 - Changing one policy row changes behavior with no code change: set quarantine to auto and the same proposal executes with no human; set it back and it waits (verified end to end, `backend/spacetime/README.md`).
 - All five Winstead requirements in one console, usable under stress: one card, one keystroke, one plain-language brief.
-- Two consoles, one truth, with no refresh.
+- Two consoles, one truth, with no refresh: a War Room message or an approval on one console reached the other's screen in about 335 ms against Maincloud (`apps/dashboard/shots/live-run.json`).
 - Real OpenSSH certificates and a tamper-evident session ledger behind a single click.
 
 ## What we learned
@@ -85,15 +88,15 @@ Claura is the immune system for AI data centers. It turns a scattered attack int
 - **Policy, not the model, decides.** A deterministic gate is what makes a small, local model safe to act on production systems.
 - **Incident response is a coordination problem.** Detection gets the headlines, but the night is lost when people can't talk safely or can't agree on what's true. The communications plane has to sit outside the blast radius.
 - **Plain language is a security feature.** "What we know / what we don't know yet" stops guessing from spreading.
-- **Label the simulated parts.** It cost us nothing, and it makes everything we show live more believable.
+- **Label the simulated parts.** It cost us nothing, and it makes everything we show live more believable. The same goes for numbers: the replay's 9.4 s is a demo clock, while the live console shows the real one, 33 to 47 s on a laptop with a local model, and we'd rather show the real one.
 
 ## What's next for Claura
 
-All of this is roadmap and not built yet.
+All of this is roadmap and not built yet. (Ask Claura voice and the Solana devnet anchor are built; see "What it does".)
 
 - **Real senses:** hypervisor, IOMMU, vGPU, EDR, BMC and identity connectors, with design partners measuring time-to-contain and false-positive rates to replace our illustrative numbers.
 - **The agent firewall:** the same policy gate in front of every AI agent's tool calls in the building.
-- **Voice briefings:** "Ask Claura" lets an executive on the move ask out loud and hear the answer from the incident record, spoken by ElevenLabs in their own language.
+- **Voice beyond the console:** "Ask Claura" works today inside the console. Next is reaching an executive on a phone call or a mobile device, away from the screen, with the same read-only answers from the incident record.
 - **Autonomous recovery:** reimage, re-attest and return hosts to the pool, with a human signing once.
 - **DPU enforcement:** containment on NVIDIA BlueField-class DPUs, below the hypervisor, so a compromised host can't undo its own quarantine.
 - **Confidential-computing attestation:** prove a destination host and GPU are clean before any tenant fails over onto it.
@@ -105,4 +108,4 @@ Why it matters: McKinsey projects $6.7 trillion of data-center capex by 2030, $5
 
 ## Built with
 
-spacetimedb · maincloud · nvidia-nemotron · nemotron-3-nano · ollama · typescript · node.js · vite · three.js · openssh · webauthn · simplewebauthn · passkeys · xterm.js · express · websockets · hyperframes
+spacetimedb · maincloud · nvidia-nemotron · nemotron-3-nano · ollama · typescript · node.js · vite · three.js · openssh · webauthn · simplewebauthn · passkeys · xterm.js · express · websockets · elevenlabs · hyperframes

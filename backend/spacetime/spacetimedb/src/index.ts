@@ -330,6 +330,32 @@ export const set_agent_state = spacetimedb.reducer(
   }
 );
 
+/**
+ * One tool call an agent made (what it asked for, what came back, which model ran it), for the Agents trace. It is an
+ * incident_event of kind 'tool': not a finding, not a signal, so no score, summary or policy decision is ever built from it.
+ * incident_id 0 is allowed (Sentry reads the signals before an incident exists). The text is one JSON object
+ * {tool, args, result, model}; the operator console parses it and shows it to the response team only (the event log is a core view).
+ * Calls that write their own rows (record_finding, propose_action, file_report, set_brief, open_incident) are not logged here.
+ */
+export const record_tool_call = spacetimedb.reducer(
+  { incident_id: t.u64(), agent: t.string(), tool: t.string(), args: t.string(), result: t.string(), model: t.string() },
+  (ctx, { incident_id, agent, tool, args, result, model }) => {
+    requireOperator(ctx, AGENT_OR_ADMIN);
+    const who = norm(agent);
+    if (!isIn(AGENTS, who)) {
+      throw new SenderError(`unknown agent '${agent}' (expected one of ${AGENTS.join(', ')})`);
+    }
+    requireIncidentOrRoom(ctx, incident_id);
+    const body = JSON.stringify({
+      tool: cleanText(tool, 'tool', 60),
+      args: cleanText(args, 'args', 400, true),
+      result: cleanText(result, 'result', 600, true),
+      model: cleanText(model, 'model', 80, true),
+    });
+    logEvent(ctx, incident_id, 'tool', who, body);
+  }
+);
+
 /** Record an agent finding. blast_score < 0 leaves incident.blast_score unchanged. */
 export const record_finding = spacetimedb.reducer(
   {

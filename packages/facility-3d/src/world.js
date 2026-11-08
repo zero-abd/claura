@@ -1096,10 +1096,13 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
     const state_ =
       ch.green > 0.5 ? 'sealed' : ch.ring > 0.4 ? 'approval' : ch.d1 > 0.02 ? 'containing' : ch.hot > 0.25 ? 'breach' : 'plain';
     setLabelTex(b14tag, b14Texts[state_]);
+    // the failover tags C05 / C12 fade in with the migration; the hall names sit right under them (Hall C over C05, Hall B over the
+    // B14 tag at the campus framing), so while the tags show the halls' names give way
+    const failTags = sstep(0.2, 1.0, ch.mig);
     for (const L of labels) {
       const wpx = L.tex.w, hpx = L.tex.h;
       L.sprite.scale.set(sscale(wpx), sscale(hpx), 1);
-      L.mat.opacity = (L === c05 || L === c12) ? sstep(0.2, 1.0, ch.mig) * 0.95 : L.vis(H);
+      L.mat.opacity = (L === c05 || L === c12) ? failTags * 0.95 : L.name.startsWith('hall') ? L.vis(H) * (1 - failTags) : L.vis(H);
       L.sprite.visible = L.mat.opacity > 0.01;
     }
   }

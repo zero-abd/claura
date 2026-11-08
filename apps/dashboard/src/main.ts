@@ -26,7 +26,7 @@ import {
 } from "./engine";
 import { $, $$, installSprings, setAttr, syncDisclosures } from "./dom";
 import { FacilityMap } from "./map";
-import { flyFacility, mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
+import { flyFacility, hoverRing, mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
 import { renderSheet, renderShell, shellHTML, sheetOpened, sheetWanted } from "./shell";
 import { parseHost } from "./hosts";
 import { overview } from "./views/overview";
@@ -114,6 +114,9 @@ function setView(v: View, animate: boolean) {
   $("#scroll").scrollTop = 0;
   window.dispatchEvent(new CustomEvent("bulkhead:view", { detail: v }));
 }
+
+/** A click on the approval sheet's buttons is ignored for this long after the sheet opens (see the #approveBtn handler). */
+const APPROVE_GUARD_MS = 700;
 
 // ------------------------------------------------------------------ render
 let lastPhase: Phase | null = null;
@@ -463,6 +466,10 @@ const api = {
   fly3d(cam: Parameters<typeof flyFacility>[0]) {
     return flyFacility(cam);
   },
+  /** Test aid: the host the 3D hover ring was last moved onto while an incident is open (null = the module's own ring). */
+  hoverRing() {
+    return hoverRing();
+  },
   /** The active data source, for recorders and tests: window.claura.data.assets() ... */
   get data(): DataSource {
     return data();
@@ -693,7 +700,11 @@ document.addEventListener("click", (e) => {
       api.go("incident");
       api.play();
     } else if (a === "reset") api.reset();
-    else if (a === "add-person") api.addPerson();
+    else if (a === "replay") {
+      // the isolation popover's "Replay the incident": the replay fallback's own start (the dev dock is hidden with ?demo=1)
+      S.popover = null;
+      api.play();
+    } else if (a === "add-person") api.addPerson();
     else if (a === "show-code") void showCode(act.dataset.ref!);
     else if (a === "cancel-code") void cancelCode(act.dataset.ref!);
     else if (a === "revoke") void revoke(act.dataset.key!);
@@ -708,9 +719,9 @@ document.addEventListener("click", (e) => {
   if (t.closest("#shellBtn")) return void (S.hostSheet && openShellFor(S.hostSheet));
   if (t.closest("#hostClose")) return void api.closeHost();
   if (t.closest("#approveBtn")) {
-    // live: the sheet slides up over the middle of the 3D stage, where the Driver is clicking. A click in its first moments is
+    // the sheet slides up over the middle of the 3D stage, where the Driver is clicking. A click in its first moments is
     // aimed at the stage, not at the card, so it must not approve. (⌘↵ and a click after the pause still do.)
-    if (isLive() && performance.now() - sheetOpened.at < 700) return;
+    if (performance.now() - sheetOpened.at < APPROVE_GUARD_MS) return;
     return void api.approve();
   }
   if (t.closest("#notNow")) return void api.closeApproval();
@@ -755,16 +766,21 @@ const typing = (t: EventTarget | null) => {
   const el = t as HTMLElement | null;
   return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 };
+/** A key typed in another module (the Secure Shell's request sheet and terminal), or while its overlay is on screen: the console's
+ *  own shortcuts (⌘↵ approve, P / R replay) never take it, whatever has the focus. */
+const inModule = (t: EventTarget | null) => !!(t as HTMLElement | null)?.closest?.(".cs-root, [data-module]") || !!document.querySelector(".cs-root");
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
-    // Secure Shell's request sheet submits on ⌘↵ too: the console never takes a key that was typed inside another module
-    if ((e.target as HTMLElement | null)?.closest?.(".cs-root, [data-module]")) return;
+    // Secure Shell's request sheet submits on ⌘↵ too: the console never takes a key that was typed inside another module, and
+    // never while a module's overlay (the shell's request sheet or terminal) is on screen, wherever the focus happens to be
+    if (inModule(e.target)) return;
     // live: ⌘↵ approves what is on the sheet in front of you, never a proposal that is pending behind a closed sheet
     if (isLive() && !(phase() === "approval" && sheetWanted("approval") && document.body.dataset.sheet === "1")) return;
     api.approve();
-  } else if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "p" || e.key === "P") && S.demo && !S.started && !isLive() && !typing(e.target)) {
-    // the replay fallback (?demo=1) starts on P: the breach plays from T+0, as it does at page load with ?demo=1&play=1
+  } else if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "p" || e.key === "P" || e.key === "r" || e.key === "R") && S.demo && !isLive() && !typing(e.target) && !inModule(e.target) && (!S.started || phase() === "contained" || phase() === "report")) {
+    // the replay fallback (?demo=1) starts on P or R: the breach plays from T+0, as it does at page load with ?demo=1&play=1.
+    // Once the film has finished the same key plays it again for the next person; mid-run it does nothing.
     e.preventDefault();
     api.play();
   } else if (e.key === "Escape") {

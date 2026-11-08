@@ -182,6 +182,9 @@ export class SpacetimeClauraDb implements ClauraDb {
   setAgentState(agent: string, status: string, thought: string, model: string) {
     return this.call('set_agent_state', () => this.c().reducers.setAgentState({ agent, status, thought, model }));
   }
+  recordToolCall(incidentId: bigint, agent: string, tool: string, args: string, result: string, model: string) {
+    return this.call('record_tool_call', () => this.c().reducers.recordToolCall({ incidentId, agent, tool, args, result, model }));
+  }
   recordFinding(incidentId: bigint, agent: string, kind: string, text: string, blastScore: number) {
     return this.call('record_finding', () => this.c().reducers.recordFinding({ incidentId, agent, kind, text, blastScore }));
   }

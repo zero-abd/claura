@@ -410,8 +410,8 @@ function renderAnchor() {
     s.busy
       ? `<span class="a-dot"></span><b>Anchoring ${esc(s.label)}</b><span>SHA-256 of the record, signed by the gateway</span>`
       : s.sig && s.sim
-        ? `<span class="a-dot"></span><b>Simulated anchor</b><span>${esc(s.label)} · SHA-256 <code title="${esc(s.digest)}">${esc(short(s.digest))}</code> · nothing was written to Solana${s.reason === "unfunded" ? " (the devnet wallet has no SOL)" : ""}</span>
-           <span class="a-sig">local reference <code title="${esc(s.sig)}">${esc(short(s.sig))}</code> · not a transaction on the chain, so there is no Explorer link</span>`
+        ? `<span class="a-dot"></span><b>Simulated anchor${s.reason === "unfunded" ? " — devnet wallet not funded yet" : ""}</b><span>${esc(s.label)} · SHA-256 <code title="${esc(s.digest)}">${esc(short(s.digest))}</code> · nothing was written to Solana</span>
+           <span class="a-sig">local reference <code title="${esc(s.sig)}">${esc(short(s.sig))}</code> · not a transaction on the chain, so there is no Explorer link and it is left out of the printed PDF</span>`
         : s.sig
         ? `<span class="a-dot"></span><b>Anchored on Solana devnet</b><span>${esc(s.label)} · SHA-256 <code title="${esc(s.digest)}">${esc(short(s.digest))}</code></span>
            <span class="a-sig">signature <code title="${esc(s.sig)}">${esc(short(s.sig))}</code> <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Solana Explorer</a></span>`

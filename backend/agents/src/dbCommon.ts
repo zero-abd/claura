@@ -18,7 +18,8 @@ export function tsToMs(ts: unknown): number {
  * incident's story, so they are included too. Ordered by id, not by time.
  */
 export function eventsFor(all: EventRow[], incidentId: bigint): EventRow[] {
+  // kind 'tool' rows are the Agents trace's record of what an agent called: they are not part of the story an agent reads back
   return all
-    .filter(e => e.incidentId === incidentId || (e.incidentId === 0n && e.kind === 'signal'))
+    .filter(e => e.kind !== 'tool' && (e.incidentId === incidentId || (e.incidentId === 0n && e.kind === 'signal')))
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)); // ids are monotonic; ctx.timestamp is shared within one reducer call
 }

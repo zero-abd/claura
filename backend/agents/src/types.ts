@@ -189,6 +189,11 @@ export interface ClauraDb {
   ingestSignal(source: string, message: string, host: string, vm: string): Promise<void>;
   openIncident(title: string, severity: string, host: string, vm: string): Promise<void>;
   setAgentState(agent: string, status: string, thought: string, model: string): Promise<void>;
+  /**
+   * One tool call, for the console's Agents trace: an incident_event of kind 'tool' (not a finding, never read back into
+   * a prompt: events() leaves it out). incidentId 0n = before an incident exists. Fire-and-forget callers must catch.
+   */
+  recordToolCall(incidentId: bigint, agent: string, tool: string, args: string, result: string, model: string): Promise<void>;
   /** blastScore < 0 leaves the incident's score unchanged */
   recordFinding(
     incidentId: bigint,

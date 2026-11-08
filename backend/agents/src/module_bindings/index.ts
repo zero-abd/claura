@@ -47,6 +47,7 @@ import PostMessageReducer from "./post_message_reducer.ts";
 import ProposeActionReducer from "./propose_action_reducer.ts";
 import RecordDecisionReducer from "./record_decision_reducer.ts";
 import RecordFindingReducer from "./record_finding_reducer.ts";
+import RecordToolCallReducer from "./record_tool_call_reducer.ts";
 import ResetDemoReducer from "./reset_demo_reducer.ts";
 import RevokeEnrollmentReducer from "./revoke_enrollment_reducer.ts";
 import RevokeOperatorReducer from "./revoke_operator_reducer.ts";
@@ -228,6 +229,7 @@ const reducersSchema = __reducers(
   __reducerSchema("propose_action", ProposeActionReducer),
   __reducerSchema("record_decision", RecordDecisionReducer),
   __reducerSchema("record_finding", RecordFindingReducer),
+  __reducerSchema("record_tool_call", RecordToolCallReducer),
   __reducerSchema("reset_demo", ResetDemoReducer),
   __reducerSchema("revoke_enrollment", RevokeEnrollmentReducer),
   __reducerSchema("revoke_operator", RevokeOperatorReducer),

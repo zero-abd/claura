@@ -148,7 +148,7 @@ export const incidentEventTable = table(
     /** 0 = not tied to an incident (e.g. a signal before any incident exists). */
     incident_id: t.u64(),
     at: t.timestamp(),
-    /** signal | incident | finding | action | blocked | approval_requested | approval | state | report */
+    /** signal | incident | finding | action | blocked | approval_requested | approval | state | report | tool (an agent's tool call, JSON text) */
     kind: t.string(),
     actor: t.string(),
     text: t.string(),

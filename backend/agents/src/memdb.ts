@@ -131,6 +131,10 @@ export class MemClauraDb implements ClauraDb {
     this.agentState.set(agent, { agent, status, thought, model, updatedAtMs: this.now() });
   }
 
+  async recordToolCall(incidentId: bigint, agent: string, tool: string, args: string, result: string, model: string) {
+    this.log(incidentId, 'tool', agent, JSON.stringify({ tool, args, result, model }));
+  }
+
   async recordFinding(incidentId: bigint, agent: string, kind: string, text: string, blastScore: number) {
     this.finding.push({ id: this.seq.finding++, incidentId, agent, kind, text, atMs: this.now() });
     const inc = this.incident.get(incidentId);

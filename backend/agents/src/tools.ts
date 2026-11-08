@@ -6,6 +6,7 @@ import type { Env } from './agents/common.ts';
 import { reachabilityFixture } from './fixtures.ts';
 import { claimProblems, plainify, softenClaims } from './room.ts';
 import { validateArgs } from './schema.ts';
+import { traced } from './trace.ts';
 import type { Tool } from './toolLoop.ts';
 import { clip, waitFor } from './util.ts';
 
@@ -46,7 +47,7 @@ export async function callTool(tools: Tool[], name: string, args: Record<string,
   if (!tool) throw new Error(`no such tool: ${name}`);
   const v = validateArgs(tool.parameters, args);
   if (!v.ok) throw new Error(`invalid arguments for ${name}: ${v.error}`);
-  return tool.run(v.value);
+  return tool.run(v.value, { routine: true }); // a routine, not the model, is calling: the trace says so
 }
 
 const str = (description: string, extra: object = {}) => ({ type: 'string' as const, description, ...extra });
@@ -54,7 +55,7 @@ const str = (description: string, extra: object = {}) => ({ type: 'string' as co
 // ---------------------------------------------------------------- Sentry ---
 
 export function sentryTools(env: Env): Tool[] {
-  return [
+  return traced(env, 'sentry', 0n, [
     {
       name: 'list_recent_signals',
       description:
@@ -117,13 +118,13 @@ export function sentryTools(env: Env): Tool[] {
         return { incident_id: String(inc.id), status: inc.status, host, vm, note: 'incident opened; Triage has been notified' };
       },
     },
-  ];
+  ]);
 }
 
 // ---------------------------------------------------------------- Triage ---
 
 export function triageTools(env: Env, incidentId: bigint): Tool[] {
-  return [
+  return traced(env, 'triage', incidentId, [
     {
       name: 'get_host_inventory',
       description: 'Get a host\'s rack location, status and the guest VMs placed on it (to find co-resident guests).',
@@ -210,7 +211,7 @@ export function triageTools(env: Env, incidentId: bigint): Tool[] {
         return { recorded: true, asset: a.name, status: args.status };
       },
     },
-  ];
+  ]);
 }
 
 // ---------------------------------------------------------------- Warden ---
@@ -255,7 +256,7 @@ export async function proposeThroughGate(
 }
 
 export function wardenTools(env: Env, incidentId: bigint): Tool[] {
-  return [
+  return traced(env, 'warden', incidentId, [
     {
       name: 'get_policy',
       description: 'Read the containment policy table: for each action, whether it runs automatically, needs human approval, or is denied.',
@@ -296,13 +297,13 @@ export function wardenTools(env: Env, incidentId: bigint): Tool[] {
         return proposeThroughGate(env, incidentId, String(args.action), String(args.target), String(args.reason));
       },
     },
-  ];
+  ]);
 }
 
 // ---------------------------------------------------------------- Scribe ---
 
 export function scribeTools(env: Env, incidentId: bigint): Tool[] {
-  return [
+  return traced(env, 'scribe', incidentId, [
     {
       name: 'list_events',
       description: 'List the incident\'s event log (signals, findings, actions, blocked actions, approvals), oldest first. Read it before writing the report.',
@@ -376,5 +377,5 @@ export function scribeTools(env: Env, incidentId: bigint): Tool[] {
         return { posted: true, ...(g.note ? { note: g.note } : {}) };
       },
     },
-  ];
+  ]);
 }

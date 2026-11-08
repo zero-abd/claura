@@ -32,6 +32,8 @@ interface Facility {
   onPick?: (cb: (hit: unknown) => void) => unknown;
   /** outline a host in the scene: highlight('b14-gpu-07', 'select'); highlight(null, 'select') clears */
   highlight?: (host: string | null, kind?: string) => void;
+  /** subscribe to the pointer moving over hosts: cb(hit | null). The module outlines the slot under the cursor itself, right before it calls. */
+  onHover?: (cb: (hit: unknown) => void) => unknown;
 }
 
 const MODULE_URL = `${import.meta.env.BASE_URL}bulkhead-3d/facility.js`;
@@ -99,6 +101,7 @@ export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
     if (!inst || typeof inst.setState !== "function") return false;
     await inst.ready; // shaders compiled, first frame drawn
     inst.onPick?.(emitPick);
+    inst.onHover?.(emitHover);
     facility = inst;
     mounted = true;
     el.classList.add("has-3d");
@@ -117,9 +120,33 @@ export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
   }
 }
 
-function emitPick(hit: unknown) {
+const hitHost = (hit: unknown): string | null => {
   const h = hit as { host?: string; hostId?: string; id?: string } | string | null;
   const id = typeof h === "string" ? h : (h?.host ?? h?.hostId ?? h?.id);
+  return id ? String(id) : null;
+};
+
+/** The module outlines whichever slot is under the cursor. While an incident is open that is a lie on its rack (a click opens the
+ *  incident host, not the slot), so the hover ring is moved onto the incident host: what is outlined is what a click opens. */
+let hoverTarget: string | null = null;
+/** Test aid: the host the adapter last moved the hover ring onto (null = it left the module's own ring alone). */
+export const hoverRing = (): string | null => hoverTarget;
+function emitHover(hit: unknown) {
+  const id = hitHost(hit);
+  hoverTarget = null;
+  if (!id || !facility?.highlight) return;
+  const target = incidentHostFor(id);
+  if (target === id) return;
+  try {
+    facility.highlight(target, "hover");
+    hoverTarget = target;
+  } catch {
+    /* the module does not know this host: leave its own ring */
+  }
+}
+
+function emitPick(hit: unknown) {
+  const id = hitHost(hit);
   if (!id) return;
   // During an incident the camera moves with every phase. A click while it is still in flight lands on whatever is under the
   // cursor at that instant (a neighbour, T+1.6 s), not where the person aimed: ignore it, they will click again in a second.
