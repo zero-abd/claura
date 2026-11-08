@@ -1,0 +1,128 @@
+<template>
+  <style>
+    @font-face { font-family: 'Big Shoulders Stencil'; src: url('assets/fonts/BigShouldersStencil.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Big Shoulders'; src: url('assets/fonts/BigShoulders.woff2') format('woff2'); font-weight: 100 900; }
+
+    #root { position: absolute; inset: 0; background: #C8CBC6; overflow: hidden; }
+    .cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    .plate { position: absolute; left: 1100px; top: 120px; width: 740px; height: 840px; background: #121417; border-radius: 18px; padding: 56px 56px; }
+    .ptitle { font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; font-size: 84px; color: #C8CBC6; text-transform: uppercase; line-height: 1; }
+    .row { position: relative; margin-top: 34px; height: 92px; border-bottom: 3px solid rgba(200,203,198,0.25); display: flex; align-items: center; font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 46px; color: #C8CBC6; text-transform: uppercase; letter-spacing: 0.03em; }
+    .stamp { position: absolute; right: 0; top: 18px; padding: 4px 16px; border: 5px solid #FF5A1F; color: #FF5A1F; font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; font-size: 44px; transform: rotate(-6deg); }
+    .big { font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; color: #C8CBC6; text-transform: uppercase; line-height: 0.9; }
+  </style>
+  <div id="root" data-composition-id="oldway" data-width="1920" data-height="1080">
+    <div id="oldway-cam" class="cam"><svg class="plan" viewBox="0 0 1920 1080" width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="oldway-cells" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect x="3" y="3" width="14" height="14" rx="2" fill="#121417" fill-opacity="0.2" />
+    </pattern>
+    <pattern id="oldway-hazard" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="16" height="16" fill="#121417" />
+      <rect width="8" height="16" fill="#FF5A1F" />
+    </pattern>
+    <clipPath id="oldway-hallB"><rect x="477" y="246" width="336" height="588" /></clipPath>
+  </defs>
+  <!-- hull: stern left, bow right; the bow compartment is the management plane -->
+  <path d="M160 240 H1480 C1640 240 1760 380 1810 540 C1760 700 1640 840 1480 840 H160 Q120 840 120 800 V280 Q120 240 160 240 Z" fill="#D5D8D3" stroke="#121417" stroke-width="7" />
+  <line x1="130" y1="540" x2="1700" y2="540" stroke="#121417" stroke-opacity="0.25" stroke-width="3" stroke-dasharray="14 12" />
+  <!-- racks of sandboxed agents -->
+  <g fill="url(#oldway-cells)">
+    <rect x="160" y="290" width="280" height="200" /><rect x="160" y="590" width="280" height="200" />
+    <rect x="500" y="290" width="300" height="200" /><rect x="500" y="590" width="300" height="200" />
+    <rect x="840" y="290" width="300" height="200" /><rect x="840" y="590" width="300" height="200" />
+    <rect x="1200" y="290" width="280" height="200" /><rect x="1200" y="590" width="280" height="200" />
+  </g>
+  <!-- bulkheads with watertight door openings on the corridor -->
+  <g fill="#121417">
+    <rect x="463" y="240" width="14" height="275" /><rect x="463" y="565" width="14" height="275" />
+    <rect x="813" y="240" width="14" height="275" /><rect x="813" y="565" width="14" height="275" />
+    <rect x="1163" y="240" width="14" height="275" /><rect x="1163" y="565" width="14" height="275" />
+    <rect x="1493" y="250" width="14" height="265" /><rect x="1493" y="565" width="14" height="265" />
+  </g>
+  <g font-family="Big Shoulders Stencil" font-weight="900" font-size="34" fill="#121417" text-anchor="middle" letter-spacing="2">
+    <text x="300" y="900">HALL A</text><text x="645" y="900">HALL B</text><text x="990" y="900">HALL C</text><text x="1335" y="900">HALL D</text>
+  </g>
+  <g font-family="Big Shoulders Stencil" font-weight="900" fill="#121417" text-anchor="middle">
+    <text x="1640" y="525" font-size="40" letter-spacing="2">MGMT</text>
+    <text x="1640" y="572" font-size="30" letter-spacing="3" fill-opacity="0.6">BMC · IPMI</text>
+  </g>
+  <!-- the flood: the escape spreading through hall B -->
+  <g clip-path="url(#oldway-hallB)"><circle id="oldway-flood" cx="660" cy="370" r="0" fill="#FF5A1F" fill-opacity="0.42" /></g>
+  <path id="oldway-mgmtpath" d="M700 380 V540 H1600" fill="none" stroke="#FF5A1F" stroke-width="7" stroke-dasharray="1300" stroke-dashoffset="1300" />
+  <!-- host b14-gpu-07: the suspect VM and its eleven co-resident guests -->
+  <g id="oldway-host">
+    <rect x="610" y="340" width="100" height="80" fill="#C8CBC6" stroke="#121417" stroke-width="3" />
+    <rect class="oldway-guest" x="623" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect id="oldway-hot" x="643" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="663" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="683" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="623" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="643" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="663" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="683" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="623" y="393" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="643" y="393" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="663" y="393" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="oldway-guest" x="683" y="393" width="14" height="14" rx="2" fill="#121417" />
+  </g>
+  <!-- containment: the two corridor doors of hall B, the cordon and the quarantine plate -->
+  <rect id="oldway-doorL" x="459" y="515" width="22" height="50" fill="url(#oldway-hazard)" stroke="#121417" stroke-width="3" />
+  <rect id="oldway-doorR" x="809" y="515" width="22" height="50" fill="url(#oldway-hazard)" stroke="#121417" stroke-width="3" />
+  <rect id="oldway-cordon" x="600" y="330" width="120" height="100" fill="none" stroke="url(#oldway-hazard)" stroke-width="9" />
+  <g id="oldway-qplate">
+    <rect x="606" y="336" width="108" height="88" fill="#121417" />
+    <text x="660" y="389" font-family="Big Shoulders Stencil" font-weight="900" font-size="22" fill="#2FBF71" text-anchor="middle" letter-spacing="1">SEALED</text>
+  </g>
+</svg>
+</div>
+    <div id="oldway-book" class="plate">
+      <div class="ptitle">Playbook</div>
+      <div class="row">ransomware<span class="stamp" id="oldway-s1">no match</span></div>
+      <div class="row">ddos<span class="stamp" id="oldway-s2">no match</span></div>
+      <div class="row">phishing<span class="stamp" id="oldway-s3">no match</span></div>
+      <div class="row">crypto-miner<span class="stamp" id="oldway-s4">no match</span></div>
+      <div id="oldway-never" class="big" style="margin-top: 70px; font-size: 92px; color: #FF5A1F;">never seen it</div>
+    </div>
+    <div id="oldway-phone" class="plate" style="background: #121417;">
+      <div class="ptitle" style="color: #FF5A1F;">Sev-1 page</div>
+      <div class="big" style="margin-top: 50px; font-size: 64px;">b14-gpu-07</div>
+      <div class="big" style="margin-top: 24px; font-size: 48px; opacity: 0.6;">on-call · unacknowledged</div>
+      <div id="oldway-clock" class="big" style="margin-top: 70px; font-size: 230px; font-variant-numeric: tabular-nums;">00:00</div>
+      <div id="oldway-zzz" class="big" style="margin-top: 20px; font-size: 92px; color: #FF5A1F;">zzz</div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const P = '#oldway-';
+      const tl = gsap.timeline({ paused: true });
+      const spray = (sel, at, d = 0.2) => tl.fromTo(sel, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: d, ease: 'none' }, at);
+      const camAt = (px, py, s) => ({ x: 960 - px * s, y: 540 - py * s, scale: s });
+
+      tl.set([P + 'doorL', P + 'doorR'], { y: -70 }, 0);
+      tl.set([P + 'cordon', P + 'qplate'], { opacity: 0 }, 0);
+      tl.set(P + 'hot', { fill: '#FF5A1F' }, 0);
+      tl.fromTo(P + 'cam', camAt(760, 470, 1.75), { ...camAt(986, 520, 1.35), duration: 0.7, ease: 'power2.inOut' }, 0);
+      // the flood keeps spreading and starts down the corridor toward the management plane
+      tl.fromTo(P + 'flood', { attr: { r: 150 } }, { attr: { r: 300 }, duration: 4.98, ease: 'none' }, 0);
+      tl.fromTo(P + 'mgmtpath', { strokeDashoffset: 1300 }, { strokeDashoffset: 520, duration: 4.98, ease: 'none' }, 0);
+      // the playbook slams in from the right and finds nothing
+      tl.fromTo(P + 'book', { x: 900 }, { x: 0, duration: 0.5, ease: 'expo.out' }, 0.05);
+      [[1, 0.53], [2, 1.06], [3, 1.41], [4, 1.49]].forEach(([k, at]) => {
+        tl.fromTo(P + 's' + k, { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.12, ease: 'power4.in' }, at);
+      });
+      tl.set(P + 'never', { opacity: 0 }, 0);
+      tl.set(P + 'never', { opacity: 1 }, 1.7);
+      spray(P + 'never', 1.7, 0.22);
+      // the page: a phone plate replaces the book, ringing, nobody answers
+      tl.fromTo(P + 'book', { x: 0 }, { x: -60, opacity: 0, filter: 'blur(10px)', duration: 0.22, ease: 'power3.in', immediateRender: false }, 2.47);
+      tl.fromTo(P + 'phone', { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.45, ease: 'expo.out' }, 2.65);
+      tl.fromTo(P + 'phone', { rotation: -1.2 }, { rotation: 1.2, duration: 0.05, yoyo: true, repeat: 15, ease: 'none', immediateRender: false }, 2.87);
+      tl.fromTo({ s: 0 }, { s: 0 }, { s: 47, duration: 2.21, ease: 'none', onUpdate() { const s = Math.floor(this.targets()[0].s); document.querySelector(P + 'clock').textContent = '00:' + String(s).padStart(2, '0'); } }, 2.77);
+      tl.set(P + 'zzz', { opacity: 0 }, 0);
+      tl.set(P + 'zzz', { opacity: 1 }, 4.19);
+      spray(P + 'zzz', 4.19, 0.3);
+      window.__timelines['oldway'] = tl;
+    })();
+  </script>
+</template>

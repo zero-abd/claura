@@ -1,0 +1,56 @@
+<template>
+  <style>
+    @font-face { font-family: 'Big Shoulders Stencil'; src: url('assets/fonts/BigShouldersStencil.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Big Shoulders'; src: url('assets/fonts/BigShoulders.woff2') format('woff2'); font-weight: 100 900; }
+
+    #root { position: absolute; inset: 0; background: #C8CBC6; overflow: hidden; }
+    .stencil { position: absolute; font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.88; white-space: nowrap; color: #121417; }
+    #spacetime-log { position: absolute; left: 100px; top: 250px; width: 1080px; height: 720px; background: #121417; border-radius: 22px; padding: 44px 50px; }
+    .lhead { font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 34px; color: #9BA19C; text-transform: uppercase; letter-spacing: 0.06em; }
+    .lrow { position: relative; margin-top: 26px; height: 118px; border-radius: 10px; padding: 18px 26px; background: rgba(200, 203, 198, 0.07); }
+    .lrow .t { font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 34px; color: #9BA19C; letter-spacing: 0.04em; }
+    .lrow .m { margin-top: 6px; font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 46px; color: #C8CBC6; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; }
+    .lrow .k { color: #FF5A1F; }
+    .con { position: absolute; width: 520px; height: 200px; background: #9BA19C; border: 6px solid #121417; border-radius: 14px; padding: 22px 26px; }
+    .con .who { font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; font-size: 44px; color: #121417; text-transform: uppercase; }
+    .con .row { margin-top: 14px; font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 40px; color: #121417; text-transform: uppercase; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="spacetime" data-width="1920" data-height="1080">
+    <div id="spacetime-title" class="stencil" style="left: 100px; top: 60px; font-size: 150px;">SpacetimeDB</div>
+    <div id="spacetime-sub" class="stencil" style="left: 1010px; top: 112px; font-size: 64px; opacity: 0.6;">the ship's log</div>
+    <div id="spacetime-log">
+      <div class="lhead">table incident_event · every console subscribed</div>
+      <div class="lrow" id="spacetime-r1"><div class="t">02:14:07.0 · sentry</div><div class="m"><span class="k">alert</span> · vgpu escape suspected</div></div>
+      <div class="lrow" id="spacetime-r2"><div class="t">02:14:11.6 · warden</div><div class="m"><span class="k">action</span> · cordon b14-gpu-07</div></div>
+      <div class="lrow" id="spacetime-r3"><div class="t">02:14:15.8 · operator</div><div class="m"><span class="k">approval</span> · quarantine host</div></div>
+      <div class="lrow" id="spacetime-r4"><div class="t">02:14:16.4 · scribe</div><div class="m"><span style="color: #2FBF71;">state</span> · sealed · 9.4 s</div></div>
+    </div>
+    <div id="spacetime-cA" class="con" style="left: 1260px; top: 250px;"><div class="who">console · A</div><div class="row" style="position: relative; height: 48px;"><span id="spacetime-xA1" style="position: absolute; left: 0; top: 0; opacity: 0;">alert · vgpu escape</span><span id="spacetime-xA2" style="position: absolute; left: 0; top: 0; opacity: 0;">action · cordon host</span><span id="spacetime-xA3" style="position: absolute; left: 0; top: 0; opacity: 0;">approval · quarantine</span><span id="spacetime-xA4" style="position: absolute; left: 0; top: 0; opacity: 0;">state · sealed 9.4 s</span></div></div>
+    <div id="spacetime-cB" class="con" style="left: 1300px; top: 510px;"><div class="who">console · B</div><div class="row" style="position: relative; height: 48px;"><span id="spacetime-xB1" style="position: absolute; left: 0; top: 0; opacity: 0;">alert · vgpu escape</span><span id="spacetime-xB2" style="position: absolute; left: 0; top: 0; opacity: 0;">action · cordon host</span><span id="spacetime-xB3" style="position: absolute; left: 0; top: 0; opacity: 0;">approval · quarantine</span><span id="spacetime-xB4" style="position: absolute; left: 0; top: 0; opacity: 0;">state · sealed 9.4 s</span></div></div>
+    <div id="spacetime-cC" class="con" style="left: 1240px; top: 770px;"><div class="who">console · C</div><div class="row" style="position: relative; height: 48px;"><span id="spacetime-xC1" style="position: absolute; left: 0; top: 0; opacity: 0;">alert · vgpu escape</span><span id="spacetime-xC2" style="position: absolute; left: 0; top: 0; opacity: 0;">action · cordon host</span><span id="spacetime-xC3" style="position: absolute; left: 0; top: 0; opacity: 0;">approval · quarantine</span><span id="spacetime-xC4" style="position: absolute; left: 0; top: 0; opacity: 0;">state · sealed 9.4 s</span></div></div>
+  </div>
+  <script>
+    (function () {
+      const P = '#spacetime-';
+      const tl = gsap.timeline({ paused: true });
+      const spray = (sel, at, d = 0.2) => tl.fromTo(sel, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: d, ease: 'none' }, at);
+      const show = (sel, at, d) => { tl.set(sel, { opacity: 0 }, 0); tl.set(sel, { opacity: 1 }, at); spray(sel, at, d); };
+
+      show(P + 'title', 0.23, 0.3);
+      show(P + 'sub', 1.23, 0.3);
+      tl.fromTo(P + 'log', { y: 900 }, { y: 0, duration: 0.6, ease: 'expo.out' }, 0.05);
+      ['cA', 'cB', 'cC'].forEach((c, k) => tl.fromTo(P + c, { x: 700 }, { x: 0, duration: 0.55, ease: 'expo.out' }, 0.25 + k * 0.07));
+      // each row lands in the log and on every console at the same frame
+      [[1, 3.65], [2, 4.49], [3, 5.01], [4, 5.79]].forEach(([k, at]) => {
+        tl.fromTo(P + 'r' + k, { opacity: 0, x: -50, backgroundColor: 'rgba(255, 90, 31, 0.55)' }, { opacity: 1, x: 0, duration: 0.3, ease: 'expo.out' }, at - 0.08);
+        tl.to(P + 'r' + k, { backgroundColor: 'rgba(200, 203, 198, 0.07)', duration: 0.6, ease: 'power2.out' }, at + 0.25);
+        ['A', 'B', 'C'].forEach((c) => {
+          if (k > 1) tl.set(P + 'x' + c + (k - 1), { opacity: 0 }, at - 0.08);
+          tl.set(P + 'x' + c + k, { opacity: 1 }, at - 0.08);
+          tl.fromTo(P + 'c' + c, { backgroundColor: '#FF5A1F' }, { backgroundColor: '#9BA19C', duration: 0.5, ease: 'power2.out', immediateRender: false }, at - 0.08);
+        });
+      });
+      window.__timelines['spacetime'] = tl;
+    })();
+  </script>
+</template>

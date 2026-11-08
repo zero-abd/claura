@@ -1,0 +1,214 @@
+/* Tokens, wallpaper, type. System font only (SF Pro on Apple devices). */
+
+:root {
+  /* wallpaper */
+  --abyss: #04060d;
+  --hull: #0a1530;
+  --ultra: #2456ff;
+  --violet: #6b34e6;
+  /* ink */
+  --ink: #f5f5f7;
+  --ink-2: rgba(245, 245, 247, 0.74);
+  --ink-3: rgba(245, 245, 247, 0.58);
+  /* brand: signal for the breach, green only for "contained" */
+  --signal: #ff5a1f;
+  --contained: #2fbf71;
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --wrap: 1120px;
+  --gutter: clamp(20px, 5vw, 40px);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--abyss);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 88px;
+}
+
+body {
+  margin: 0;
+  font: 400 1.0625rem/1.5 var(--font);
+  font-optical-sizing: auto;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+kbd {
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.05em 0.5em 0.1em;
+  border-radius: 0.45em;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.wrap {
+  width: min(var(--wrap), 100% - var(--gutter) * 2);
+  margin-inline: auto;
+}
+
+/* ── Wallpaper: a deep sea of blue and violet, fixed behind everything ── */
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 12% 6%, rgba(36, 86, 255, 0.62), transparent 62%),
+    radial-gradient(55% 46% at 94% 16%, rgba(107, 52, 230, 0.52), transparent 64%),
+    radial-gradient(64% 52% at 76% 100%, rgba(10, 150, 180, 0.34), transparent 66%),
+    radial-gradient(46% 40% at 2% 88%, rgba(255, 90, 31, 0.12), transparent 70%),
+    linear-gradient(165deg, #060b1d 0%, #091330 48%, #100a29 100%);
+}
+
+/* fine grain to kill banding in the dark gradients */
+.wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  height: 52px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 26px;
+  font: 600 1.0625rem/1 var(--font);
+  letter-spacing: -0.012em;
+  text-decoration: none;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  transition: transform 120ms ease-out, filter 200ms ease, background-color 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* feedback lives on the press, instantly */
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-sm {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 19px;
+  font-size: 0.9375rem;
+}
+
+.btn-primary {
+  color: #1a0a04;
+  background: linear-gradient(180deg, #ff8a5c 0%, var(--signal) 52%, #ee4a10 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(120, 30, 0, 0.35),
+    0 0 0 1px rgba(255, 90, 31, 0.7),
+    0 12px 34px -8px rgba(255, 90, 31, 0.6);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06) saturate(1.05);
+}
+
+.btn-primary kbd {
+  background: rgba(26, 10, 4, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(26, 10, 4, 0.28);
+  font-size: 0.875rem;
+}
+
+.btn-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07)), rgba(16, 24, 56, 0.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.8);
+  backdrop-filter: blur(22px) saturate(1.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 10px 30px -10px rgba(0, 0, 0, 0.55);
+}
+
+.btn-glass:hover {
+  background-color: rgba(60, 80, 160, 0.35);
+}
+
+.section-head {
+  text-align: center;
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.section-head h2 {
+  font-size: clamp(2.5rem, 6.4vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.042em;
+  font-weight: 700;
+}
+
+.section-head p {
+  margin-top: 1.25rem;
+  font-size: clamp(1.125rem, 1.7vw, 1.4rem);
+  line-height: 1.42;
+  letter-spacing: -0.012em;
+  color: var(--ink-2);
+}

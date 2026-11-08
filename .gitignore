@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.venv*/
+.hyperframes/
+.hyperframes-check.*
+.scratch/
+.DS_Store
+.env
+.env.*
+*.token*
+*.pem
+out/
+renders/
+*.f32

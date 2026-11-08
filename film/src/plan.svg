@@ -1,0 +1,63 @@
+<svg class="plan" viewBox="0 0 1920 1080" width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="{{P}}cells" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect x="3" y="3" width="14" height="14" rx="2" fill="#121417" fill-opacity="0.2" />
+    </pattern>
+    <pattern id="{{P}}hazard" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="16" height="16" fill="#121417" />
+      <rect width="8" height="16" fill="#FF5A1F" />
+    </pattern>
+    <clipPath id="{{P}}hallB"><rect x="477" y="246" width="336" height="588" /></clipPath>
+  </defs>
+  <!-- hull: stern left, bow right; the bow compartment is the management plane -->
+  <path d="M160 240 H1480 C1640 240 1760 380 1810 540 C1760 700 1640 840 1480 840 H160 Q120 840 120 800 V280 Q120 240 160 240 Z" fill="#D5D8D3" stroke="#121417" stroke-width="7" />
+  <line x1="130" y1="540" x2="1700" y2="540" stroke="#121417" stroke-opacity="0.25" stroke-width="3" stroke-dasharray="14 12" />
+  <!-- racks of sandboxed agents -->
+  <g fill="url(#{{P}}cells)">
+    <rect x="160" y="290" width="280" height="200" /><rect x="160" y="590" width="280" height="200" />
+    <rect x="500" y="290" width="300" height="200" /><rect x="500" y="590" width="300" height="200" />
+    <rect x="840" y="290" width="300" height="200" /><rect x="840" y="590" width="300" height="200" />
+    <rect x="1200" y="290" width="280" height="200" /><rect x="1200" y="590" width="280" height="200" />
+  </g>
+  <!-- bulkheads with watertight door openings on the corridor -->
+  <g fill="#121417">
+    <rect x="463" y="240" width="14" height="275" /><rect x="463" y="565" width="14" height="275" />
+    <rect x="813" y="240" width="14" height="275" /><rect x="813" y="565" width="14" height="275" />
+    <rect x="1163" y="240" width="14" height="275" /><rect x="1163" y="565" width="14" height="275" />
+    <rect x="1493" y="250" width="14" height="265" /><rect x="1493" y="565" width="14" height="265" />
+  </g>
+  <g font-family="Big Shoulders Stencil" font-weight="900" font-size="34" fill="#121417" text-anchor="middle" letter-spacing="2">
+    <text x="300" y="900">HALL A</text><text x="645" y="900">HALL B</text><text x="990" y="900">HALL C</text><text x="1335" y="900">HALL D</text>
+  </g>
+  <g font-family="Big Shoulders Stencil" font-weight="900" fill="#121417" text-anchor="middle">
+    <text x="1640" y="525" font-size="40" letter-spacing="2">MGMT</text>
+    <text x="1640" y="572" font-size="30" letter-spacing="3" fill-opacity="0.6">BMC · IPMI</text>
+  </g>
+  <!-- the flood: the escape spreading through hall B -->
+  <g clip-path="url(#{{P}}hallB)"><circle id="{{P}}flood" cx="660" cy="370" r="0" fill="#FF5A1F" fill-opacity="0.42" /></g>
+  <path id="{{P}}mgmtpath" d="M700 380 V540 H1600" fill="none" stroke="#FF5A1F" stroke-width="7" stroke-dasharray="1300" stroke-dashoffset="1300" />
+  <!-- host b14-gpu-07: the suspect VM and its eleven co-resident guests -->
+  <g id="{{P}}host">
+    <rect x="610" y="340" width="100" height="80" fill="#C8CBC6" stroke="#121417" stroke-width="3" />
+    <rect class="{{P}}guest" x="623" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect id="{{P}}hot" x="643" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="663" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="683" y="353" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="623" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="643" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="663" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="683" y="373" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="623" y="393" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="643" y="393" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="663" y="393" width="14" height="14" rx="2" fill="#121417" />
+    <rect class="{{P}}guest" x="683" y="393" width="14" height="14" rx="2" fill="#121417" />
+  </g>
+  <!-- containment: the two corridor doors of hall B, the cordon and the quarantine plate -->
+  <rect id="{{P}}doorL" x="459" y="515" width="22" height="50" fill="url(#{{P}}hazard)" stroke="#121417" stroke-width="3" />
+  <rect id="{{P}}doorR" x="809" y="515" width="22" height="50" fill="url(#{{P}}hazard)" stroke="#121417" stroke-width="3" />
+  <rect id="{{P}}cordon" x="600" y="330" width="120" height="100" fill="none" stroke="url(#{{P}}hazard)" stroke-width="9" />
+  <g id="{{P}}qplate">
+    <rect x="606" y="336" width="108" height="88" fill="#121417" />
+    <text x="660" y="389" font-family="Big Shoulders Stencil" font-weight="900" font-size="22" fill="#2FBF71" text-anchor="middle" letter-spacing="1">SEALED</text>
+  </g>
+</svg>

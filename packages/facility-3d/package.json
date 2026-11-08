@@ -1,0 +1,15 @@
+{
+  "name": "claura-3d",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Claura DFW-2 data-center visualization: deterministic three.js scene with two looks (iso hairline, Lumen solid).",
+  "main": "src/facility.js",
+  "exports": { ".": "./src/facility.js", "./bundle": "./dist/facility.js" },
+  "scripts": {
+    "serve": "node tools/serve.mjs",
+    "build": "node tools/build.mjs"
+  },
+  "dependencies": { "three": "0.180.0" },
+  "devDependencies": { "esbuild": "0.25.10" }
+}

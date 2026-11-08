@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape" data-composition-variables='[
+  {"id":"color-ground","type":"color","label":"Steel","default":"#C8CBC6"},
+  {"id":"color-ink","type":"color","label":"Stencil ink","default":"#121417"},
+  {"id":"color-accent","type":"color","label":"Safety orange","default":"#FF5A1F"},
+  {"id":"color-sealed","type":"color","label":"Sealed green","default":"#2FBF71"}
+]'>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: 'Big Shoulders Stencil'; src: url('assets/fonts/BigShouldersStencil.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Big Shoulders'; src: url('assets/fonts/BigShoulders.woff2') format('woff2'); font-weight: 100 900; }
+
+      :root { --color-ground: #C8CBC6; --color-ink: #121417; --color-accent: #FF5A1F; --color-sealed: #2FBF71; --panel: #0E0F12; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--color-ground); }
+      #root { width: 100%; height: 100%; position: relative; font-family: 'Big Shoulders', sans-serif; }
+      #steel { position: absolute; inset: 0; background: var(--color-ground); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="87.96" data-width="1920" data-height="1080">
+      <div id="steel"></div>
+      <div id="fleet" data-composition-id="fleet" data-composition-src="compositions/fleet.html" data-start="0" data-duration="6.41" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:2"></div>
+      <div id="breach" data-composition-id="breach" data-composition-src="compositions/breach.html" data-start="6.41" data-duration="5.58" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:3"></div>
+      <div id="oldway" data-composition-id="oldway" data-composition-src="compositions/oldway.html" data-start="11.99" data-duration="4.98" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:4"></div>
+      <div id="reveal" data-composition-id="reveal" data-composition-src="compositions/reveal.html" data-start="16.97" data-duration="3.56" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:5"></div>
+      <div id="sentry" data-composition-id="sentry" data-composition-src="compositions/sentry.html" data-start="20.53" data-duration="7.96" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:6"></div>
+      <div id="triage" data-composition-id="triage" data-composition-src="compositions/triage.html" data-start="28.49" data-duration="8.5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:7"></div>
+      <div id="warden" data-composition-id="warden" data-composition-src="compositions/warden.html" data-start="36.99" data-duration="6.54" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:8"></div>
+      <div id="evidence" data-composition-id="evidence" data-composition-src="compositions/evidence.html" data-start="43.53" data-duration="6.1" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:9"></div>
+      <div id="approve" data-composition-id="approve" data-composition-src="compositions/approve.html" data-start="49.63" data-duration="6.54" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:10"></div>
+      <div id="sealed" data-composition-id="sealed" data-composition-src="compositions/sealed.html" data-start="56.17" data-duration="4.58" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:11"></div>
+      <div id="scribe" data-composition-id="scribe" data-composition-src="compositions/scribe.html" data-start="60.75" data-duration="5.64" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:12"></div>
+      <div id="nemotron" data-composition-id="nemotron" data-composition-src="compositions/nemotron.html" data-start="66.39" data-duration="6.7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:13"></div>
+      <div id="spacetime" data-composition-id="spacetime" data-composition-src="compositions/spacetime.html" data-start="73.09" data-duration="8.88" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:14"></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="compositions/endcard.html" data-start="81.97" data-duration="5.99" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:15"></div>
+      <audio id="vo" class="clip" data-start="0" data-track-index="10" data-volume="1" src="assets/audio/vo.mp3"></audio>
+      <audio id="music" class="clip" data-start="0" data-duration="87.96" data-track-index="11" data-volume="0.5" src="assets/audio/music.mp3"></audio>
+<!--SFX-->
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

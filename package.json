@@ -1,0 +1,7 @@
+{
+  "name": "claura-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": { "push": "sh tools/sync.sh && node tools/push.mjs" },
+  "devDependencies": { "isomorphic-git": "1.29.0" }
+}

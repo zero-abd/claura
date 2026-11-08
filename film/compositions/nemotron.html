@@ -1,0 +1,68 @@
+<template>
+  <style>
+    @font-face { font-family: 'Big Shoulders Stencil'; src: url('assets/fonts/BigShouldersStencil.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Big Shoulders'; src: url('assets/fonts/BigShoulders.woff2') format('woff2'); font-weight: 100 900; }
+
+    #root { position: absolute; inset: 0; background: #C8CBC6; overflow: hidden; }
+    .stencil { position: absolute; font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.88; white-space: nowrap; color: #121417; }
+    .body { position: absolute; font-family: 'Big Shoulders', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; color: #121417; }
+    #nemotron-engine { position: absolute; left: 110px; top: 300px; width: 600px; height: 480px; background: #121417; border-radius: 22px; padding: 46px; }
+    .tag { position: absolute; left: 740px; height: 96px; padding: 0 34px; display: flex; align-items: center; gap: 22px; background: #9BA19C; border: 5px solid #121417; border-radius: 10px; font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 46px; text-transform: uppercase; color: #121417; white-space: nowrap; }
+    .mark { font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; font-size: 54px; }
+  </style>
+  <div id="root" data-composition-id="nemotron" data-width="1920" data-height="1080">
+    <!-- the on-prem boundary: everything inside stays in the building -->
+    <svg style="position: absolute; inset: 0;" width="1920" height="1080" viewBox="0 0 1920 1080">
+      <rect id="nemotron-fence" x="70" y="230" width="1780" height="640" rx="30" fill="none" stroke="#121417" stroke-width="7" stroke-dasharray="34 20" />
+      <!-- the policy door: a bulkhead with a lock -->
+      <g id="nemotron-door">
+        <rect x="1300" y="250" width="60" height="600" fill="#121417" />
+        <rect x="1278" y="470" width="104" height="150" rx="14" fill="#FF5A1F" stroke="#121417" stroke-width="6" />
+        <path d="M1305 470 V440 a25 25 0 0 1 50 0 V470" fill="none" stroke="#121417" stroke-width="12" />
+      </g>
+    </svg>
+    <div id="nemotron-onprem" class="body" style="left: 100px; top: 180px; font-size: 40px;">on-prem · telemetry stays in DFW-2</div>
+    <div id="nemotron-engine">
+      <div class="body" style="position: static; font-size: 40px; color: #9BA19C;">defender agents reason with</div>
+      <div class="stencil" style="position: static; margin-top: 26px; font-size: 128px; color: #C8CBC6;">NVIDIA<br />Nemotron</div>
+      <div class="body" style="position: static; margin-top: 30px; font-size: 36px; color: #9BA19C;">sentry · triage · warden · scribe</div>
+    </div>
+    <div id="nemotron-policy" class="stencil" style="left: 1240px; top: 900px; font-size: 76px;">policy</div>
+    <div id="nemotron-t1" class="tag" style="top: 330px;">freeze vm-7f3a<span class="mark" id="nemotron-k1" style="color: #2FBF71;">✓</span></div>
+    <div id="nemotron-t2" class="tag" style="top: 500px;">cut network<span class="mark" id="nemotron-k2" style="color: #2FBF71;">✓</span></div>
+    <div id="nemotron-t3" class="tag" style="top: 670px;">wipe hall b<span class="mark" id="nemotron-k3" style="color: #FF5A1F;">✕</span></div>
+    <div id="nemotron-head" class="stencil" style="left: 100px; top: 40px; font-size: 120px;">The model proposes</div>
+    <div id="nemotron-head2" class="stencil" style="left: 100px; top: 40px; font-size: 120px;">The <span style="color: #FF5A1F;">lock</span> decides</div>
+  </div>
+  <script>
+    (function () {
+      const P = '#nemotron-';
+      const tl = gsap.timeline({ paused: true });
+      const spray = (sel, at, d = 0.2) => tl.fromTo(sel, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: d, ease: 'none' }, at);
+      const show = (sel, at, d) => { tl.set(sel, { opacity: 0 }, 0); tl.set(sel, { opacity: 1 }, at); spray(sel, at, d); };
+
+      tl.fromTo(P + 'fence', { strokeDashoffset: 0, opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.05);
+      tl.fromTo(P + 'fence', { strokeDashoffset: 0 }, { strokeDashoffset: -270, duration: 6.7, ease: 'none', immediateRender: false }, 0);
+      tl.fromTo(P + 'engine', { x: -700 }, { x: 0, duration: 0.55, ease: 'expo.out' }, 0.93);
+      show(P + 'onprem', 2.45, 0.3);
+      show(P + 'head', 0.27, 0.3);
+      // the policy door slams down between the model and the actions
+      tl.fromTo(P + 'door', { y: -900 }, { y: 0, duration: 0.26, ease: 'power4.in' }, 4.11);
+      show(P + 'policy', 4.37, 0.2);
+      // proposals leave the engine; the door lets two through and stops the third
+      [['t1', 4.55, 1500], ['t2', 4.86, 1480], ['t3', 4.95, 0]].forEach(([id, at, x], k) => {
+        tl.fromTo(P + id, { opacity: 0, x: -160 }, { opacity: 1, x: 0, duration: 0.3, ease: 'expo.out' }, at - 0.35);
+        if (x) {
+          tl.to(P + id, { x: x - 740, duration: 0.55, ease: 'power2.inOut' }, at + 0.15);
+        } else {
+          tl.to(P + id, { x: 300, duration: 0.28, ease: 'power3.in' }, at + 0.15);
+          tl.to(P + id, { x: 240, duration: 0.3, ease: 'expo.out' }, at + 0.43);
+        }
+        tl.fromTo(P + 'k' + (k + 1), { opacity: 0, scale: 1.8 }, { opacity: 1, scale: 1, duration: 0.14, ease: 'power4.in' }, at + (x ? 0.65 : 0.4));
+      });
+      tl.to(P + 'head', { opacity: 0, filter: 'blur(8px)', duration: 0.18, ease: 'power3.in' }, 4.9);
+      show(P + 'head2', 5.1, 0.25);
+      window.__timelines['nemotron'] = tl;
+    })();
+  </script>
+</template>

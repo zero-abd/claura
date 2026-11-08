@@ -1,0 +1,23 @@
+{
+  "name": "claura-agents",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claura agent runner: NVIDIA Nemotron (local Ollama) drives Sentry/Triage/Warden/Scribe against the SpacetimeDB module",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "demo": "tsx src/main.ts",
+    "demo:scripted": "tsx src/main.ts --scripted",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "test:loop": "tsx test/ollama-loop.live.ts"
+  },
+  "dependencies": {
+    "spacetimedb": "2.14.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.6.2"
+  }
+}

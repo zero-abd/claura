@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Bulkhead mark: a hull section with a sealed watertight door. One path, fill-rule evenodd. -->
+  <path fill="#FF5A1F" fill-rule="evenodd" d="M24 44H232V116C232 174 188 220 128 232C68 220 24 174 24 116ZM88 108A40 40 0 0 1 168 108V164A40 40 0 0 1 88 164ZM100 108A28 28 0 0 1 156 108V164A28 28 0 0 1 100 164ZM106 130H150V142H106Z"/>
+</svg>

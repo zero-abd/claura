@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Claura: seal the breach before it spreads</title>
+    <meta
+      name="description"
+      content="Claura is agentic incident response for AI data centers. When an AI workload tries to escape its VM, defender agents seal it off. A HackUTD 2026 prototype with demo data."
+    />
+    <meta name="theme-color" content="#050914" />
+    <link rel="canonical" href="https://claura.tech/" />
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://claura.tech/" />
+    <meta property="og:title" content="Claura: seal the breach before it spreads" />
+    <meta
+      property="og:description"
+      content="Agentic incident response for AI data centers. Prototype, demo data."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+  </head>
+  <body>
+    <div class="wallpaper" aria-hidden="true"></div>
+
+    <!-- ───────── Navigation ───────── -->
+    <header class="nav glass" style="--r: 26px; --blur: 34px">
+      <a class="brand" href="#top" aria-label="Claura, back to top">
+        <img src="/brand/logo.svg" alt="" width="22" height="22" />
+        <span>Claura</span>
+      </a>
+      <nav aria-label="Sections">
+        <ul>
+          <li><a href="#crew">Crew</a></li>
+          <li><a href="#moment">9.4 s</a></li>
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#demo">Demo</a></li>
+        </ul>
+      </nav>
+      <a class="btn btn-sm btn-glass" data-prototype href="#" target="_blank" rel="noopener">Open the prototype</a>
+    </header>
+
+    <main>
+      <!-- ───────── 1. Hero ───────── -->
+      <section class="hero" id="top">
+        <svg class="doors" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false">
+          <rect x="665.0" y="292.0" width="110.0" height="176.0" rx="24.2" style="--i:0;opacity:0.550"/>
+          <rect x="641.4" y="254.2" width="157.3" height="251.7" rx="34.6" style="--i:1;opacity:0.440"/>
+          <rect x="607.5" y="200.0" width="224.9" height="359.9" rx="49.5" style="--i:2;opacity:0.352"/>
+          <rect x="559.2" y="122.7" width="321.7" height="514.7" rx="70.8" style="--i:3;opacity:0.282"/>
+          <rect x="490.0" y="12.0" width="460.0" height="736.0" rx="101.2" style="--i:4;opacity:0.225"/>
+          <rect x="391.1" y="-146.2" width="657.8" height="1052.4" rx="144.7" style="--i:5;opacity:0.180"/>
+          <rect x="249.7" y="-372.5" width="940.6" height="1505.0" rx="206.9" style="--i:6;opacity:0.144"/>
+          <rect x="47.5" y="-696.1" width="1345.1" height="2152.1" rx="260.0" style="--i:7;opacity:0.115"/>
+          <rect x="-241.7" y="-1158.8" width="1923.5" height="3077.5" rx="260.0" style="--i:8;opacity:0.092"/>
+        </svg>
+
+        <div class="wrap hero-copy">
+          <button class="mark-tile glass" type="button" data-mark aria-label="Replay the Claura seal">
+            <img src="/brand/logo.svg" alt="" width="56" height="56" data-mark-img />
+          </button>
+          <h1>Seal the breach <br />before it spreads.</h1>
+          <p class="lede">
+            When an AI workload tries to escape its VM, Claura’s defender agents seal it off like a ship’s bulkhead.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="#demo">Watch the demo</a>
+            <a class="btn btn-glass" data-prototype href="#" target="_blank" rel="noopener">Open the prototype</a>
+          </div>
+          <p class="demo-note glass-s" style="--r: 999px; --blur: 16px">
+            <span class="live-dot" aria-hidden="true"></span>prototype · demo data
+          </p>
+        </div>
+
+        <div class="wrap hero-shot">
+          <figure class="frame glass" style="--r: 34px" data-frame>
+            <img
+              data-shot="hero"
+              alt="The Claura console during incident INC-0419, a suspected guest-to-host escape, with the quarantine approval card waiting on the operator."
+              width="3456"
+              height="2160"
+              decoding="async"
+            />
+          </figure>
+        </div>
+      </section>
+
+      <!-- ───────── 2. The problem ───────── -->
+      <section class="problem" id="problem" aria-labelledby="beat-1">
+        <div class="wrap">
+          <article class="beat" data-beat>
+            <h2 id="beat-1">60,000 sandboxed agents. One of them breaks out.</h2>
+            <p>A guest-to-host escape through the vGPU path puts its neighbours and the management plane within reach.</p>
+            <div class="vm glass" aria-hidden="true" style="--r: 30px">
+              <div class="vm-dots"></div>
+              <svg class="trail" viewBox="0 0 400 200" preserveAspectRatio="none" focusable="false">
+                <path d="M120 60 C 200 40, 260 120, 400 100" />
+              </svg>
+              <i class="runaway"></i>
+            </div>
+          </article>
+
+          <article class="beat" data-beat>
+            <h2>A static playbook has never seen it.</h2>
+            <p>Playbooks only match attacks they have already seen. This one is new.</p>
+          </article>
+
+          <article class="beat" data-beat>
+            <h2>The on-call engineer is asleep.</h2>
+            <p>
+              Every minute spent waking someone, finding the host and deciding what to cut is a minute the breach spends
+              spreading.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ───────── 3. How it works ───────── -->
+      <section class="crew-section" id="crew" aria-labelledby="crew-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="crew-title">Four agents. One human.</h2>
+            <p>Each agent has one job. The one high-impact step stays with a person.</p>
+          </header>
+
+          <ol class="crew" data-crew>
+            <!-- Sentry -->
+            <li class="stage" id="stage-sentry" data-reveal>
+              <div class="stage-copy">
+                <h3>Sentry spots the escape.</h3>
+                <p>
+                  It correlates IOMMU faults, hypervisor audit logs, host EDR, IPMI flows and token misuse into a single
+                  incident.
+                </p>
+              </div>
+              <div class="art art-sentry" aria-hidden="true">
+                <ul class="signals">
+                  <li class="glass-s" style="--i: 0">IOMMU faults</li>
+                  <li class="glass-s" style="--i: 1">Hypervisor audit logs</li>
+                  <li class="glass-s" style="--i: 2">Host EDR</li>
+                  <li class="glass-s" style="--i: 3">IPMI flows</li>
+                  <li class="glass-s" style="--i: 4">Token misuse</li>
+                </ul>
+                <svg class="converge" viewBox="0 0 100 260" preserveAspectRatio="none" focusable="false">
+                  <path d="M0 22 C50 22 50 130 100 130" />
+                  <path d="M0 76 C50 76 50 130 100 130" />
+                  <path d="M0 130 L100 130" />
+                  <path d="M0 184 C50 184 50 130 100 130" />
+                  <path d="M0 238 C50 238 50 130 100 130" />
+                </svg>
+                <div class="incident glass">
+                  <span class="pulse" aria-hidden="true"></span>
+                  <strong>INC-0419</strong>
+                  <span>critical</span>
+                  <small>Suspected guest-to-host escape</small>
+                </div>
+              </div>
+            </li>
+
+            <!-- Triage -->
+            <li class="stage" id="stage-triage" data-reveal>
+              <div class="stage-copy">
+                <h3>Triage sizes the blast radius.</h3>
+                <p>
+                  One suspect host, 11 co-resident guests and a reachable management plane. Triage scores what the escape
+                  could touch before anything moves.
+                </p>
+              </div>
+              <div class="art art-triage glass" role="img" aria-label="Blast radius: 1 suspect host, 11 co-resident guests, management plane reachable.">
+                <svg viewBox="0 0 360 240" focusable="false" aria-hidden="true">
+                  <circle class="ring ring-a" cx="112" cy="120" r="46" />
+                  <circle class="ring ring-b" cx="112" cy="120" r="88" />
+                  <path class="reach" d="M112 120 L286 120" />
+                  <g class="guests"></g>
+                  <circle class="host" cx="112" cy="120" r="11" />
+                  <rect class="mgmt" x="286" y="92" width="52" height="56" rx="14" />
+                  <path class="mgmt-ico" d="M299 112h26M299 120h26M299 128h14" />
+                </svg>
+                <dl class="legend">
+                  <div><dt>1</dt><dd>suspect host</dd></div>
+                  <div><dt>11</dt><dd>co-resident guests</dd></div>
+                  <div><dt>Reachable</dt><dd>management plane</dd></div>
+                </dl>
+              </div>
+            </li>
+
+            <!-- Warden -->
+            <li class="stage" id="stage-warden" data-reveal>
+              <div class="stage-copy">
+                <h3>Warden seals it, reversible steps first.</h3>
+                <p>
+                  Cut the network, revoke credentials, cordon the host. Then pause the guest, capture its memory and fail
+                  the guests over to clean hosts.
+                </p>
+              </div>
+              <div class="art art-warden glass">
+                <p class="group-label">Reversible first</p>
+                <ol class="ladder" start="1">
+                  <li style="--i: 0"><span class="tick"></span><span class="name">Isolate network</span><time>T+2.4 s</time></li>
+                  <li style="--i: 1"><span class="tick"></span><span class="name">Revoke credentials</span><time>T+2.9 s</time></li>
+                  <li style="--i: 2"><span class="tick"></span><span class="name">Cordon host</span><time>T+3.3 s</time></li>
+                </ol>
+                <p class="group-label">Then</p>
+                <ol class="ladder" start="4">
+                  <li style="--i: 3"><span class="tick"></span><span class="name">Pause guest</span><time>T+3.8 s</time></li>
+                  <li style="--i: 4"><span class="tick"></span><span class="name">Capture memory</span><time>T+4.6 s</time></li>
+                  <li style="--i: 5"><span class="tick"></span><span class="name">Fail over guests</span><time>T+5.3 s</time></li>
+                </ol>
+                <p class="hold" style="--i: 6">
+                  <span class="hold-ico" aria-hidden="true"></span>Quarantine host waits for a person
+                </p>
+              </div>
+            </li>
+
+            <!-- Scribe -->
+            <li class="stage" id="stage-scribe" data-reveal>
+              <div class="stage-copy">
+                <h3>Scribe writes the timeline.</h3>
+                <p>A forensic record of every signal, action and approval, kept while the others work.</p>
+              </div>
+              <div class="art art-scribe glass">
+                <ol class="ledger">
+                  <li style="--i: 0"><time>T+0.6</time><b>Sentry</b><span>Escape suspected on the vGPU path</span></li>
+                  <li style="--i: 1"><time>T+1.5</time><b>Triage</b><span>1 host, 11 guests, management plane reachable</span></li>
+                  <li style="--i: 2"><time>T+2.4</time><b>Warden</b><span>Network isolated</span></li>
+                  <li style="--i: 3"><time>T+5.3</time><b>Warden</b><span>11 guests failed over to clean hosts</span></li>
+                  <li style="--i: 4"><time>T+7.4</time><b>Operator</b><span>Quarantine approved with ⌘↵</span></li>
+                  <li style="--i: 5"><time>T+9.4</time><b>Warden</b><span>Host quarantined, incident contained</span></li>
+                </ol>
+              </div>
+            </li>
+
+            <!-- The human -->
+            <li class="stage stage-human" id="stage-human" data-reveal>
+              <div class="stage-copy">
+                <h3>You make the one call.</h3>
+                <p>
+                  Quarantining the host is the single high-impact step. Evidence, scope and rollback sit on one card.
+                  Approve with <kbd>⌘↵</kbd>.
+                </p>
+              </div>
+              <div class="art art-approve glass" data-approve style="--r: 30px">
+                <div class="approve-head">
+                  <div>
+                    <h4>Quarantine host b14-gpu-07</h4>
+                    <p class="state-line"><span data-approve-state>Proposed by Warden · policy-bounded</span></p>
+                  </div>
+                  <span class="badge" data-approve-badge>Needs approval</span>
+                </div>
+                <p class="approve-why">
+                  <b>Warden:</b> qemu on this host spawned a shell after a DMA fault. Treat the host as untrusted until it
+                  is reimaged.
+                </p>
+                <dl class="facts">
+                  <div>
+                    <dt>Evidence</dt>
+                    <dd>6 correlated signals: IOMMU fault, vGPU mdev fault, VMM ioctl, qemu → /bin/sh, IPMI flow, token misuse</dd>
+                  </div>
+                  <div><dt>Scope</dt><dd>1 host · 11 guests failed over</dd></div>
+                  <div><dt>Rollback</dt><dd>Un-quarantine restores the host to the pool</dd></div>
+                </dl>
+                <div class="approve-actions">
+                  <button class="btn btn-primary" type="button" data-approve-btn>
+                    <span data-approve-label>Approve quarantine</span>
+                    <kbd aria-hidden="true">⌘↵</kbd>
+                  </button>
+                  <p class="approve-note" data-approve-note>Warden cannot quarantine a host on its own.</p>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ───────── 4. The 9.4 s moment ───────── -->
+      <section class="moment" id="moment" aria-labelledby="moment-title" data-moment>
+        <div class="wrap">
+          <p class="moment-status" data-status>Contained</p>
+          <h2 class="bignum" id="moment-title" aria-label="Contained in 9.4 seconds">
+            <span data-count aria-hidden="true">9.4</span><span class="unit" aria-hidden="true">s</span>
+          </h2>
+          <p class="moment-sub"><strong>0 co-resident guests affected.</strong> Six automated steps, one approval, one sealed host.</p>
+
+          <div class="strip glass" style="--r: 32px">
+            <div class="scale" aria-hidden="true">
+              <div class="rail"><i class="fill"></i></div>
+              <span class="tick" style="--t: 0">0</span>
+              <span class="tick" style="--t: 2">2 s</span>
+              <span class="tick" style="--t: 4">4 s</span>
+              <span class="tick" style="--t: 6">6 s</span>
+              <span class="tick" style="--t: 8">8 s</span>
+              <span class="tick" style="--t: 10">10 s</span>
+              <i class="pip" style="--t: 2.4" data-t="2.4"></i>
+              <i class="pip" style="--t: 2.9" data-t="2.9"></i>
+              <i class="pip" style="--t: 3.3" data-t="3.3"></i>
+              <i class="pip" style="--t: 3.8" data-t="3.8"></i>
+              <i class="pip" style="--t: 4.6" data-t="4.6"></i>
+              <i class="pip" style="--t: 5.3" data-t="5.3"></i>
+              <i class="pip human" style="--t: 7.4" data-t="7.4"></i>
+              <i class="pip final" style="--t: 9.4" data-t="9.4"></i>
+              <i class="head"></i>
+            </div>
+            <ol class="steps">
+              <li data-t="2.4"><time>T+2.4 s</time><b>Isolate</b></li>
+              <li data-t="2.9"><time>T+2.9 s</time><b>Revoke</b></li>
+              <li data-t="3.3"><time>T+3.3 s</time><b>Cordon</b></li>
+              <li data-t="3.8"><time>T+3.8 s</time><b>Pause</b></li>
+              <li data-t="4.6"><time>T+4.6 s</time><b>Memory</b></li>
+              <li data-t="5.3"><time>T+5.3 s</time><b>Failover</b></li>
+              <li data-t="7.4" class="human"><time>T+7.4 s</time><b>Approval</b></li>
+              <li data-t="9.4" class="final"><time>T+9.4 s</time><b>Contained</b></li>
+            </ol>
+          </div>
+
+          <div class="moment-foot">
+            <button class="btn btn-sm btn-glass" type="button" data-replay>Replay</button>
+            <p>Illustrative demo data from the prototype.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────── 5. Architecture ───────── -->
+      <section class="arch" id="architecture" aria-labelledby="arch-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="arch-title">Agents propose. Policy decides.</h2>
+            <p>
+              Defender agents reason with NVIDIA Nemotron, self-hosted on-prem, so telemetry stays in the building. Every
+              proposed action passes a policy gate before anything runs.
+            </p>
+          </header>
+
+          <div class="diagram glass" style="--r: 36px" data-diagram>
+            <span class="tag glass-s" style="--r: 999px; --blur: 14px">Planned architecture</span>
+            <div class="diagram-art" data-diagram-art></div>
+          </div>
+
+          <div class="versus">
+            <div>
+              <h3>Static SOAR playbooks</h3>
+              <p>Match attacks they have already seen, then run fixed steps.</p>
+            </div>
+            <div>
+              <h3>Claura’s agents</h3>
+              <p>
+                Assemble evidence on attacks nobody has seen and propose bounded actions. Policy, not the model, decides
+                what executes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────── 6. Demo video ───────── -->
+      <section class="demo" id="demo" aria-labelledby="demo-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="demo-title">Watch a breach get sealed.</h2>
+            <p>A scripted incident from first signal to containment, with the one approval in the middle.</p>
+          </header>
+
+          <div class="video glass" style="--r: 38px" data-video-frame>
+            <video controls preload="metadata" playsinline data-video></video>
+            <div class="soon" data-soon hidden>
+              <div class="soon-card glass" style="--r: 28px">
+                <span class="soon-play" aria-hidden="true"></span>
+                <h3>Demo video coming soon</h3>
+                <p>The walkthrough is being cut. The prototype runs the same incident in the meantime.</p>
+                <a class="btn btn-glass btn-sm" data-prototype href="#" target="_blank" rel="noopener">Open the prototype</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ───────── 7. Footer ───────── -->
+    <footer class="foot">
+      <div class="wrap">
+        <div class="foot-bar glass" style="--r: 30px">
+          <a class="brand" href="#top" aria-label="Claura, back to top">
+            <img src="/brand/logo.svg" alt="" width="26" height="26" />
+            <span>Claura</span>
+          </a>
+          <p>Built at HackUTD 2026</p>
+          <p class="foot-meta"><a href="https://claura.tech">claura.tech</a><span aria-hidden="true"> · </span>prototype · demo data</p>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

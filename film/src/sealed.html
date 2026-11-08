@@ -1,0 +1,56 @@
+<template>
+  <style>
+    /*COMMON*/
+    #root { position: absolute; inset: 0; background: #C8CBC6; overflow: hidden; }
+    .cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    #{{P}}band { position: absolute; left: 0; top: 0; width: 840px; height: 1080px; background: #C8CBC6; border-right: 10px solid #121417; }
+    .stencil { position: absolute; font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.86; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="sealed" data-width="1920" data-height="1080">
+    <div id="{{P}}cam" class="cam"><!--PLAN--></div>
+    <div id="{{P}}band"></div>
+    <div id="{{P}}lab" class="stencil" style="left: 100px; top: 150px; font-size: 92px; color: #2FBF71;">Sealed in</div>
+    <div id="{{P}}num" class="stencil" style="left: 92px; top: 250px; font-size: 420px; color: #121417; font-variant-numeric: tabular-nums;">0.0</div>
+    <div id="{{P}}sec" class="stencil" style="left: 100px; top: 610px; font-size: 120px; color: #121417;">seconds</div>
+    <div id="{{P}}zero" class="stencil" style="left: 100px; top: 800px; font-size: 64px; color: #121417; line-height: 1;">0 other guests touched</div>
+    <div id="{{P}}demo" style="position: absolute; left: 104px; top: 980px; font-family: 'Big Shoulders', sans-serif; font-weight: 700; font-size: 28px; color: #121417; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.04em;">prototype · demo data</div>
+  </div>
+  <script>
+    (function () {
+      const P = '#{{P}}';
+      const tl = gsap.timeline({ paused: true });
+      const spray = (sel, at, d = 0.2) => tl.fromTo(sel, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: d, ease: 'none' }, at);
+      const camAt = (px, py, s) => ({ x: 960 - px * s, y: 540 - py * s, scale: s });
+
+      // state carried from the containment: doors shut, host cordoned, guests failed over to hall D
+      tl.set(P + 'cam', camAt(470, 470, 2.3), 0);
+      tl.set([P + 'doorL', P + 'doorR'], { y: 0 }, 0);
+      tl.set(P + 'cordon', { opacity: 1 }, 0);
+      tl.set(P + 'hot', { fill: '#FF5A1F' }, 0);
+      tl.set(P + 'flood', { attr: { r: 300 } }, 0);
+      tl.set(P + 'mgmtpath', { strokeDashoffset: 1300 }, 0);
+      document.querySelectorAll('.{{P}}guest').forEach((g, i) => {
+        const tx = 1223 + (i % 4) * 20, ty = 303 + Math.floor(i / 4) * 20;
+        tl.set(g, { x: tx - +g.getAttribute('x'), y: ty - +g.getAttribute('y'), fill: '#2FBF71' }, 0);
+      });
+      tl.fromTo(P + 'band', { x: -860 }, { x: 0, duration: 0.45, ease: 'expo.out' }, 0);
+      // the quarantine plate drops onto the host and the flood drains back into it
+      tl.fromTo(P + 'qplate', { opacity: 0, y: -160 }, { opacity: 1, y: 0, duration: 0.24, ease: 'power4.in' }, {{w(141) - 0.24}});
+      tl.fromTo(P + 'cam', { y: camAt(470, 470, 2.3).y }, { y: camAt(470, 470, 2.3).y + 10, duration: 0.035, yoyo: true, repeat: 3, ease: 'none', immediateRender: false }, {{w(141)}});
+      tl.to(P + 'flood', { attr: { r: 0 }, duration: 0.9, ease: 'power2.inOut' }, {{w(141) + 0.05}});
+      tl.set(P + 'lab', { opacity: 0 }, 0);
+      tl.set(P + 'lab', { opacity: 1 }, {{w(141) - 0.05}});
+      spray(P + 'lab', {{w(141) - 0.05}}, 0.2);
+      tl.fromTo({ n: 0 }, { n: 0 }, { n: 9.4, duration: 1.4, ease: 'expo.out', onUpdate() { document.querySelector(P + 'num').textContent = this.targets()[0].n.toFixed(1); } }, {{w(143) - 0.1}});
+      tl.fromTo(P + 'num', { opacity: 0 }, { opacity: 1, duration: 0.1 }, {{w(143) - 0.1}});
+      tl.set(P + 'sec', { opacity: 0 }, 0);
+      tl.set(P + 'sec', { opacity: 1 }, {{w(146) - 0.05}});
+      spray(P + 'sec', {{w(146) - 0.05}}, 0.2);
+      tl.set(P + 'zero', { opacity: 0 }, 0);
+      tl.set(P + 'zero', { opacity: 1 }, {{w(147) - 0.05}});
+      spray(P + 'zero', {{w(147) - 0.05}}, 0.3);
+      tl.fromTo(P + 'demo', { opacity: 0 }, { opacity: 0.55, duration: 0.3 }, {{w(148)}});
+      window.__timelines['sealed'] = tl;
+    })();
+  </script>
+</template>

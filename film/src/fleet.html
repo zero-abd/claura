@@ -1,0 +1,63 @@
+<template>
+  <style>
+    /*COMMON*/
+    #root { position: absolute; inset: 0; background: #C8CBC6; overflow: hidden; }
+    .cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    .stencil { position: absolute; font-family: 'Big Shoulders Stencil', sans-serif; font-weight: 900; color: #121417; text-transform: uppercase; line-height: 0.9; white-space: nowrap; }
+    .body { position: absolute; font-family: 'Big Shoulders', sans-serif; font-weight: 700; color: #121417; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    #{{P}}crate { position: absolute; left: 260px; top: 110px; width: 860px; height: 860px; }
+    .item { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  </style>
+  <div id="root" data-composition-id="fleet" data-width="1920" data-height="1080">
+    <div id="{{P}}cam" class="cam"><!--PLAN--></div>
+    <div id="{{P}}count" class="stencil" style="left: 120px; top: 44px; font-size: 150px;">61,207 agents</div>
+    <div id="{{P}}sub" class="body" style="right: 120px; top: 92px; font-size: 40px;">one sandbox each · 2,048 hosts</div>
+    <div id="{{P}}demo" class="body" style="right: 120px; top: 1000px; font-size: 28px; opacity: 0.55;">prototype · demo data</div>
+    <!-- one cell opened up: the sandbox, with its tools and keys inside -->
+    <div id="{{P}}crate">
+      <svg width="860" height="860" viewBox="0 0 700 700">
+        <rect id="{{P}}wall" x="20" y="20" width="660" height="660" rx="40" fill="#D5D8D3" stroke="#121417" stroke-width="14" stroke-dasharray="46 22" />
+        <rect id="{{P}}agent" x="290" y="250" width="120" height="120" rx="18" fill="#121417" />
+      </svg>
+      <div id="{{P}}tools" class="item" style="left: 90px; top: 540px; transform: scale(1.25); transform-origin: 0 0;">
+        <svg width="140" height="110" viewBox="0 0 140 110"><path d="M20 90 L80 30 M80 30 a26 26 0 1 0 30 -14 l-14 14 l-10 -6 l-2 -12 l14 -14 a26 26 0 0 0 -18 32" fill="none" stroke="#121417" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <div class="body" style="position: static; font-size: 44px;">tools</div>
+      </div>
+      <div id="{{P}}keys" class="item" style="left: 500px; top: 540px; transform: scale(1.25); transform-origin: 0 0;">
+        <svg width="160" height="110" viewBox="0 0 160 110"><circle cx="40" cy="55" r="28" fill="none" stroke="#121417" stroke-width="12" /><path d="M68 55 H145 M120 55 V80 M140 55 V74" fill="none" stroke="#121417" stroke-width="12" stroke-linecap="round" /></svg>
+        <div class="body" style="position: static; font-size: 44px;">credentials</div>
+      </div>
+    </div>
+    <div id="{{P}}boxlabel" class="stencil" style="left: 1190px; top: 470px; font-size: 170px;">Sandbox</div>
+  </div>
+  <script>
+    (function () {
+      const P = '#{{P}}';
+      const tl = gsap.timeline({ paused: true });
+      const spray = (sel, at, d = 0.2) => tl.fromTo(sel, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: d, ease: 'none' }, at);
+      const cam = (at, px, py, s, d, ease) => tl.to(P + 'cam', { x: 960 - px * s, y: 540 - py * s, scale: s, duration: d, ease }, at);
+
+      tl.set(P + 'cam', { x: 960 - 960 * 1.0, y: 540 - 520 * 1.0, scale: 1.0 }, 0);
+      tl.set([P + 'doorL', P + 'doorR'], { y: -70 }, 0);
+      tl.set([P + 'cordon', P + 'qplate'], { opacity: 0 }, 0);
+      tl.set([P + 'crate', P + 'boxlabel'], { opacity: 0 }, 0);
+      // a slow drift across the fleet while the count lands
+      tl.to(P + 'cam', { x: 960 - 930 * 1.04, y: 540 - 515 * 1.04, scale: 1.04, duration: {{w(8)}}, ease: 'none' }, 0);
+      spray(P + 'count', {{w(5) - 0.15}}, 0.25);
+      tl.fromTo({ n: 0 }, { n: 0 }, { n: 61207, duration: 1.4, ease: 'expo.out', onUpdate() { document.querySelector(P + 'count').textContent = Math.round(this.targets()[0].n).toLocaleString('en-US') + ' agents'; } }, {{w(5) - 0.15}});
+      spray(P + 'sub', {{w(7)}}, 0.3);
+      tl.fromTo(P + 'demo', { opacity: 0 }, { opacity: 0.55, duration: 0.3 }, {{w(7)}});
+      // "each one": dive into one cell; it opens into the sandbox
+      tl.to([P + 'count', P + 'sub', P + 'demo'], { opacity: 0, filter: 'blur(8px)', duration: 0.2, ease: 'power3.in' }, {{w(8) - 0.25}});
+      cam({{w(8) - 0.2}}, 650, 360, 9, 0.75, 'power3.in');
+      tl.fromTo(P + 'crate', { opacity: 0, scale: 0.15 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'expo.out', transformOrigin: '50% 50%' }, {{w(8) + 0.45}});
+      tl.to(P + 'cam', { opacity: 0, duration: 0.25 }, {{w(8) + 0.5}});
+      tl.fromTo(P + 'tools', { opacity: 0, y: 30, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'expo.out' }, {{w(11) - 0.08}});
+      tl.fromTo(P + 'keys', { opacity: 0, y: 30, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'expo.out' }, {{w(12) - 0.08}});
+      tl.set(P + 'boxlabel', { opacity: 1 }, {{w(15) - 0.1}});
+      spray(P + 'boxlabel', {{w(15) - 0.1}}, 0.22);
+      tl.fromTo(P + 'wall', { strokeDashoffset: 0 }, { strokeDashoffset: -68, duration: 0.6, ease: 'power2.out' }, {{w(15) - 0.1}});
+      window.__timelines['fleet'] = tl;
+    })();
+  </script>
+</template>
