@@ -5,10 +5,12 @@ import { $, $$, disc, setAttr, setHTML, setText } from "./dom";
 import { S, U, VIEWS, tone, type Phase, type View } from "./engine";
 import { hostInfo } from "./hosts";
 import { fmtT } from "./util";
+import { live } from "./live";
 
 const NAV: Record<View, { label: string; icon: string }> = {
   overview: { label: "Overview", icon: "overview" },
   incident: { label: "Incident", icon: "incident" },
+  live: { label: "Live", icon: "database" },
   warroom: { label: "War Room", icon: "warroom" },
   shells: { label: "Shells", icon: "terminal" },
   agents: { label: "Agents", icon: "agents" },
@@ -34,7 +36,7 @@ export function shellHTML(views: string): string {
       </nav>
       <div class="side-foot">
         <p class="tagline">Seal the breach before it spreads.</p>
-        <div class="stack"><span class="tag">NVIDIA Nemotron · on-prem</span><span class="tag">SpacetimeDB · live sync</span></div>
+        <div class="stack"><span class="tag">Agents: NVIDIA Nemotron, local</span><span class="tag">Incident views: scripted replay</span></div>
       </div>
     </aside>
 
@@ -47,7 +49,7 @@ export function shellHTML(views: string): string {
         <button type="button" class="tb-btn" id="micBtn" data-act="voice" data-tip="Ask Claura" aria-label="Ask Claura" aria-pressed="false" data-target="mic">${icon("mic")}</button>
         <div class="presence">
           <div class="avatars">${OPERATORS.map((o, i) => `<span class="av av${i}" id="av${i}" title="${o.initials} · ${o.role}">${o.initials}</span>`).join("")}</div>
-          <span class="sync"><i></i><span><b>synced</b> · SpacetimeDB</span></span>
+          <button type="button" class="sync" id="syncPill" data-go="live" data-s="off"><i></i><span id="syncText"></span></button>
         </div>
       </header>
       <div class="scroll" id="scroll">
@@ -117,8 +119,9 @@ export function shellHTML(views: string): string {
 // ------------------------------------------------------------------ render
 const SUB: Record<View, (ph: Phase) => string> = {
   overview: (ph) => (ph === "nominal" ? "All clear" : ph === "contained" || ph === "report" ? "Contained" : "Breach in progress"),
-  incident: (ph) => (ph === "nominal" ? "No open incident" : INCIDENT.id),
-  warroom: () => "Out-of-band · SpacetimeDB cloud",
+  incident: (ph) => (ph === "nominal" ? "No open incident" : `${INCIDENT.id} · replay`),
+  live: () => "Real rows from SpacetimeDB",
+  warroom: () => "Out-of-band channel · scripted",
   shells: () => "Secure shells",
   agents: () => "Sentry, Triage, Warden, Scribe",
   policy: () => "Playbook guest-escape v3",
@@ -133,6 +136,8 @@ export function renderShell(ph: Phase) {
   setHTML($("#tbIco"), S.view, () => icon(NAV[S.view].icon));
   setText($("#tbTitle"), NAV[S.view].label);
   setText($("#tbSub"), SUB[S.view](ph));
+  setAttr($("#syncPill"), "data-s", live.status);
+  setText($("#syncText"), live.status === "live" ? "Live · SpacetimeDB" : live.status === "connecting" ? "Connecting" : "Replay · scripted");
 
   setAttr($("#av0"), "data-s", ph === "approval" ? "looking" : ph === "isolating" ? "approved" : "");
 

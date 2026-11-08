@@ -3077,3 +3077,248 @@ html[data-demo="1"] .devdock {
 #claura-shell-slot:has(> :not(.slot-empty)) > .slot-empty {
   display: none;
 }
+
+/* ------------------------------------------------------------ live (real SpacetimeDB rows) */
+button.sync {
+  appearance: none;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+}
+button.sync:hover {
+  background: var(--sunk);
+  color: var(--ink);
+}
+.sync[data-s="off"] i,
+.sync[data-s="error"] i {
+  background: var(--ink-4);
+  animation: none;
+}
+.sync[data-s="live"] {
+  color: var(--safe-ink);
+}
+.sync[data-s="live"] i {
+  background: var(--safe);
+}
+
+.lv-conn {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  padding: 16px 18px;
+}
+.lv-conn .chip {
+  align-self: center;
+}
+.lv-conn label {
+  display: grid;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.lv-conn input {
+  height: 34px;
+  min-width: 220px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  color: var(--ink);
+  font: 13.5px/1 var(--mono);
+}
+.lv-conn input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.lv-err {
+  flex-basis: 100%;
+  font-size: 13.5px;
+  color: var(--accent-ink);
+}
+.lv-err:empty {
+  display: none;
+}
+.lv-note {
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+.lv-note:empty {
+  display: none;
+}
+.lv-note[data-tone="safe"] {
+  color: var(--safe-ink);
+  background: var(--safe-wash);
+}
+.lv-note[data-tone="hot"] {
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+}
+#lvBody {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.lv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.lv-card {
+  padding: 20px 22px;
+  min-width: 0;
+}
+.lv-card h2 {
+  font: 600 18px/1.25 var(--font);
+  letter-spacing: -0.015em;
+}
+.lv-card > p {
+  margin-top: 8px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.lv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lv-dim {
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+.lv-card > p.lv-dim {
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+.lv-empty {
+  padding: 36px 28px;
+}
+.lv-empty code,
+.lv-conn code {
+  font: 13px var(--mono);
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--sunk);
+}
+.lv-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  margin-top: 18px;
+}
+.lv-facts dt {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.lv-facts dd {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: var(--ink);
+}
+.lv-ask .btn-primary {
+  margin-top: 18px;
+}
+.lv-ask .btn-chip {
+  margin-top: 10px;
+  width: 100%;
+}
+.lv-ask[data-done="1"] {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+.lv-ask[data-done="1"] .sheet-ico.ok {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+.lv-card button[disabled] {
+  opacity: 0.55;
+  cursor: progress;
+}
+.lv-table {
+  margin-top: 14px;
+  overflow-x: auto;
+}
+.lv-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.lv-table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink-3);
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.lv-table td {
+  padding: 9px 12px 9px 0;
+  border-bottom: 1px solid var(--hair);
+  white-space: nowrap;
+}
+.lv-table tr:last-child td {
+  border-bottom: 0;
+}
+.lv-table .mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.lv-agents {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.lv-agents li {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+}
+.lv-agents b {
+  text-transform: capitalize;
+  font-weight: 600;
+  margin-right: 8px;
+}
+.lv-agents p {
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.lv-log {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-height: 460px;
+  overflow-y: auto;
+}
+.lv-log li {
+  display: grid;
+  grid-template-columns: 64px 84px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--hair);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.lv-log time,
+.lv-kind {
+  font: 12px/1.6 var(--mono);
+  color: var(--ink-3);
+}
+.lv-report {
+  white-space: pre-wrap;
+}

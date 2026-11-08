@@ -6,7 +6,7 @@ import { agentNow, at, since, S } from "../engine";
 import { fmtT } from "../util";
 
 // Agents: four cards. Collapsed = status + current line. Expanded = reasoning,
-// tool calls (nemotron-on-prem) and policy bounds.
+// tool calls and policy bounds. This view replays INC-0419; the Live view shows real agent state.
 
 function trace(a: AgentDef) {
   const rows: { t: number; text: string }[] = [];
@@ -28,7 +28,7 @@ export const agents = {
       const b = BOUNDS[a.id];
       const body = `<div class="row-body" style="padding:0">
         <div class="sec"><h4>Reasoning</h4><ol class="trace" id="tr-${a.id}"></ol></div>
-        <div class="sec"><h4>Tool calls<span class="tag">nemotron-on-prem</span></h4><div id="tl-${a.id}"></div></div>
+        <div class="sec"><h4>Tool calls<span class="tag">replay</span></h4><div id="tl-${a.id}"></div></div>
         <div class="sec"><h4>Policy bounds<span class="tag${a.id === "warden" ? " warm" : ""}">${b.mode}</span></h4>
           <dl class="bounds"><dt>Can</dt><dd>${b.can}</dd><dt>Cannot</dt><dd>${b.cannot}</dd></dl>
         </div>
@@ -51,7 +51,7 @@ export const agents = {
     return `<section class="view" id="v-agents" data-view="agents">
       <header class="hero-head">
         <h1 class="h-title">Agents</h1>
-        <p class="h-sub">Four defenders reason on-prem with NVIDIA Nemotron. Every action stays inside policy.</p>
+        <p class="h-sub">Four defenders, run locally on NVIDIA Nemotron. Every action stays inside policy. This page replays INC-0419; Live shows a real run.</p>
       </header>
       <div class="agent-grid">${cards}</div>
     </section>`;

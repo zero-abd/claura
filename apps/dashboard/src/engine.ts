@@ -13,8 +13,8 @@ import {
 import { hash } from "./util";
 
 export type Phase = "nominal" | "breach" | "approval" | "isolating" | "contained" | "report";
-export type View = "overview" | "incident" | "warroom" | "shells" | "agents" | "policy" | "reports";
-export const VIEWS: View[] = ["overview", "incident", "warroom", "shells", "agents", "policy", "reports"];
+export type View = "overview" | "incident" | "live" | "warroom" | "shells" | "agents" | "policy" | "reports";
+export const VIEWS: View[] = ["overview", "incident", "live", "warroom", "shells", "agents", "policy", "reports"];
 
 export const S = {
   started: false,

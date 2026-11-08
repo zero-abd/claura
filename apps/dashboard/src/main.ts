@@ -2,6 +2,7 @@ import "./style.css";
 
 import {
   APPROVAL_AT,
+  APPROVER,
   CANON_APPROVE,
   CONTAINED_AT,
   ISOLATE_DUR,
@@ -34,8 +35,10 @@ import { policy } from "./views/policy";
 import { reports } from "./views/reports";
 import { selectChannel, warroom } from "./views/warroom";
 import { shells } from "./views/shells";
+import { liveView } from "./views/live";
+import { approve as liveApprove, connect as liveConnect, live, proposeReimage } from "./live";
 
-const VIEW_MODULES = { overview, incident, warroom, shells, agents, policy, reports } as const;
+const VIEW_MODULES = { overview, incident, live: liveView, warroom, shells, agents, policy, reports } as const;
 
 // ------------------------------------------------------------------ boot DOM
 let map!: FacilityMap;
@@ -478,6 +481,15 @@ document.addEventListener("click", (e) => {
   const hostEl = t.closest("[data-host]") as HTMLElement | null;
   if (hostEl) return void api.openHost(hostEl.dataset.host!);
 
+  const lv = t.closest("[data-live]") as HTMLElement | null;
+  if (lv) {
+    const a = lv.dataset.live;
+    if (a === "approve") void liveApprove(APPROVER.initials);
+    else if (a === "approve-agent") void liveApprove("warden");
+    else if (a === "reimage") void proposeReimage();
+    return;
+  }
+
   const d = t.closest("[data-disc]") as HTMLElement | null;
   if (d) return void api.toggle(d.dataset.disc!);
 
@@ -529,6 +541,18 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("submit", (e) => {
   const f = e.target as HTMLElement;
+  if (f.id === "lvForm") {
+    e.preventDefault();
+    const uri = ($("#lvUri") as HTMLInputElement).value.trim() || live.uri;
+    const db = ($("#lvDb") as HTMLInputElement).value.trim() || live.db;
+    try {
+      localStorage.setItem("claura-live", JSON.stringify({ uri, db }));
+    } catch {
+      // storage blocked: the address lasts for this visit
+    }
+    void liveConnect(uri, db);
+    return;
+  }
   if (f.id !== "wrForm") return;
   e.preventDefault();
   const input = $("#wrInput") as HTMLInputElement;
@@ -538,7 +562,8 @@ document.addEventListener("submit", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
-    api.approve();
+    if (S.view === "live") void liveApprove(APPROVER.initials);
+    else api.approve();
   } else if (e.key === "Escape") {
     if (!api.closeHost()) api.closeApproval();
   } else if ((e.key === "Enter" || e.key === " ") && (e.target as HTMLElement).classList?.contains("switch")) {
@@ -548,7 +573,20 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ------------------------------------------------------------------ boot
+/** The Live view's address: ?stdb=ws://host:port and ?db=name win, then the last address used, then the defaults. */
+function loadLiveAddress(params: URLSearchParams) {
+  let saved: { uri?: string; db?: string } = {};
+  try {
+    saved = JSON.parse(localStorage.getItem("claura-live") ?? "{}");
+  } catch {
+    // storage blocked or empty
+  }
+  live.uri = params.get("stdb") ?? saved.uri ?? live.uri;
+  live.db = params.get("db") ?? saved.db ?? live.db;
+}
+
 installSprings();
+loadLiveAddress(new URLSearchParams(location.search));
 build();
 exposeApi();
 setPickHandler((id) => void api.openHost(id));
@@ -584,6 +622,8 @@ const channelParam = params.get("channel"); // ?channel=exec (or %23exec)
 if (channelParam) selectChannel(channelParam);
 const hostParam = params.get("host"); // ?host=b14-gpu-07 opens its Host sheet
 if (hostParam) settle(() => void api.openHost(hostParam));
+// ?live=1 connects the Live view to SpacetimeDB (address set before build(), see loadLiveAddress).
+if (params.get("live") === "1" || params.has("stdb")) void liveConnect();
 if (params.get("play") === "1") api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });
 
 document.fonts.ready.then(() => {
