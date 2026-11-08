@@ -49,6 +49,12 @@ export interface LoopConfig {
   isDone: () => boolean;
   /** Sent as a user message when the model stops talking without being done. */
   nudge: string;
+  /**
+   * When isDone() becomes true after a tool batch, give the model ONE more
+   * neutral turn (no nudge) instead of stopping at once. Lets the model say it
+   * is finished, and gives it a fair chance to propose anything else on its own.
+   */
+  allowFinalTurn?: boolean;
   deadlineMs?: number;
   llmTimeoutMs?: number;
   hooks?: LoopHooks;
@@ -109,6 +115,7 @@ export async function runToolLoop(cfg: LoopConfig): Promise<LoopResult> {
   let stalls = 0;
   let nudges = 0;
   let executed = 0;
+  let finalTurnTaken = false;
 
   const finish = (reason: LoopReason, detail: string): LoopResult => {
     res.reason = reason;
@@ -222,7 +229,10 @@ export async function runToolLoop(cfg: LoopConfig): Promise<LoopResult> {
 
     if (good === 0 && bad > 0) malformedStreak++;
     else if (good > 0) malformedStreak = 0;
-    if (cfg.isDone()) return finish('done', 'backend state complete');
+    if (cfg.isDone()) {
+      if (!cfg.allowFinalTurn || finalTurnTaken) return finish('done', 'backend state complete');
+      finalTurnTaken = true; // one more neutral turn, then stop
+    }
     // Original attempt + one retry both malformed => give up and let the caller fall back.
     if (malformedStreak >= 2) return finish('malformed', 'model produced malformed tool calls twice in a row');
     if (res.malformed >= 4) return finish('malformed', `${res.malformed} malformed tool calls in total`);

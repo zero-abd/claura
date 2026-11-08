@@ -1,6 +1,7 @@
 import { FLEET, INCIDENT, LAST_INCIDENT, RESOLUTION, FACILITY } from "../script";
 import { icon, chev } from "../icons";
 import { $, setAttr, setHTML, setText } from "../dom";
+import { hostLink } from "../hosts";
 import { S, ttc, type Phase } from "../engine";
 
 // Overview: calm state. One status, fleet health in one line, the facility stage, the last incident.
@@ -52,11 +53,11 @@ export const overview = {
     if (ph === "nominal") {
       setHTML(line, "fleet", () => `<b>${FLEET.hosts}</b> hosts<span class="sep">·</span><b>${FLEET.vms}</b> VMs<span class="sep">·</span><b>${FLEET.agents}</b> sandboxed agents`);
     } else if (ph === "breach") {
-      setHTML(line, "b", () => `Suspected escape on <b>${INCIDENT.host}</b>. Agents are containing it.`);
+      setHTML(line, "b", () => `Suspected escape on <b>${hostLink(INCIDENT.host)}</b>. Agents are containing it.`);
     } else if (ph === "approval") {
-      setHTML(line, "a", () => `Warden needs your approval to quarantine <b>${INCIDENT.host}</b>.`);
+      setHTML(line, "a", () => `Warden needs your approval to quarantine <b>${hostLink(INCIDENT.host)}</b>.`);
     } else if (ph === "isolating") {
-      setHTML(line, "i", () => `Taking <b>${INCIDENT.host}</b> off the fabric.`);
+      setHTML(line, "i", () => `Taking <b>${hostLink(INCIDENT.host)}</b> off the fabric.`);
     } else {
       setHTML(line, "c", () => RESOLUTION.replace(" · memory captured", ""));
     }

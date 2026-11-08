@@ -10,7 +10,7 @@ sync "$R/bulkhead-site"     "$M/apps/site"           "--exclude shots"
 sync "$R/bulkhead-3d"       "$M/packages/facility-3d" ""
 sync "$R/claura-backend"    "$M/backend"             ""
 sync "$R/claura-brand"      "$M/brand"               ""
-sync "$R/bulkhead-film"     "$M/film"                "--exclude assets/clips --exclude .hyperframes-check.json --exclude .hyperframes-check.log"
+sync "$R/bulkhead-film"     "$M/film"                "--exclude assets/clips --exclude .hyperframes-check.json --exclude .hyperframes-check.log --exclude docs/hyperframes-skills"
 sync "$R/bulkhead/docs"     "$M/docs"                ""
 # secret scan: refuse to continue if anything key-shaped is present
 if grep -rEl "sk_[a-f0-9]{30,}|gho_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|xi-api-key: [A-Za-z0-9]|nvapi-[A-Za-z0-9]{20,}|BEGIN (OPENSSH|RSA|EC) PRIVATE KEY" "$M" --exclude-dir=node_modules --exclude-dir=.git --exclude=sync.sh 2>/dev/null; then

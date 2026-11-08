@@ -60,7 +60,7 @@ export const CRADLE = { cx: 156, cy: 128, ri: 78, e: 21, t0: 33, alpha: 36, orb:
 function cradle() {
   const k = g.cradleC(CRADLE);
   const orb = D(circle(CRADLE.cx, CRADLE.cy, CRADLE.orb));
-  const color = [{ d: k.d, fill: 'O', id: 'aura' }, { d: orb, fill: 'O', id: 'seal' }];
+  const color = [{ d: k.d, fill: 'O', id: 'ring' }, { d: orb, fill: 'O', id: 'seal' }];
   return { color, mono: mono(color) };
 }
 

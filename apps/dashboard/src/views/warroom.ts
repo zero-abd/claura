@@ -20,6 +20,7 @@ import { AGENT_ICON, icon } from "../icons";
 import { $, $$, disc, setAttr, setHTML, setText } from "../dom";
 import { S, at, finalState, since, type Phase } from "../engine";
 import { fmtT } from "../util";
+import { linkHosts } from "../hosts";
 
 // War Room: the out-of-band coordination channel. A plain-language brief, channels and people,
 // the live thread, and (collapsed) tasks, decisions and notification clocks.
@@ -119,7 +120,7 @@ export const warroom = {
 
       <div class="glass wr-brief">
         <div class="wr-brief-main">
-          <div class="card-head"><h2>Brief for stakeholders</h2><span class="meta" id="wrStamp"></span></div>
+          <div class="card-head"><h2>Brief for stakeholders</h2><div class="head-r"><span class="meta" id="wrStamp"></span><button type="button" class="btn-chip play" data-act="play-brief" data-tip="Play brief" aria-label="Play brief" data-target="play-brief">${icon("speaker")}<span>Play brief</span></button></div></div>
           <dl class="brief-lines" id="wrLines"></dl>
         </div>
         <div class="wr-pair" id="wrPair"></div>
@@ -167,11 +168,11 @@ export const warroom = {
         ["Impact", b.impact],
         ["What we need from you", b.need],
       ]
-        .map(([k, v]) => `<div class="bl"><dt>${k}</dt><dd>${v}</dd></div>`)
+        .map(([k, v]) => `<div class="bl"><dt>${k}</dt><dd>${linkHosts(v)}</dd></div>`)
         .join(""),
     );
     setHTML($("#wrPair"), st, () => {
-      const list = (items: string[], ico: string) => items.map((i) => `<li>${icon(ico)}<span>${i}</span></li>`).join("");
+      const list = (items: string[], ico: string) => items.map((i) => `<li>${icon(ico)}<span>${linkHosts(i)}</span></li>`).join("");
       return `<div><h3>What we know</h3><ul class="know">${list(b.know, "check")}</ul></div>
         <div><h3>What we don't know yet</h3><ul class="dont">${list(b.dont, "info")}</ul></div>`;
     });
@@ -218,7 +219,7 @@ export const warroom = {
             ${avatar(m.who)}
             <div class="m-main">
               <div class="m-head"><b>${who.name}</b>${who.agent ? `<span class="m-tag">agent</span>` : who.role ? `<span class="m-role">${who.role}</span>` : ""}<time>${clock}</time></div>
-              <p>${m.text}</p>
+              <p>${linkHosts(m.text)}</p>
               ${m.action === "review" && pending ? `<button type="button" class="btn-chip accent" data-act="review">Review and approve</button>` : ""}
             </div>
           </div>`;
@@ -276,8 +277,8 @@ export const warroom = {
         ? items
             .map((x) =>
               x.done
-                ? `<div class="dec"><time>${fmtT(at(x.d))}</time><div><b>${x.d.what}</b><span>${x.d.by}</span></div></div>`
-                : `<div class="dec wait"><time>now</time><div><b>${x.d.pendingText}</b><span>waiting</span></div></div>`,
+                ? `<div class="dec"><time>${fmtT(at(x.d))}</time><div><b>${linkHosts(x.d.what)}</b><span>${x.d.by}</span></div></div>`
+                : `<div class="dec wait"><time>now</time><div><b>${linkHosts(x.d.pendingText ?? "")}</b><span>waiting</span></div></div>`,
             )
             .join("")
         : `<p class="ob-note" style="margin:0">No decisions yet.</p>`,

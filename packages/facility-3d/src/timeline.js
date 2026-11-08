@@ -132,7 +132,7 @@ const hb = HALL_CENTERS.B;
 const facilityPts = boxPts(-PLINTH.hx, PLINTH.hx, -PLINTH.depth, 3.4, -PLINTH.hz, PLINTH.hz);
 const hallBPts = boxPts(hb[0] - HALL.len / 2 - 0.4, hb[0] + HALL.len / 2 + 0.4, -0.1, 3.6, hb[1] - HALL.wid / 2 - 0.4, hb[1] + HALL.wid / 2 + 0.4);
 const zf14 = frontZ(B14);
-const rack14Pts = boxPts(B14.x - 1.7, B14.x + 1.7, 0, 4.1, B14.z - 1.0, zf14 + 1.55);
+const rack14Pts = boxPts(B14.x - 1.7, B14.x + 1.7, 0, 4.75, B14.z - 1.0, zf14 + 1.55);
 
 export const PRESETS = {
   facility: fitPose(facilityPts, 45, ISO_EL, [0.1, 0.12]),

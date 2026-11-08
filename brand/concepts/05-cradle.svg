@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <title>Claura concept 05: Cradle</title>
   <desc>A C-shaped aura cupping the breach in a concentric socket; the mouth is narrower than the orb, so it cannot slip out.</desc>
-  <path id="aura" fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z"/>
+  <path id="ring" fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z"/>
   <path id="seal" fill="#FF5A1F" d="M108,128c0,-26.5 21.5,-48 48,-48c26.5,0 48,21.5 48,48c0,26.5 -21.5,48 -48,48c-26.5,0 -48,-21.5 -48,-48z"/>
 </svg>

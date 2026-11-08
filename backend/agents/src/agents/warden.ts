@@ -31,7 +31,7 @@ Work through the guest-escape playbook in this order, ONE propose_action call pe
 5. capture_memory   target: the suspect VM
 6. failover_guests   target: the suspect host
 7. quarantine_host   target: the suspect host (always last)
-Give every step a one-sentence reason with evidence from the incident. If a result says BLOCKED, do not retry that action; carry on. When all steps have been proposed, reply with one short sentence.`;
+Give every step a reason of at most 15 words that cites evidence from the incident. If a result says BLOCKED, do not retry that action; carry on. When all steps have been proposed, reply with one short sentence.`;
 
 const targetOf = (inc: IncidentRow, step: PlaybookStep) =>
   step.on === 'vm' ? inc.vm : step.on === 'identity' ? SUSPECT_IDENTITY : inc.host;
@@ -56,7 +56,8 @@ export async function runWarden(env: Env, inc: IncidentRow): Promise<AgentOutcom
     maxToolCalls: 16,
     deadlineMs: 150_000,
     isDone,
-    nudge: 'The playbook is not finished. Call propose_action for the next step that has not been proposed yet.',
+    nudge: 'The playbook is not finished. Call propose_action for the next playbook step that has not been proposed yet.',
+    allowFinalTurn: true,
     startStatus: 'Executing',
     startThought: `Reversible steps first on ${inc.host}: cut the network, pull credentials, cordon, pause, capture, fail over. Quarantine last.`,
     async deterministic(pace) {

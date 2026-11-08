@@ -22,18 +22,20 @@ import {
   type Phase,
   type View,
 } from "./engine";
-import { $, $$, installSprings, syncDisclosures } from "./dom";
+import { $, $$, installSprings, setAttr, syncDisclosures } from "./dom";
 import { FacilityMap } from "./map";
-import { mountFacility3D, nudgeFacilityResize, stageMode, syncFacility3D } from "./facility3d";
-import { renderSheet, renderShell, shellHTML } from "./shell";
+import { mountFacility3D, nudgeFacilityResize, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
+import { renderSheet, renderShell, shellHTML, sheetWanted } from "./shell";
+import { parseHost } from "./hosts";
 import { overview } from "./views/overview";
 import { incident } from "./views/incident";
 import { agents } from "./views/agents";
 import { policy } from "./views/policy";
 import { reports } from "./views/reports";
 import { selectChannel, warroom } from "./views/warroom";
+import { shells } from "./views/shells";
 
-const VIEW_MODULES = { overview, incident, warroom, agents, policy, reports } as const;
+const VIEW_MODULES = { overview, incident, warroom, shells, agents, policy, reports } as const;
 
 // ------------------------------------------------------------------ boot DOM
 let map!: FacilityMap;
@@ -50,6 +52,34 @@ function build() {
   stageEl.innerHTML = `<canvas class="f3d-fallback"></canvas>`;
   $('.stage-slot[data-slot="overview"]').appendChild(stageEl);
   map = new FacilityMap(stageEl.querySelector("canvas") as HTMLCanvasElement);
+  wireStage();
+}
+
+/** The 2D facility map is a host picker: click a rack to inspect it, click a host to open its Host sheet. */
+function wireStage() {
+  const canvas = stageEl.querySelector("canvas") as HTMLCanvasElement;
+  const at = (e: PointerEvent | MouseEvent) => {
+    const r = canvas.getBoundingClientRect();
+    return map.hit(e.clientX - r.left, e.clientY - r.top);
+  };
+  stageEl.addEventListener("pointermove", (e) => {
+    if (stageMode() === "mounted") return;
+    map.hover = at(e);
+    canvas.style.cursor = map.hover ? "pointer" : "default";
+  });
+  stageEl.addEventListener("pointerleave", () => {
+    map.hover = null;
+  });
+  stageEl.addEventListener("click", (e) => {
+    if (stageMode() === "mounted") return; // the 3D module reports picks through the same hook (onPick)
+    const h = at(e);
+    if (!h) return;
+    if (h.kind === "rack") {
+      map.sel = { hall: h.hall, rack: h.rack };
+      setOpen("map", true);
+      syncDisclosures();
+    } else api.openHost(h.id);
+  });
 }
 
 function setView(v: View, animate: boolean) {
@@ -74,10 +104,21 @@ function setView(v: View, animate: boolean) {
 
 // ------------------------------------------------------------------ render
 let lastPhase: Phase | null = null;
+function refreshTips() {
+  const v = window.claura?.voice;
+  const hasToggle = typeof v?.toggle === "function";
+  const hasPlay = typeof v?.playBrief === "function";
+  setAttr($("#micBtn"), "data-tip", hasToggle ? "Ask Claura" : "Ask Claura · voice module not loaded");
+  setAttr($("#micBtn"), "aria-pressed", String(S.micOn && hasToggle));
+  const play = document.querySelector('[data-act="play-brief"]');
+  if (play) setAttr(play, "data-tip", hasPlay ? "Play brief" : "Play brief · voice module not loaded");
+}
+
 function render() {
   const ph = phase();
   document.body.dataset.phase = ph;
   renderShell(ph);
+  refreshTips();
   VIEW_MODULES[S.view].render(ph);
   syncDisclosures();
   renderSheet(ph);
@@ -253,6 +294,22 @@ const api = {
     render();
     return true;
   },
+  /** Open the Host sheet for a host id such as 'b14-gpu-07'. Every host name and the facility map call this;
+   *  a 3D map can call it through the same `onPick` hook. Returns false for an unknown id or while the approval is up. */
+  openHost(id: string) {
+    if (!parseHost(id)) return false;
+    if (sheetWanted(phase())) return false;
+    S.hostSheet = id;
+    S.shellNote = false;
+    render();
+    return true;
+  },
+  closeHost() {
+    if (S.hostSheet === null) return false;
+    S.hostSheet = null;
+    render();
+    return true;
+  },
   /** Show the approval sheet again after "Not now". Only works while approval is pending. */
   openApproval() {
     if (phase() !== "approval") return false;
@@ -288,6 +345,14 @@ const api = {
     }
     for (const el of $$(".arow[data-agent]")) add(`agent-row:${el.dataset.agent}`, el);
     for (const el of $$("#wrInput")) add("composer", el);
+    const seen = new Set<string>();
+    for (const el of $$(".host[data-host]")) {
+      const k = `host:${el.dataset.host}`;
+      const r = el.getBoundingClientRect();
+      if (seen.has(k) || r.width === 0 || r.top >= innerHeight || r.bottom <= 0) continue;
+      seen.add(k);
+      add(k, el);
+    }
     return out;
   },
   get state(): Phase {
@@ -317,15 +382,77 @@ const api = {
   },
   views: VIEWS,
 };
+// Hooks other modules attach to window.claura. All optional: the console works without them.
+type ClauraHooks = {
+  openShell?: (hostId: string) => unknown;
+  voice?: { toggle?: () => unknown; playBrief?: () => unknown };
+};
 declare global {
   interface Window {
     bulkhead: typeof api;
+    claura: typeof api & ClauraHooks;
   }
+}
+
+/** window.bulkhead and window.claura are one object. If a module already created window.claura, merge into it
+ *  without overwriting anything it set (its openShell / voice stay untouched). */
+function exposeApi() {
+  const existing = (window as unknown as { claura?: object }).claura;
+  if (existing && existing !== api) {
+    const props = Object.getOwnPropertyDescriptors(api);
+    for (const k of Object.keys(props)) if (!(k in existing)) Object.defineProperty(existing, k, props[k]);
+    window.claura = existing as Window["claura"];
+    window.bulkhead = existing as Window["bulkhead"];
+  } else {
+    window.claura = api as Window["claura"];
+    window.bulkhead = api;
+  }
+}
+
+/** Host sheet -> Open secure shell. Calls window.claura?.openShell?.(hostId); if the module is absent, say so. */
+function openShellFor(id: string) {
+  const c = window.claura;
+  if (typeof c?.openShell !== "function") {
+    S.shellNote = true;
+    render();
+    return false;
+  }
+  S.hostSheet = null;
+  api.go("shells"); // the slot must be on screen before the terminal mounts into it
+  try {
+    const r = c.openShell(id);
+    if (r && typeof (r as Promise<unknown>).catch === "function") (r as Promise<unknown>).catch(() => {});
+  } catch {
+    /* a misbehaving module must never break the console */
+  }
+  render();
+  return true;
+}
+
+function voiceCall(fn: "toggle" | "playBrief", btn: HTMLElement) {
+  const v = window.claura?.voice;
+  const f = v?.[fn];
+  if (typeof f !== "function") {
+    btn.classList.add("tip-on"); // module absent: a no-op with a quiet tooltip
+    window.setTimeout(() => btn.classList.remove("tip-on"), 1800);
+    return false;
+  }
+  try {
+    const r = f.call(v);
+    if (r && typeof (r as Promise<unknown>).catch === "function") (r as Promise<unknown>).catch(() => {});
+  } catch {
+    /* ignore */
+  }
+  if (fn === "toggle") S.micOn = !S.micOn;
+  return true;
 }
 
 // ------------------------------------------------------------------ input
 document.addEventListener("click", (e) => {
   const t = e.target as HTMLElement;
+
+  const hostEl = t.closest("[data-host]") as HTMLElement | null;
+  if (hostEl) return void api.openHost(hostEl.dataset.host!);
 
   const d = t.closest("[data-disc]") as HTMLElement | null;
   if (d) return void api.toggle(d.dataset.disc!);
@@ -337,6 +464,8 @@ document.addEventListener("click", (e) => {
   if (act) {
     const a = act.dataset.act;
     if (a === "review") api.openApproval();
+    else if (a === "voice") voiceCall("toggle", act);
+    else if (a === "play-brief") voiceCall("playBrief", act);
     else if (a === "sim") {
       api.go("incident");
       api.play();
@@ -344,6 +473,8 @@ document.addEventListener("click", (e) => {
     return;
   }
 
+  if (t.closest("#shellBtn")) return void (S.hostSheet && openShellFor(S.hostSheet));
+  if (t.closest("#hostClose")) return void api.closeHost();
   if (t.closest("#approveBtn")) return void api.approve();
   if (t.closest("#notNow")) return void api.closeApproval();
 
@@ -385,7 +516,7 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     api.approve();
   } else if (e.key === "Escape") {
-    api.closeApproval();
+    if (!api.closeHost()) api.closeApproval();
   } else if ((e.key === "Enter" || e.key === " ") && (e.target as HTMLElement).classList?.contains("switch")) {
     e.preventDefault();
     (e.target as HTMLElement).click();
@@ -395,7 +526,8 @@ document.addEventListener("keydown", (e) => {
 // ------------------------------------------------------------------ boot
 installSprings();
 build();
-window.bulkhead = api;
+exposeApi();
+setPickHandler((id) => void api.openHost(id));
 void mountFacility3D(stageEl);
 
 const params = new URLSearchParams(location.search);

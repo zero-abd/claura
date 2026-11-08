@@ -42,6 +42,8 @@ export interface AgentSpec {
   /** Objective completion check against backend state. */
   isDone: () => boolean;
   nudge: string;
+  /** See LoopConfig.allowFinalTurn. */
+  allowFinalTurn?: boolean;
   startStatus: string;
   startThought: string;
   /**
@@ -111,6 +113,7 @@ export async function runAgent(env: Env, spec: AgentSpec): Promise<AgentOutcome>
       maxToolCalls: spec.maxToolCalls,
       isDone: spec.isDone,
       nudge: spec.nudge,
+      allowFinalTurn: spec.allowFinalTurn,
       deadlineMs: spec.deadlineMs,
       llmTimeoutMs: env.opts.llmTimeoutMs,
       log: { debug: t => log.debug(name, t), warn: t => log.warn(name, t) },

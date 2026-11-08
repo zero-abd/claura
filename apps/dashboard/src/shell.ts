@@ -126,6 +126,7 @@ const SUB: Record<View, (ph: Phase) => string> = {
   overview: (ph) => (ph === "nominal" ? "All clear" : ph === "contained" || ph === "report" ? "Contained" : "Breach in progress"),
   incident: (ph) => (ph === "nominal" ? "No open incident" : INCIDENT.id),
   warroom: () => "Out-of-band · SpacetimeDB cloud",
+  shells: () => "Secure shells",
   agents: () => "Sentry, Triage, Warden, Scribe",
   policy: () => "Playbook guest-escape v3",
   reports: () => "Filed by Scribe",

@@ -210,13 +210,14 @@ export async function runDemo(opts: RunOptions, deps: Deps = {}): Promise<RunSum
 export function printSummary(s: RunSummary, db: ClauraDb): void {
   const { marks, log } = s;
   const t = (n: Parameters<Marks['get']>[0]) => marks.get(n);
+  const t0 = marks.get('first_signal') ?? 0;
   const row = (at: number | undefined, text: string) =>
-    at === undefined ? null : `  +${(at / 1000).toFixed(2).padStart(6)}s  ${text}`;
+    at === undefined ? null : `  T+${((at - t0) / 1000).toFixed(2).padStart(6)}s  ${text}`;
 
   console.log('\n' + '='.repeat(78));
   console.log('CLAURA RUN SUMMARY');
   console.log('='.repeat(78));
-  console.log('\nTimeline (milestones, seconds since the runner started)');
+  console.log('\nTimeline (milestones, seconds after the first signal)');
   const lines = [
     row(t('first_signal'), 'first telemetry signal ingested'),
     row(t('incident_open'), `Sentry opened incident #${s.incidentId}`),

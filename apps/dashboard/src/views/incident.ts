@@ -15,8 +15,9 @@ import {
   LAST_INCIDENT,
 } from "../script";
 import { AGENT_ICON, icon } from "../icons";
+import { hostLink, linkHosts } from "../hosts";
 import { logoSVG } from "../logo";
-import { $, disc, setAttr, setHTML, setText } from "../dom";
+import { $, disc, setAttr, setHTML, setLinked, setText } from "../dom";
 import {
   AMB_DT,
   AMB_PREFILL,
@@ -53,7 +54,7 @@ export const incident = {
     const steps = STEPS.map((s, i) =>
       disc(
         `step:${i + 1}`,
-        `<span class="s-mark">${icon("check")}</span><span class="s-label">${s.label}</span><span class="s-right" id="sr${i}"></span>`,
+        `<span class="s-mark">${icon("check")}</span><span class="s-label">${linkHosts(s.label)}</span><span class="s-right" id="sr${i}"></span>`,
         `<div class="s-body">
           <p class="s-detail">${s.detail}</p>
           <p class="s-undo">${STEP_MORE[i].undo}</p>
@@ -64,7 +65,7 @@ export const incident = {
     ).join("");
     const final = disc(
       `step:${STEPS.length + 1}`,
-      `<span class="s-mark">${icon("lock")}</span><span class="s-label">${FINAL_STEP.label}</span><span class="s-right" id="srf"></span>`,
+      `<span class="s-mark">${icon("lock")}</span><span class="s-label">${linkHosts(FINAL_STEP.label)}</span><span class="s-right" id="srf"></span>`,
       `<div class="s-body">
         <p class="s-detail" id="fDetail">${FINAL_STEP.scope}</p>
         <p class="s-undo">${FINAL_STEP.rollback}</p>
@@ -149,7 +150,7 @@ export const incident = {
           `<div class="row-body"><dl class="facts">
             <div><dt>Guest VM</dt><dd>${INCIDENT.vm}</dd></div>
             <div><dt>Agent</dt><dd>${INCIDENT.agent}</dd></div>
-            <div><dt>Host</dt><dd>${INCIDENT.host}</dd></div>
+            <div><dt>Host</dt><dd>${hostLink(INCIDENT.host)}</dd></div>
             <div><dt>Location</dt><dd>${INCIDENT.where}</dd></div>
             <div><dt>Opened</dt><dd>02:14:07 ${TIMEZONE}</dd></div>
             <div><dt>Playbook</dt><dd>guest-escape v3</dd></div>
@@ -178,9 +179,9 @@ export const incident = {
     if (!inc) {
       setHTML(meta, "n", () => `Last incident ${LAST_INCIDENT.id}<span class="sep">·</span>contained in ${LAST_INCIDENT.ttc.toFixed(1)} s<span class="sep">·</span>${LAST_INCIDENT.when}`);
     } else if (done) {
-      setHTML(meta, "d", () => `${INCIDENT.id}<span class="sep">·</span>${INCIDENT.host}<span class="sep">·</span>${RESOLUTION.split(" · ").slice(1, 2)[0]}`);
+      setHTML(meta, "d", () => `${INCIDENT.id}<span class="sep">·</span>${hostLink(INCIDENT.host)}<span class="sep">·</span>${RESOLUTION.split(" · ").slice(1, 2)[0]}`);
     } else {
-      setHTML(meta, "o", () => `${INCIDENT.id}<span class="sep">·</span>${INCIDENT.host}<span class="sep">·</span>${INCIDENT.where}`);
+      setHTML(meta, "o", () => `${INCIDENT.id}<span class="sep">·</span>${hostLink(INCIDENT.host)}<span class="sep">·</span>${INCIDENT.where}`);
     }
     ($("#reviewBtn") as HTMLButtonElement).hidden = !(ph === "approval" && S.sheetDismissed);
     setText($("#wrPillText"), `War Room · ${onlineCount()} online`);
@@ -207,7 +208,7 @@ export const incident = {
       const row = $(`#ar-${a.id}`);
       setAttr(row, "data-tone", n.tone);
       const line = $(`#al-${a.id}`);
-      setText(line.querySelector(".tx"), n.text);
+      setLinked(line.querySelector(".tx"), n.text);
       line.classList.toggle("typing", n.typing);
       const chip = $(`#ac-${a.id}`);
       setAttr(chip, "data-tone", n.tone);

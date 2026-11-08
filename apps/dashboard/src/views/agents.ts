@@ -1,6 +1,7 @@
 import { AGENTS, BOUNDS, TOOLS, type AgentDef } from "../script";
 import { AGENT_ICON, icon } from "../icons";
-import { $, disc, setAttr, setHTML, setText } from "../dom";
+import { $, disc, setAttr, setHTML, setLinked, setText } from "../dom";
+import { linkHosts } from "../hosts";
 import { agentNow, at, since, S } from "../engine";
 import { fmtT } from "../util";
 
@@ -64,7 +65,7 @@ export const agents = {
       setAttr(chip, "data-tone", n.tone);
       setText(chip.querySelector("span"), n.status);
       const line = $(`#gl-${a.id}`);
-      setText(line.querySelector(".tx"), n.text);
+      setLinked(line.querySelector(".tx"), n.text);
       line.classList.toggle("typing", n.typing);
       setText($(`#gs-${a.id}`), n.stamp);
 
@@ -72,11 +73,11 @@ export const agents = {
       const tc = tools(a);
       setText($(`#gv-${a.id}`), `${tr.length} thought${tr.length === 1 ? "" : "s"} · ${tc.length} tool call${tc.length === 1 ? "" : "s"}`);
       setHTML($(`#tr-${a.id}`), `t${tr.length}:${S.A ?? ""}:${S.started}`, () =>
-        tr.map((r) => `<li><time>${fmtT(r.t)}</time><span>${r.text}</span></li>`).join("") || `<li><time></time><span>No activity yet.</span></li>`,
+        tr.map((r) => `<li><time>${fmtT(r.t)}</time><span>${linkHosts(r.text)}</span></li>`).join("") || `<li><time></time><span>No activity yet.</span></li>`,
       );
       setHTML($(`#tl-${a.id}`), `c${tc.length}:${S.A ?? ""}`, () =>
         tc
-          .map((c) => `<div class="tool"><time>${fmtT(at(c))}</time><code>${c.call}<span>→ ${c.result}</span></code></div>`)
+          .map((c) => `<div class="tool"><time>${fmtT(at(c))}</time><code>${linkHosts(c.call)}<span>→ ${linkHosts(c.result)}</span></code></div>`)
           .join("") || `<div class="tool"><time></time><code><span>No calls yet.</span></code></div>`,
       );
     }

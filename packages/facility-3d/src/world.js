@@ -610,52 +610,60 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   const lidHatch = hatchLines(9, (k) => { const x = -frontW / 2 + k * frontW; return [[x - 0.08, lidT / 2 + 0.001, lidLen / 2 - 0.16], [x + 0.08, lidT / 2 + 0.001, lidLen / 2]]; });
   const lid = makePlate('lid', [frontW, lidT, lidLen], [B14.x, lidY, finZc], { pos: [0, 0, lidLen / 2 - 0.08], size: [frontW, lidT + 0.012, 0.16] }, lidHatch);
 
-  // aura ring + seal bar, built from the Claura mark (open C ring, door bar closing its opening)
-  const RING_R = 1.75, RING_r = (RING_R * 68) / 104, GAP = (40 * Math.PI) / 180;
+  // aura = the Claura "Cradle" mark: a C-shaped ring (stays orange) holding the contained breach, an orb (turns green when sealed).
+  // Geometry is taken from claura-brand/logo.svg: socket r78 at S, outer circle r111 centred 21 units behind S, tip caps r7.64, orb r48.
+  const MU = 3.6 / 222; // metres per mark unit
+  const DEG = Math.PI / 180;
+  const alpha = Math.atan2(54.05, 96.95); // outer circle meets the tips here
+  const capC = [69.29, 50.34]; // tip cap centre (top); the bottom one mirrors it
+  const A = [-21 + 111 * Math.cos(alpha), 111 * Math.sin(alpha)];
+  const Bp = [A[0], -A[1]];
+  const D = [78 * Math.cos(-36 * DEG), 78 * Math.sin(-36 * DEG)];
+  const E = [D[0], -D[1]];
+  const ang = (c, p) => Math.atan2(p[1] - c[1], p[0] - c[0]);
   const ringShape = new THREE.Shape();
-  ringShape.absarc(0, 0, RING_R, GAP, Math.PI * 2 - GAP, false);
-  ringShape.absarc(0, 0, RING_r, Math.PI * 2 - GAP, GAP, true);
+  ringShape.moveTo(A[0] * MU, A[1] * MU);
+  ringShape.absarc(-21 * MU, 0, 111 * MU, alpha, Math.PI * 2 - alpha, false); // far side of the C, down to the lower tip
+  ringShape.absarc(capC[0] * MU, -capC[1] * MU, 7.64 * MU, ang([capC[0], -capC[1]], Bp), ang([capC[0], -capC[1]], D), false); // lower round cap
+  ringShape.absarc(0, 0, 78 * MU, -36 * DEG, -324 * DEG, true); // the socket
+  ringShape.absarc(capC[0] * MU, capC[1] * MU, 7.64 * MU, ang(capC, E), ang(capC, A) + (ang(capC, A) < ang(capC, E) ? 0 : 0), false); // upper round cap
   ringShape.closePath();
   const ringDepth = 0.1;
   const ringGeo = track(new THREE.ExtrudeGeometry(ringShape, { depth: ringDepth, bevelEnabled: !ISO, bevelSize: 0.012, bevelThickness: 0.012, bevelSegments: 2, curveSegments: 72 }));
   ringGeo.rotateX(-Math.PI / 2);
-  const barW = 24 * RING_R / 104, barL = 72 * RING_R / 104, barX = 74 * RING_R / 104;
-  const barShape = new THREE.Shape();
-  barShape.absarc(0, barL / 2 - barW / 2, barW / 2, 0, Math.PI, false);
-  barShape.absarc(0, -(barL / 2 - barW / 2), barW / 2, Math.PI, Math.PI * 2, false);
-  barShape.closePath();
-  const barGeo = track(new THREE.ExtrudeGeometry(barShape, { depth: ringDepth + 0.03, bevelEnabled: !ISO, bevelSize: 0.012, bevelThickness: 0.012, bevelSegments: 2, curveSegments: 32 }));
-  barGeo.rotateX(-Math.PI / 2);
+  const HALO_Y = SLAB_Y + RACK.h + 0.95; // floats above B14, clear of the tall racks that would hide a floor mark
   const auraGroup = new THREE.Group();
-  const HALO_Y = SLAB_Y + RACK.h + 0.95; // the aura floats above B14, clear of the tall racks that would hide a floor ring
-  auraGroup.position.set(B14.x, HALO_Y, B14.z + 0.3);
-  auraGroup.rotation.y = Math.PI / 4; // opening faces screen-right, exactly like the Claura mark
+  const gapDir = new THREE.Vector3(Math.SQRT1_2, 0, -Math.SQRT1_2); // the mouth faces screen-right, exactly like the mark
+  auraGroup.position.set(B14.x + 27.5 * MU * gapDir.x, HALO_Y, B14.z + 0.3 + 27.5 * MU * gapDir.z); // centre the mark's bounding box over B14
+  auraGroup.rotation.y = Math.PI / 4;
   root.add(auraGroup);
-  let ringMat, barMat, ringLineMat = null, barLineMat = null;
+  let ringMat, orbMat, ringLineMat = null, orbLineMat = null;
   if (ISO) {
-    ringMat = new THREE.MeshBasicMaterial({ color: ORANGE, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
-    barMat = ringMat.clone();
+    ringMat = new THREE.MeshBasicMaterial({ color: ORANGE.clone(), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+    orbMat = ringMat.clone();
   } else {
-    ringMat = new THREE.MeshStandardMaterial({ color: '#1b1f26', emissive: ORANGE, emissiveIntensity: 1.2, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 0 });
-    barMat = ringMat.clone();
+    ringMat = new THREE.MeshStandardMaterial({ color: '#1b1f26', emissive: ORANGE.clone(), emissiveIntensity: 1.2, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 0 });
+    orbMat = ringMat.clone();
+    orbMat.roughness = 0.25; orbMat.metalness = 0.1;
   }
-  track(ringMat); track(barMat);
-  const ringMesh = new THREE.Mesh(ringGeo, ringMat); ringMesh.castShadow = false; ringMesh.renderOrder = 3;
-  const barMesh = new THREE.Mesh(barGeo, barMat); barMesh.renderOrder = 3;
-  const barPivot = new THREE.Group(); barPivot.add(barMesh);
-  auraGroup.add(ringMesh, barPivot);
+  track(ringMat); track(orbMat);
+  const ringMesh = new THREE.Mesh(ringGeo, ringMat); ringMesh.renderOrder = 3;
+  const orbGeo = track(new THREE.SphereGeometry(48 * MU, 48, 24));
+  const orbMesh = new THREE.Mesh(orbGeo, orbMat); orbMesh.scale.set(1, 0.5, 1); orbMesh.renderOrder = 3; // a lens: reads as the orb, stays within the C's height
+  const orbPivot = new THREE.Group(); orbPivot.add(orbMesh);
+  auraGroup.add(ringMesh, orbPivot);
   if (ISO) {
     const rb = new LineBank();
-    const sp = ringShape.getPoints(96).map((p) => [p.x, ringDepth, -p.y]);
-    rb.poly(sp, ORANGE, true);
-    ringLineMat = lineMat({ color: ORANGE, transparent: true, opacity: 0 });
-    const rl = rb.build(ringLineMat, false); auraGroup.add(rl);
-    const bb = new LineBank();
-    const bp = barShape.getPoints(48).map((p) => [p.x, ringDepth + 0.03, -p.y]);
-    bb.poly(bp, ORANGE, true);
-    barLineMat = lineMat({ color: ORANGE, transparent: true, opacity: 0 });
-    barPivot.add(bb.build(barLineMat, false));
+    rb.poly(ringShape.getPoints(24).map((p) => [p.x, ringDepth, -p.y]), ORANGE, true);
+    ringLineMat = lineMat({ color: ORANGE.clone(), transparent: true, opacity: 0 });
+    auraGroup.add(rb.build(ringLineMat, false));
+    const ob = new LineBank();
+    const circ = []; for (let i = 0; i < 64; i++) circ.push([Math.cos((i / 64) * Math.PI * 2) * 48 * MU, 0, Math.sin((i / 64) * Math.PI * 2) * 48 * MU]);
+    ob.poly(circ, ORANGE, true);
+    orbLineMat = lineMat({ color: ORANGE.clone(), transparent: true, opacity: 0 });
+    orbPivot.add(ob.build(orbLineMat, false));
   }
+
 
   // ---------------------------------------------------------------- guest particles
   const rng = mulberry32(0xc1a02a);
@@ -747,7 +755,7 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
   HALL_IDS.forEach((id) => hallLabel(id));
   const title = addLabel('title', 'DFW-2 · 2,048 hosts', 'plain', [-9.4, 0.4, 6.9], (H) => sstep(11, 14, H));
   addLabel('hub', 'Mgmt / BMC', 'plain', [HUB.x, hubTop + 1.5, HUB.z], (H) => sstep(6.5, 8.5, H));
-  const b14tag = addLabel('b14', 'B14', 'plain', [B14.x - 1.38, HALO_Y, B14.z + 0.3 + 1.38], () => 1, { noTick: true, center: [1, 0.5] });
+  const b14tag = addLabel('b14', 'B14', 'plain', [B14.x - 1.45, HALO_Y, B14.z + 0.3 + 1.45], () => 1, { noTick: true, center: [1, 0.5] });
   const c05 = addLabel('c05', 'C05', 'plain', [C05.x, SLAB_Y + RACK.h + 0.55, C05.z], () => 1);
   const c12 = addLabel('c12', 'C12', 'plain', [C12.x, SLAB_Y + RACK.h + 0.55, C12.z], () => 1);
   const hostLabel = addLabel('host', 'b14-gpu-07', 'plain', [B14.x - 0.5, chTop - 0.02, zf14 + 0.08], (H) => 1 - sstep(5.8, 7.2, H));
@@ -1024,35 +1032,35 @@ export function buildWorld({ look = 'iso', lineWidth = 1.25 } = {}) {
       }
     }
 
-    // --- aura ring + seal bar
+    // --- aura (Cradle mark): the C stays orange; the orb is the breach, held above in approval and dropped in (turning green) when sealed
     {
       const ringA = ch.ring;
-      const col = tmpC.copy(ORANGE).lerp(GREEN, ch.green);
+      const orbCol = tmpC.copy(ORANGE).lerp(GREEN, ch.green);
       const pulse = 1 + 0.35 * ch.appr * (slowPulse - 0.4) + 0.5 * ch.flash;
-      ringMesh.visible = barPivot.visible = ringA > 0.002;
+      ringMesh.visible = orbPivot.visible = ringA > 0.002;
       if (ISO) {
-        ringMat.color.copy(col); barMat.color.copy(col);
-        ringMat.opacity = ringA * 0.22 * pulse; barMat.opacity = ringA * (0.3 + 0.45 * ch.seal) * pulse;
-        ringLineMat.color.copy(col); barLineMat.color.copy(col);
-        ringLineMat.opacity = clamp(ringA * 0.95 * pulse, 0, 1); barLineMat.opacity = clamp(ringA * (0.95), 0, 1);
+        ringMat.color.copy(ORANGE); orbMat.color.copy(orbCol);
+        ringMat.opacity = ringA * 0.2; orbMat.opacity = ringA * (0.3 + 0.35 * ch.seal) * pulse;
+        ringLineMat.color.copy(ORANGE); orbLineMat.color.copy(orbCol);
+        ringLineMat.opacity = clamp(ringA * 0.95, 0, 1); orbLineMat.opacity = clamp(ringA * 0.95, 0, 1);
       } else {
-        ringMat.emissive.copy(col); barMat.emissive.copy(col);
-        const eb = lerp(1.15, 0.7, ch.green);
-        ringMat.emissiveIntensity = eb * pulse; barMat.emissiveIntensity = (eb + 0.3) * pulse + 0.9 * ch.flash;
-        ringMat.opacity = ringA >= 0.999 ? 1 : ringA * 0.9; barMat.opacity = ringA >= 0.999 ? 1 : ringA * 0.95;
-        haloLight.color.copy(col); haloLight.intensity = ringA * lerp(7, 4.5, ch.green) * pulse;
+        ringMat.emissive.copy(ORANGE); orbMat.emissive.copy(orbCol);
+        ringMat.emissiveIntensity = 1.0 * (0.92 + 0.08 * pulse);
+        orbMat.emissiveIntensity = lerp(1.15, 0.85, ch.green) * pulse + 0.9 * ch.flash;
+        ringMat.opacity = ringA >= 0.999 ? 1 : ringA * 0.9; orbMat.opacity = ringA >= 0.999 ? 1 : ringA * 0.95;
+        haloLight.color.copy(orbCol).lerp(ORANGE, 0.45); haloLight.intensity = ringA * lerp(7, 4.5, ch.green) * pulse;
       }
       const es = easeInQuart(clamp(ch.seal));
-      barPivot.position.set(barX + (1 - es) * 1.05, (1 - es) * 0.5, 0);
-      sealGlow.material.color.copy(col);
-      sealGlow.material.opacity = ringA * (ISO ? 0.16 : 0.32) * (0.7 + 0.5 * pulse) * (ch.green > 0.5 ? 0.8 : 1);
+      orbPivot.position.set(0, (1 - es) * 1.05, 0);
+      sealGlow.material.color.copy(orbCol);
+      sealGlow.material.opacity = ringA * (ISO ? 0.16 : 0.3) * (0.7 + 0.5 * pulse) * (ch.green > 0.5 ? 0.8 : 1);
       sealGlow.visible = sealGlow.material.opacity > 0.003;
-      if (!ISO) {
-        sealGlow.material.opacity *= 0.9;
-        orangeLight && (orangeLight.color.copy(ORANGE).lerp(GREEN, ch.green));
-        if (ch.green > 0.01 && orangeLight) orangeLight.intensity += ch.green * 2.2 * ch.ring * (0.9 + 0.1 * slowPulse);
+      if (!ISO && orangeLight) {
+        orangeLight.color.copy(ORANGE).lerp(GREEN, ch.green);
+        if (ch.green > 0.01) orangeLight.intensity += ch.green * 2.2 * ch.ring * (0.9 + 0.1 * slowPulse);
       }
     }
+
 
     // --- guests
     for (let k = 0; k < guests.length; k++) {

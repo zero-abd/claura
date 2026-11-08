@@ -2,7 +2,8 @@
 //
 // `#facility3d` (the glass-framed stage, which holds the 2D map as its fallback) is the mount point for a
 // separately built module at /bulkhead-3d/facility.js exposing
-//   createFacility(container, { look, background: 'transparent' }) -> { setState(s), fly(cam) }
+//   createFacility(container, { look, background: 'transparent', onPick(hostId) }) -> { setState(s), fly(cam) }
+// `onPick` is how a click on a host in the 3D scene opens the Host sheet (same hook the 2D map uses).
 // If that file is not there, this adapter does nothing and the 2D drawing stays. No errors, no waiting.
 //
 // Engine phase -> 3D:
@@ -31,6 +32,12 @@ let mounted = false;
 let sentState: F3DState | null = null;
 let sentCam: F3DCam | null = null;
 let want: { state: F3DState; cam: F3DCam } = { state: "nominal", cam: "facility" };
+let onPick: ((hostId: string) => void) | null = null;
+
+/** The host picker hook: the 3D module calls it (as `onPick`) when a host is clicked; it opens the Host sheet. */
+export function setPickHandler(fn: (hostId: string) => void) {
+  onPick = fn;
+}
 
 export function facilityTarget(ph: Phase, r: number): { state: F3DState; cam: F3DCam } {
   switch (ph) {
@@ -59,7 +66,14 @@ export async function mountFacility3D(el: HTMLElement): Promise<boolean> {
     const mod = await import(/* @vite-ignore */ MODULE_URL);
     const create = mod.createFacility ?? mod.default?.createFacility ?? (typeof mod.default === "function" ? mod.default : null);
     if (typeof create !== "function") return false;
-    const inst: Facility = await create(el, { look: LOOK, background: "transparent" });
+    const inst: Facility = await create(el, {
+      look: LOOK,
+      background: "transparent",
+      onPick: (pick: unknown) => {
+        const id = typeof pick === "string" ? pick : ((pick as { hostId?: string; id?: string } | null)?.hostId ?? (pick as { id?: string } | null)?.id);
+        if (id) onPick?.(String(id));
+      },
+    });
     if (!inst || typeof inst.setState !== "function") return false;
     facility = inst;
     mounted = true;

@@ -16,15 +16,15 @@ const O = '#FF5A1F', INK = '#0B0C0E';
 // ---- logo.svg / logo-mono.svg
 const logo = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <title>Claura</title>
-  <!-- Cradle: a C-shaped aura (id="aura") holding the contained breach (id="seal"). Tint #seal to #2FBF71 when sealed. -->
-  <path id="aura" fill="${O}" d="${RING}"/>
+  <!-- Cradle: a C-shaped aura (id="ring") holding the contained breach (id="seal"). Tint #seal to #2FBF71 when sealed. -->
+  <path id="ring" fill="${O}" d="${RING}"/>
   <path id="seal" fill="${O}" d="${ORB}"/>
 </svg>
 `;
 fs.writeFileSync(`${OUT}/logo.svg`, logo);
 fs.writeFileSync(`${OUT}/logo-mono.svg`, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <title>Claura (one colour)</title>
-  <path id="aura" fill="currentColor" d="${RING}"/>
+  <path id="ring" fill="currentColor" d="${RING}"/>
   <path id="seal" fill="currentColor" d="${ORB}"/>
 </svg>
 `);
@@ -37,7 +37,7 @@ const W = +(wx + WM.width * sc - x0).toFixed(1);
 const wm = (fill) => `<path fill="${fill}" transform="translate(${wx.toFixed(2)} ${base.toFixed(2)}) scale(${sc.toFixed(4)})" d="${WM.d}"/>`;
 const lock = (fill, title) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0.toFixed(1)} ${y0.toFixed(1)} ${W} ${H.toFixed(1)}" width="${Math.round(W / H * 64)}" height="64">
   <title>${title}</title>
-  <path id="aura" fill="${O}" d="${RING}"/>
+  <path id="ring" fill="${O}" d="${RING}"/>
   <path id="seal" fill="${O}" d="${ORB}"/>
   ${wm(fill)}
 </svg>
@@ -145,7 +145,5 @@ function icon(variant) {
 </svg>
 `;
 }
-fs.writeFileSync(`${OUT}/app-icon.svg`, icon(process.env.ICON || 'orange'));
-fs.writeFileSync(`${OUT}/tools/app-icon-orange.svg`, icon('orange'));
-fs.writeFileSync(`${OUT}/tools/app-icon-ink.svg`, icon('ink'));
+fs.writeFileSync(`${OUT}/app-icon.svg`, icon(process.env.ICON || 'ink'));
 console.log('final assets written; ring', RING.length, 'chars; W', W);

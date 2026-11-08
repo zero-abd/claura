@@ -1,5 +1,6 @@
 import { chev } from "./icons";
 import { isOpen } from "./engine";
+import { linkHosts } from "./hosts";
 
 export const $ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector(sel) as T;
 export const $$ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode = document) =>
@@ -10,6 +11,14 @@ export const setText = (el: Element | null, v: string) => {
 };
 export const setAttr = (el: Element | null, k: string, v: string) => {
   if (el && el.getAttribute(k) !== v) el.setAttribute(k, v);
+};
+/** Set text, turning host ids in it into clickable links (only touches the DOM when the text changed). */
+export const setLinked = (el: Element | null, text: string) => {
+  const e = el as HTMLElement | null;
+  if (e && e.dataset.raw !== text) {
+    e.dataset.raw = text;
+    e.innerHTML = linkHosts(text);
+  }
 };
 /** innerHTML, but only when the content key changed. */
 export const setHTML = (el: HTMLElement | null, key: string, html: () => string) => {

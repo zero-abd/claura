@@ -2,6 +2,7 @@ import { APPROVER, EVIDENCE, INCIDENT, PAST_REPORTS, REPORT, RESOLUTION, SCRIBE_
 import { icon } from "../icons";
 import { $, disc, setAttr, setHTML, setText } from "../dom";
 import { S, U, at, since } from "../engine";
+import { linkHosts } from "../hosts";
 
 // Reports: a list. INC-0419 opens into a timeline; "Authorized by" and evidence files sit behind expanders.
 
@@ -14,7 +15,7 @@ export const reports = {
   html(): string {
     const past = PAST_REPORTS.map((p) => {
       const rows = p.rows
-        .map((r) => `<li class="${r.actor.length === 2 ? "human" : ""}"><span class="t">${r.t.toFixed(1)}</span><i class="dot"></i><span class="who">${r.actor}</span><span class="what">${r.action}</span></li>`)
+        .map((r) => `<li class="${r.actor.length === 2 ? "human" : ""}"><span class="t">${r.t.toFixed(1)}</span><i class="dot"></i><span class="who">${r.actor}</span><span class="what">${linkHosts(r.action)}</span></li>`)
         .join("");
       return `<div class="glass rep">${disc(
         `report:${p.id}`,
@@ -72,7 +73,7 @@ export const reports = {
         .map((r) => {
           const human = r.actor === APPROVER.initials;
           const win = r.u === ISOLATE_DUR;
-          return `<li class="${human ? "human" : ""}${win ? " win" : ""}"><span class="t">${at(r).toFixed(1)}</span><i class="dot"></i><span class="who">${r.actor}</span><span class="what">${r.action}</span></li>`;
+          return `<li class="${human ? "human" : ""}${win ? " win" : ""}"><span class="t">${at(r).toFixed(1)}</span><i class="dot"></i><span class="who">${r.actor}</span><span class="what">${linkHosts(r.action)}</span></li>`;
         })
         .join(""),
     );
