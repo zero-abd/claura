@@ -88,7 +88,7 @@ export const incident = {
     ).join("");
 
     return `<section class="view" id="v-incident" data-view="incident">
-      <div class="glass stage-frame hero" id="hero" data-tone="nominal">
+      <div class="panel stage-frame hero" id="hero" data-tone="nominal">
         <div class="stage-slot" data-slot="incident"></div>
         <div class="hero-veil"></div>
         <div class="hero-body">
@@ -110,17 +110,17 @@ export const incident = {
         </div>
       </div>
 
-      <div class="glass card path-card">
+      <div class="panel card path-card">
         <div class="card-head"><h2 id="pathHead">All boundaries intact</h2></div>
         ${pathHTML()}
       </div>
 
       <div class="two">
-        <div class="glass card">
+        <div class="panel card">
           <div class="card-head"><h2>Agents</h2><span class="tag">nemotron-on-prem</span></div>
           <div id="arows">${agents}</div>
         </div>
-        <div class="glass card">
+        <div class="panel card">
           <div class="card-head"><h2>Containment</h2><span class="meta" id="stepMeta">Playbook guest-escape v3</span></div>
           <div class="steps">${steps}${final}</div>
           <p class="foot-note">policy, not the model, controls execution</p>
@@ -128,8 +128,8 @@ export const incident = {
       </div>
 
       <div class="dgrid">
-        ${disc("signals", rowHead("signal", "Signals", "sigVal", "6 correlated"), `<div class="row-body"><div class="sig" id="sigLines"></div></div>`, "row glass")}
-        ${disc("evidence", rowHead("file", "Evidence", "evVal", "none yet"), evidenceBody(), "row glass")}
+        ${disc("signals", rowHead("signal", "Signals", "sigVal", "6 correlated"), `<div class="row-body"><div class="sig" id="sigLines"></div></div>`, "row panel")}
+        ${disc("evidence", rowHead("file", "Evidence", "evVal", "none yet"), evidenceBody(), "row panel")}
         ${disc(
           "blast",
           rowHead("blast", "Blast radius", "blVal", "scoring"),
@@ -142,7 +142,7 @@ export const incident = {
             </div>
             <p class="row-note" id="blNote">Triage has not scored this incident yet.</p>
           </div>`,
-          "row glass",
+          "row panel",
         )}
         ${disc(
           "details",
@@ -157,7 +157,7 @@ export const incident = {
             <div><dt>Fleet mean to contain</dt><dd>${FLEET.meanTtc} s · ${FLEET.incidents30d} incidents</dd></div>
             <div><dt>Fleet</dt><dd>${FLEET.hosts} hosts · ${FLEET.vms} VMs</dd></div>
           </dl></div>`,
-          "row glass",
+          "row panel",
         )}
       </div>
     </section>`;

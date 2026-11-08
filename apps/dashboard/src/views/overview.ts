@@ -19,7 +19,7 @@ export const overview = {
         <div class="o-actions" id="oActions"></div>
       </header>
 
-      <div class="glass stage-frame o-stage disc" data-key="map" data-open="0" id="mapStage">
+      <div class="panel stage-frame o-stage disc" data-key="map" data-open="0" id="mapStage">
         <div class="stage-slot" data-slot="overview"></div>
         <div class="stage-top">
           <div class="stage-title"><b>${FACILITY.split(" · ")[0]}</b><span>${FACILITY.split(" · ")[1]}</span></div>
@@ -28,13 +28,13 @@ export const overview = {
           </button>
         </div>
         <div class="stage-foot">
-          <span><i style="background:rgba(196,210,255,.7)"></i>Load</span>
+          <span><i style="background:var(--ink-4)"></i>Load</span>
           <span id="legendHot"><i style="background:var(--accent)"></i>Breach</span>
           <span id="legendSafe"><i style="background:var(--safe)"></i>Contained</span>
         </div>
       </div>
 
-      <button type="button" class="glass last" id="lastRow" data-go="reports" data-target="last-incident">
+      <button type="button" class="panel last" id="lastRow" data-go="reports" data-target="last-incident">
         <span class="r-ico" id="lastIco">${icon("shieldCheck")}</span>
         <span class="last-main"><b id="lastTitle"></b><span id="lastSub"></span></span>
         <span class="when" id="lastWhen"></span>

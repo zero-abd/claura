@@ -20,12 +20,6 @@ const [FAC_ID, FAC_NAME] = FACILITY.split(" · ");
 
 export function shellHTML(views: string): string {
   return `
-  <div class="wallpaper" aria-hidden="true">
-    <i class="wp b1"></i><i class="wp b2"></i><i class="wp b3"></i><i class="wp b4"></i>
-    <i class="wp ember"></i><i class="wp green"></i>
-    <i class="vignette"></i><i class="grain"></i>
-  </div>
-
   <div class="app" id="appRoot">
     <aside class="sidebar" aria-label="Claura">
       <div class="brand">${logoSVG(32)}<span class="word">Claura</span></div>
@@ -59,7 +53,6 @@ export function shellHTML(views: string): string {
       <div class="scroll" id="scroll">
         <div class="page" id="page">${views}</div>
       </div>
-      <div class="edge-top"></div>
     </div>
   </div>
 
@@ -75,12 +68,12 @@ export function shellHTML(views: string): string {
       </dl>
       ${disc(
         "evidence",
-        `<span class="r-title" style="font-size:16px;font-weight:550">Show evidence</span>`,
+        `<span class="r-title" style="font-size:14.5px;font-weight:500">Show evidence</span>`,
         `<div class="row-body"><p class="ev-note">${FINAL_STEP.evidence}</p>${EVIDENCE.map((e) => `<div class="file">${icon("file")}<b>${e.name}</b><em>${e.meta}</em></div>`).join("")}</div>`,
         "",
       )}
       <div class="sheet-actions">
-        <button type="button" class="btn-primary" id="approveBtn" data-target="approve"><span>${FINAL_STEP.button}</span><kbd>⌘↵</kbd></button>
+        <button type="button" class="btn-primary approve" id="approveBtn" data-target="approve"><span>${FINAL_STEP.button}</span><kbd>⌘↵</kbd></button>
         <button type="button" class="btn-text" id="notNow" data-target="not-now">Not now</button>
       </div>
       <p class="sheet-note">Warden cannot quarantine a host on its own.</p>

@@ -1,12 +1,12 @@
 import { icon } from "../icons";
 
-// Shells: a full-height glass panel. A separate terminal module mounts into #claura-shell-slot
+// Shells: a full-height dark panel. A separate terminal module mounts into #claura-shell-slot
 // (see window.claura.openShell(hostId)). Until it does, the slot shows a calm empty state, which
 // hides itself as soon as the module adds anything to the slot.
 export const shells = {
   html(): string {
     return `<section class="view" id="v-shells" data-view="shells">
-      <div class="glass shell-panel" id="claura-shell-slot" role="region" aria-label="Secure shells">
+      <div class="panel shell-panel" id="claura-shell-slot" role="region" aria-label="Secure shells">
         <div class="slot-empty">
           <span class="sheet-ico host">${icon("terminal")}</span>
           <h2>No shell open</h2>

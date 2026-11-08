@@ -189,7 +189,7 @@ function reveal(key: string, smooth: boolean) {
     const sr = sc.getBoundingClientRect();
     const r = target.getBoundingClientRect();
     if (r.top >= sr.top + 90 && r.bottom <= sr.bottom - 12) return;
-    sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - 100), behavior: smooth ? "smooth" : "auto" });
+    sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - 24), behavior: smooth ? "smooth" : "auto" });
   };
   if (smooth) window.setTimeout(run, 280);
   else run();

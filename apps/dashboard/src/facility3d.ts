@@ -1,6 +1,6 @@
 // Optional 3D facility stage.
 //
-// `#facility3d` (the glass-framed stage, which holds the 2D map as its fallback) is the mount point for a
+// `#facility3d` (the framed stage, which holds the 2D map as its fallback) is the mount point for a
 // separately built module at /bulkhead-3d/facility.js exposing
 //   createFacility(container, { look, background: 'transparent', onPick(hostId) }) -> { setState(s), fly(cam) }
 // `onPick` is how a click on a host in the 3D scene opens the Host sheet (same hook the 2D map uses).

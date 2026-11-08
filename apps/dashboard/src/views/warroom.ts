@@ -98,7 +98,7 @@ export const warroom = {
       </div>`,
     ).join("");
 
-    const rail = `<aside class="wr-rail glass group">
+    const rail = `<aside class="wr-rail panel group">
       ${disc("tasks", `<span class="r-ico">${icon("tasks")}</span><span class="r-title">Tasks</span><span class="r-val" id="tkVal"></span>`, `<div class="row-body wr-pad"><div id="tkList"></div></div>`, "row")}
       ${disc("decisions", `<span class="r-ico">${icon("seal")}</span><span class="r-title">Decision log</span><span class="r-val" id="dcVal"></span>`, `<div class="row-body wr-pad"><div id="dcList"></div></div>`, "row")}
       ${disc(
@@ -116,9 +116,9 @@ export const warroom = {
     </aside>`;
 
     return `<section class="view" id="v-warroom" data-view="warroom">
-      <div class="glass wr-banner"><span class="wr-ico">${icon("radio")}</span><span>${BANNER}</span><span class="tag">SpacetimeDB cloud</span></div>
+      <div class="panel wr-banner"><span class="wr-ico">${icon("radio")}</span><span>${BANNER}</span><span class="tag">SpacetimeDB cloud</span></div>
 
-      <div class="glass wr-brief">
+      <div class="panel wr-brief">
         <div class="wr-brief-main">
           <div class="card-head"><h2>Brief for stakeholders</h2><div class="head-r"><span class="meta" id="wrStamp"></span><button type="button" class="btn-chip play" data-act="play-brief" data-tip="Play brief" aria-label="Play brief" data-target="play-brief">${icon("speaker")}<span>Play brief</span></button></div></div>
           <dl class="brief-lines" id="wrLines"></dl>
@@ -127,12 +127,12 @@ export const warroom = {
       </div>
 
       <div class="wr-body">
-        <aside class="glass wr-side">
+        <aside class="panel wr-side">
           <div class="side-sec"><h3>Channels</h3><div class="chs">${channels}</div></div>
           <div class="side-sec"><h3>People<span id="wrOnline"></span></h3><div class="people">${people}</div></div>
         </aside>
 
-        <section class="glass wr-thread">
+        <section class="panel wr-thread">
           <header class="th-head">
             <div><h2 id="thName">#command</h2><span id="thBlurb"></span></div>
             <span class="tag">out-of-band</span>

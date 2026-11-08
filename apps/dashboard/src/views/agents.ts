@@ -5,7 +5,7 @@ import { linkHosts } from "../hosts";
 import { agentNow, at, since, S } from "../engine";
 import { fmtT } from "../util";
 
-// Agents: four glass cards. Collapsed = status + current line. Expanded = reasoning,
+// Agents: four cards. Collapsed = status + current line. Expanded = reasoning,
 // tool calls (nemotron-on-prem) and policy bounds.
 
 function trace(a: AgentDef) {
@@ -33,7 +33,7 @@ export const agents = {
           <dl class="bounds"><dt>Can</dt><dd>${b.can}</dd><dt>Cannot</dt><dd>${b.cannot}</dd></dl>
         </div>
       </div>`;
-      return `<article class="glass agent-card" id="ag-${a.id}" data-agent="${a.id}" data-tone="idle">
+      return `<article class="panel agent-card" id="ag-${a.id}" data-agent="${a.id}" data-tone="idle">
         <div class="ac-top">
           <span class="a-ico">${icon(AGENT_ICON[a.id])}</span>
           <div class="ac-id"><h3>${a.name}</h3><span>${a.role}</span></div>
@@ -42,7 +42,7 @@ export const agents = {
         <p class="ac-line" id="gl-${a.id}"><span class="tx"></span><span class="caret"></span><span class="stamp" id="gs-${a.id}"></span></p>
         ${disc(
           `agent:${a.id}`,
-          `<span class="r-title" style="font-size:16px;font-weight:550">Show reasoning</span><span class="r-val" id="gv-${a.id}"></span>`,
+          `<span class="r-title" style="font-size:14.5px;font-weight:500">Show reasoning</span><span class="r-val" id="gv-${a.id}"></span>`,
           body,
           "",
         )}

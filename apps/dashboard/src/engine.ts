@@ -59,7 +59,7 @@ export function phase(): Phase {
   return S.view === "reports" && S.open.get(REPORT_KEY) ? "report" : "contained";
 }
 
-/** Visual tone of the whole app: drives wallpaper tint and accents. */
+/** Visual tone of the whole app: drives the status tone and accents. */
 export type Tone = "nominal" | "breach" | "contained";
 export function tone(ph: Phase = phase()): Tone {
   return ph === "nominal" ? "nominal" : ph === "contained" || ph === "report" ? "contained" : "breach";

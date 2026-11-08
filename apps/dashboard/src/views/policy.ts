@@ -17,7 +17,7 @@ export const policy = {
   html(): string {
     return `<section class="view" id="v-policy" data-view="policy">
       <header class="hero-head" style="margin-bottom:0">
-        <h1 class="h-title" style="font-size:56px;max-width:900px">Policy, not the model, controls execution.</h1>
+        <h1 class="h-title" style="font-size:44px;max-width:900px">Policy, not the model, controls execution.</h1>
         <p class="h-sub">Agents propose. The playbook decides what runs on its own, and a person decides the rest.</p>
         <div class="p-flow">
           <span class="step-chip">${icon("cpu")}Agent proposes</span><span class="arr">${icon("chevron")}</span>
@@ -38,12 +38,12 @@ export const policy = {
       </div>
 
       <div class="p-cols">
-        <section class="glass pgroup">
+        <section class="panel pgroup">
           <h2>Warden acts on its own</h2>
           <p>Each of these can be undone, or only reads.</p>
           ${POLICY_AUTO.map((a) => prow(a, false)).join("")}
         </section>
-        <section class="glass pgroup">
+        <section class="panel pgroup">
           <h2>Needs a human</h2>
           <p>Locked by policy. Warden asks, a person approves.</p>
           ${POLICY_HUMAN.map((a) => prow(a, true)).join("")}

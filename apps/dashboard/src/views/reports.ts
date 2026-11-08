@@ -17,7 +17,7 @@ export const reports = {
       const rows = p.rows
         .map((r) => `<li class="${r.actor.length === 2 ? "human" : ""}"><span class="t">${r.t.toFixed(1)}</span><i class="dot"></i><span class="who">${r.actor}</span><span class="what">${linkHosts(r.action)}</span></li>`)
         .join("");
-      return `<div class="glass rep">${disc(
+      return `<div class="panel rep">${disc(
         `report:${p.id}`,
         `<span class="r-ico">${icon("shieldCheck")}</span>
          <span class="rep-main"><b>${p.id} · ${p.title}</b><span>${p.when} · approved by ${p.approver}</span></span>
@@ -44,7 +44,7 @@ export const reports = {
         <p class="h-sub">Every alert, action and approval, written by Scribe.</p>
       </header>
       <div id="repList">
-        <div class="glass rep" id="rep419" hidden>${disc(
+        <div class="panel rep" id="rep419" hidden>${disc(
           "report:INC-0419",
           head("incident", `${INCIDENT.id} · ${INCIDENT.title}`, "r419sub", "r419ttc", "", `<span class="chip" id="r419chip" data-tone="busy"><i></i><span>Scribe writing</span></span>`),
           `<div class="rep-body"><ul class="tl" id="tlRows"></ul>${side}</div>`,

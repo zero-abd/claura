@@ -3,13 +3,21 @@ import { ISOLATE_DUR } from "./script";
 import { HALL_LETTERS, guestsFor, hostId } from "./hosts";
 
 // 2D facility drawing. It is the fallback inside #facility3d: it draws until (and unless)
-// the optional 3D module mounts. Glass look: soft rack cells, one glowing hot rack.
+// the optional 3D module mounts. Paper look: light rack cells, load in ink greys, one orange rack.
 
-const TONE = [255, 90, 31];
-const SAFE = [47, 191, 113];
-const INK = [196, 210, 255];
+const TONE = [255, 90, 31]; // --accent
+const SAFE = [47, 191, 113]; // --safe
+const PAPER_INK = [11, 12, 14]; // --ink
+const LOAD_LO = [212, 212, 216]; // --dot
+const LOAD_HI = [113, 113, 122]; // --ink-3
+const RACK = [244, 244, 245]; // --sunk
+const HAIR = [228, 228, 231]; // --hair
 const rgba = (c: number[], a: number) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
-const FONT = `-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif`;
+const loadColor = (a: number) => {
+  const t = clamp((a - 0.1) / 0.7);
+  return LOAD_LO.map((v, i) => Math.round(v + (LOAD_HI[i] - v) * t));
+};
+const FONT = `Geist, ui-sans-serif, system-ui, sans-serif`;
 
 export interface MapState {
   amb: number;
@@ -160,10 +168,10 @@ export class FacilityMap {
       const hot = inc && h === HOT_HALL && !contained;
       if (g.stage) {
         ctx.font = `600 13px ${FONT}`;
-        ctx.fillStyle = hot ? rgba(TONE, 1) : "rgba(255,255,255,0.62)";
+        ctx.fillStyle = hot ? rgba(TONE, 1) : "#71717a";
         ctx.fillText(`Hall ${HALLS[h]}`, hx, g.y0 + 14);
         ctx.font = `400 12px ${FONT}`;
-        ctx.fillStyle = "rgba(255,255,255,0.32)";
+        ctx.fillStyle = "#a1a1aa";
         ctx.textAlign = "right";
         ctx.fillText("512 hosts", hx + g.hallW, g.y0 + 14);
         ctx.textAlign = "left";
@@ -172,9 +180,9 @@ export class FacilityMap {
         const r = this.rackRect(g, h, rk);
         const isHot = h === HOT_HALL && rk === HOT_RACK;
         rr(ctx, r.x, r.y, r.w, r.h, g.stage ? 5 : 4);
-        ctx.fillStyle = `rgba(255,255,255,${0.045 * amb})`;
+        ctx.fillStyle = rgba(RACK, amb);
         ctx.fill();
-        ctx.strokeStyle = `rgba(255,255,255,${0.1 * amb})`;
+        ctx.strokeStyle = rgba(HAIR, amb);
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -198,15 +206,13 @@ export class FacilityMap {
           let glint = 0;
           if (hash(h, rk, sl, win) < 0.011) glint = Math.sin(fr * Math.PI);
           let a = load + glint * 0.6;
-          let col = INK;
           if (destGlow > 0) a = Math.max(a, 0.35 + destGlow * 0.6);
+          let col = loadColor(a);
           if (isHot && inc) {
-            if (sl === Math.min(NS - 1, Math.floor((HOT_HOST / 8) * NS))) {
-              col = contained ? [140, 160, 150] : TONE;
-              a = contained ? 0.55 : 1;
-            } else a = contained ? load : load * 0.75;
+            if (sl === Math.min(NS - 1, Math.floor((HOT_HOST / 8) * NS))) col = contained ? SAFE : TONE;
+            else col = loadColor(contained ? load : load * 0.75);
           }
-          ctx.fillStyle = rgba(col, a * amb);
+          ctx.fillStyle = rgba(col, amb);
           rr(ctx, r.x + pad, sy, r.w - pad * 2, sh, 1.2);
           ctx.fill();
         }
@@ -214,16 +220,12 @@ export class FacilityMap {
         if (isHot && inc) {
           const flash = 1 - clamp(s.r / 0.6);
           const pulse = 0.5 + 0.5 * Math.sin(s.amb * Math.PI * 1.6);
-          ctx.save();
-          ctx.shadowColor = rgba(tone, 0.9);
-          ctx.shadowBlur = contained ? 16 : 20 + pulse * 8;
           rr(ctx, r.x - 1, r.y - 1, r.w + 2, r.h + 2, 6);
-          ctx.fillStyle = rgba(tone, contained ? (g.stage ? 0.1 : 0.2) : (g.stage ? 0.14 : 0.3) + flash * 0.6 + pulse * 0.06);
+          ctx.fillStyle = rgba(tone, contained ? 0.1 : 0.1 + flash * 0.5 + pulse * 0.06);
           ctx.fill();
           ctx.strokeStyle = rgba(tone, 1);
           ctx.lineWidth = 1.6;
           ctx.stroke();
-          ctx.restore();
         }
       }
     }
@@ -256,7 +258,7 @@ export class FacilityMap {
         rr(ctx, tx, ty, tw, 17, 8.5);
         ctx.fillStyle = rgba(tone, 1);
         ctx.fill();
-        ctx.fillStyle = "#07090F";
+        ctx.fillStyle = "#fff";
         ctx.fillText(tag, tx + 7, ty + 12.5);
       }
     }
@@ -273,20 +275,16 @@ export class FacilityMap {
       const cy = Math.min(hcy, ty) + (ty - hcy) * 0.5 - 30;
       const x = (1 - e) * (1 - e) * hcx + 2 * (1 - e) * e * cx + e * e * tx;
       const y = (1 - e) * (1 - e) * hcy + 2 * (1 - e) * e * cy + e * e * ty;
-      ctx.strokeStyle = "rgba(255,255,255,0.16)";
+      ctx.strokeStyle = rgba(PAPER_INK, 0.12);
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(hcx, hcy);
       ctx.quadraticCurveTo(cx, cy, tx, ty);
       ctx.stroke();
-      ctx.save();
-      ctx.shadowColor = "rgba(255,255,255,0.9)";
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = "#fff";
+      ctx.fillStyle = rgba(PAPER_INK, 1);
       ctx.beginPath();
       ctx.arc(x, y, 2.6, 0, Math.PI * 2);
       ctx.fill();
-      ctx.restore();
     }
 
     if (g.stage) this.drawPick(g);
@@ -300,12 +298,12 @@ export class FacilityMap {
       const r = this.rackRect(g, hall, rack);
       ctx.save();
       rr(ctx, r.x - 2.5, r.y - 2.5, r.w + 5, r.h + 5, 7);
-      ctx.strokeStyle = `rgba(255,255,255,${a})`;
+      ctx.strokeStyle = rgba(PAPER_INK, a);
       ctx.lineWidth = w;
       ctx.stroke();
       ctx.restore();
     };
-    ring(this.sel.hall, this.sel.rack, 0.5, 1.3);
+    ring(this.sel.hall, this.sel.rack, 0.35, 1.3);
     const hv = this.hover;
     if (hv && hv.kind === "rack") {
       ring(hv.hall, hv.rack, 0.95, 1.6);
@@ -319,12 +317,9 @@ export class FacilityMap {
     const tw = ctx.measureText(text).width + 18;
     const tx = Math.min(Math.max(cx - tw / 2, 6), this.w - tw - 6);
     const ty = bottom - 22;
-    rr(ctx, tx, ty, tw, 22, 11);
-    ctx.fillStyle = "rgba(14,18,36,0.94)";
+    rr(ctx, tx, ty, tw, 22, 8);
+    ctx.fillStyle = rgba(PAPER_INK, 1);
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.24)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
     ctx.fillStyle = "#fff";
     ctx.fillText(text, tx + 9, ty + 15);
   }
@@ -349,7 +344,7 @@ export class FacilityMap {
     const keyIdx = live ? HOT_HOST : 7;
     const kb = this.hostBox(g, keyIdx);
 
-    ctx.strokeStyle = live ? rgba(tone, 0.55) : "rgba(255,255,255,0.22)";
+    ctx.strokeStyle = live ? rgba(tone, 0.55) : "#d4d4d8";
     ctx.lineWidth = 1;
     ctx.setLineDash([2, 4]);
     ctx.beginPath();
@@ -362,7 +357,7 @@ export class FacilityMap {
     ctx.setLineDash([]);
 
     ctx.font = `600 13px ${FONT}`;
-    ctx.fillStyle = "rgba(255,255,255,0.86)";
+    ctx.fillStyle = "#0b0c0e";
     ctx.fillText(`Rack ${HALL_LETTERS[hall].toUpperCase()}${rack + 1}`, x0, top + 14);
     const departed = parts.filter((p) => s.r >= p.t0).length;
     let status = "16 hosts · click one to inspect";
@@ -376,7 +371,7 @@ export class FacilityMap {
     }
     ctx.textAlign = "right";
     ctx.font = `500 13px ${FONT}`;
-    ctx.fillStyle = live ? rgba(tone, 1) : "rgba(255,255,255,0.4)";
+    ctx.fillStyle = live ? rgba(tone, 1) : "#71717a";
     ctx.fillText(status, x0 + W, top + 14);
     ctx.textAlign = "left";
 
@@ -385,31 +380,25 @@ export class FacilityMap {
       const isHot = live && i === HOT_HOST;
       const hovered = this.hover?.kind === "host" && this.hover.id === hostId(hall, rack, i + 1);
       rr(ctx, x, hy, hw, hh, 8);
-      ctx.fillStyle = hovered ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)";
+      ctx.fillStyle = hovered ? rgba(HAIR, 1) : rgba(RACK, 1);
       ctx.fill();
-      ctx.strokeStyle = isHot ? rgba(tone, 1) : hovered ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.1)";
+      ctx.strokeStyle = isHot ? rgba(tone, 1) : hovered ? rgba(PAPER_INK, 0.85) : rgba(HAIR, 1);
       ctx.lineWidth = isHot || hovered ? 1.6 : 1;
-      if (isHot) {
+      ctx.stroke();
+      if (isHot && s.r >= 3.3) {
         ctx.save();
-        ctx.shadowColor = rgba(tone, 0.8);
-        ctx.shadowBlur = 14;
-        ctx.stroke();
-        ctx.restore();
-        if (s.r >= 3.3) {
-          ctx.save();
-          rr(ctx, x + 1, hy + 1, hw - 2, hh - 2, 7);
-          ctx.clip();
-          ctx.strokeStyle = rgba(tone, 0.22);
-          ctx.lineWidth = 1;
-          for (let d = -hh; d < hw + hh; d += 6) {
-            ctx.beginPath();
-            ctx.moveTo(x + d, hy);
-            ctx.lineTo(x + d + hh, hy + hh);
-            ctx.stroke();
-          }
-          ctx.restore();
+        rr(ctx, x + 1, hy + 1, hw - 2, hh - 2, 7);
+        ctx.clip();
+        ctx.strokeStyle = rgba(tone, 0.22);
+        ctx.lineWidth = 1;
+        for (let d = -hh; d < hw + hh; d += 6) {
+          ctx.beginPath();
+          ctx.moveTo(x + d, hy);
+          ctx.lineTo(x + d + hh, hy + hh);
+          ctx.stroke();
         }
-      } else ctx.stroke();
+        ctx.restore();
+      }
 
       const n = guestsFor(hall, rack, i + 1);
       const ds = 4.5;
@@ -422,12 +411,10 @@ export class FacilityMap {
       for (let j = 0; j < n; j++) {
         const cx = ox + (j % 2) * (ds + dgx);
         const cy = oy + Math.floor(j / 2) * (ds + dgy);
-        let a = 0.5;
-        let col = INK;
+        let col = LOAD_HI;
         if (isHot) {
           if (j === 0) {
-            col = contained ? [150, 165, 160] : TONE;
-            a = 1;
+            col = contained ? SAFE : TONE;
             if (s.r >= 3.8) {
               ctx.strokeStyle = rgba(col, 1);
               ctx.lineWidth = 1.1;
@@ -438,16 +425,15 @@ export class FacilityMap {
           } else {
             const p = parts[j - 1];
             if (p && s.r >= p.t0) continue;
-            a = 0.7;
           }
         }
-        ctx.fillStyle = rgba(col, a);
+        ctx.fillStyle = rgba(col, 1);
         rr(ctx, cx, cy, ds, ds, 1.2);
         ctx.fill();
       }
       ctx.font = `500 11px ${FONT}`;
       ctx.textAlign = "center";
-      ctx.fillStyle = isHot ? rgba(tone, 1) : hovered ? "#fff" : "rgba(255,255,255,0.26)";
+      ctx.fillStyle = isHot ? rgba(tone, 1) : hovered ? "#0b0c0e" : "#a1a1aa";
       if (isHot || hovered || i % 3 === 0 || i === 15) ctx.fillText(String(i + 1).padStart(2, "0"), x + hw / 2, hy + hh + 17);
       ctx.textAlign = "left";
       if (hovered) this.chipLabel(hostId(hall, rack, i + 1), x + hw / 2, hy - 6);
