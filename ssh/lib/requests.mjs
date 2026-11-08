@@ -8,7 +8,7 @@
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { issueUserCert, knownHostsLine } from './ca.mjs';
-import { hostById, personById, policyFor } from './hosts.mjs';
+import { hostById, policyFor } from './hosts.mjs';
 import { HttpError, cleanText, intInRange, newId, newSecret, safeEqual, sha256hex } from './util.mjs';
 
 export const DECISION_WINDOW_MS = 10 * 60_000; // time to get a request approved
@@ -117,6 +117,7 @@ export class Requests {
         text: `passkey step-up SKIPPED for ${req.id} (DEMO_SKIP_PASSKEY is set: smoke tests only)`, data: { method: req.stepUp.method },
       });
     }
+    await this.#maybeIssue(req);
     return { req, secret };
   }
 
@@ -133,11 +134,13 @@ export class Requests {
     await this.#maybeIssue(req);
   }
 
-  async approve(requestId, approver) {
+  /** @param {{id: string, roles: string[]}} actor  who is approving: the server resolves this, the body only claims it */
+  async approve(requestId, actor) {
     const req = this.#open(requestId);
+    const approver = actor.id;
     if (req.cert) throw new HttpError(409, 'already approved');
     if (approver === req.operator) throw new HttpError(403, 'approver must differ from the requester');
-    if (!personById(approver) && !this.cfg.externalIdentity) throw new HttpError(403, 'unknown approver');
+    if (!actor.roles?.includes('approver')) throw new HttpError(403, `${approver.toUpperCase()} is not an approver`);
     if (req.approvals.some((a) => a.approver === approver)) throw new HttpError(409, `${approver.toUpperCase()} already approved this request`);
     req.approvals.push({ approver, at: Date.now() });
     await this.ledger.append({
@@ -149,11 +152,12 @@ export class Requests {
     return req;
   }
 
-  async deny(requestId, approver, reason) {
+  async deny(requestId, actor, reason) {
     const req = this.#open(requestId);
+    const approver = actor.id;
     if (req.cert) throw new HttpError(409, 'already approved; revoke it instead');
     if (approver === req.operator) throw new HttpError(403, 'use cancel to withdraw your own request');
-    if (!personById(approver) && !this.cfg.externalIdentity) throw new HttpError(403, 'unknown approver');
+    if (!actor.roles?.includes('approver')) throw new HttpError(403, `${approver.toUpperCase()} is not an approver`);
     await this.#finish(req, 'denied', `denied by ${approver}`, approver, { reason: cleanText(reason, 200) });
     return req;
   }

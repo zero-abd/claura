@@ -96,6 +96,8 @@ export function chromeArgs({ port, width, height, scale, profile, headful, extra
     '--disable-ipc-flooding-protection',
     // never ask the macOS keychain for anything
     '--password-store=basic', '--use-mock-keychain',
+    // real GPU WebGL (the 3D facility): Metal via ANGLE. CAP_GPU=0 falls back to the software rasteriser.
+    ...(process.env.CAP_GPU === '0' ? [] : ['--use-angle=metal', '--enable-gpu']),
     ...extraArgs,
   ]
 }

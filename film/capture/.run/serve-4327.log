@@ -11,3 +11,432 @@
 2:25:54 AM [vite] (client) hmr update /src/style.css
 2:26:29 AM [vite] (client) page reload src/views/warroom.ts
 2:26:29 AM [vite] (client) hmr update /src/style.css
+4:21:25 AM [vite] vite.config.ts changed, restarting server...
+4:21:25 AM [vite] (client) page reload src/logo.ts
+4:21:25 AM [vite] (client) page reload logo.svg
+4:21:25 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+4:21:25 AM [vite] server restarted.
+
+  ➜  Local:   http://127.0.0.1:4327/
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:21:31 AM [vite] (client) page reload index.html
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:21:42 AM [vite] (client) hmr update /src/style.css
+4:21:45 AM [vite] (client) hmr update /src/style.css
+4:35:58 AM [vite] (client) page reload src/script.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:36:24 AM [vite] (client) page reload src/warroom-data.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:36:53 AM [vite] (client) page reload src/views/warroom.ts
+4:36:53 AM [vite] (client) Pre-transform error: Failed to resolve import "./scope" from "src/views/warroom.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/abd/repos/bulkhead/src/views/warroom.ts:22:33
+  16 |  import { $, $$, disc, setAttr, setHTML, setText } from "../dom";
+  17 |  import { esc, linkHosts } from "../hosts";
+  18 |  import { scopeSummaryText } from "./scope";
+     |                                    ^
+  19 |  export const wr = {
+  20 |    selected: "#command",
+4:36:53 AM [vite] (client) Pre-transform error: Failed to resolve import "./scope" from "src/views/warroom.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/abd/repos/bulkhead/src/views/warroom.ts:22:33
+  16 |  import { $, $$, disc, setAttr, setHTML, setText } from "../dom";
+  17 |  import { esc, linkHosts } from "../hosts";
+  18 |  import { scopeSummaryText } from "./scope";
+     |                                    ^
+  19 |  export const wr = {
+  20 |    selected: "#command",
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:36:53 AM [vite] Internal server error: Failed to resolve import "./scope" from "src/views/warroom.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/abd/repos/bulkhead/src/views/warroom.ts:22:33
+  16 |  import { $, $$, disc, setAttr, setHTML, setText } from "../dom";
+  17 |  import { esc, linkHosts } from "../hosts";
+  18 |  import { scopeSummaryText } from "./scope";
+     |                                    ^
+  19 |  export const wr = {
+  20 |    selected: "#command",
+      at TransformPluginContext._formatLog (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:42846:41)
+      at TransformPluginContext.error (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:42843:16)
+      at normalizeUrl (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:40820:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:40939:37
+      at async Promise.all (index 5)
+      at async TransformPluginContext.transform (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:40866:7)
+      at async EnvironmentPluginContainer.transform (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:42641:18)
+      at async loadAndTransform (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36053:27)
+      at async viteTransformMiddleware (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:37550:24)
+4:37:01 AM [vite] (client) page reload src/views/warroom.ts
+4:37:01 AM [vite] (client) Pre-transform error: Failed to resolve import "./scope" from "src/views/warroom.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/abd/repos/bulkhead/src/views/warroom.ts:21:33
+  15 |  import { $, disc, setAttr, setHTML, setText } from "../dom";
+  16 |  import { esc, linkHosts } from "../hosts";
+  17 |  import { scopeSummaryText } from "./scope";
+     |                                    ^
+  18 |  export const wr = {
+  19 |    selected: "#command",
+4:37:01 AM [vite] (client) Pre-transform error: Failed to resolve import "./scope" from "src/views/warroom.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/abd/repos/bulkhead/src/views/warroom.ts:21:33
+  15 |  import { $, disc, setAttr, setHTML, setText } from "../dom";
+  16 |  import { esc, linkHosts } from "../hosts";
+  17 |  import { scopeSummaryText } from "./scope";
+     |                                    ^
+  18 |  export const wr = {
+  19 |    selected: "#command",
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:37:01 AM [vite] Internal server error: Failed to resolve import "./scope" from "src/views/warroom.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/abd/repos/bulkhead/src/views/warroom.ts:21:33
+  15 |  import { $, disc, setAttr, setHTML, setText } from "../dom";
+  16 |  import { esc, linkHosts } from "../hosts";
+  17 |  import { scopeSummaryText } from "./scope";
+     |                                    ^
+  18 |  export const wr = {
+  19 |    selected: "#command",
+      at TransformPluginContext._formatLog (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:42846:41)
+      at TransformPluginContext.error (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:42843:16)
+      at normalizeUrl (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:40820:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:40939:37
+      at async Promise.all (index 5)
+      at async TransformPluginContext.transform (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:40866:7)
+      at async EnvironmentPluginContainer.transform (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:42641:18)
+      at async loadAndTransform (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36053:27)
+      at async viteTransformMiddleware (file:///Users/abd/repos/bulkhead/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:37550:24)
+4:38:11 AM [vite] (client) page reload src/views/scope.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:38:18 AM [vite] (client) page reload src/views/scope.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:39:56 AM [vite] (client) page reload src/engine.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:40:10 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:40:29 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:40:36 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:40:41 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:41:13 AM [vite] (client) page reload src/dom.ts
+4:41:13 AM [vite] (client) page reload src/views/access.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:41:56 AM [vite] (client) page reload src/icons.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:42:49 AM [vite] (client) page reload src/views/reports.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:42:54 AM [vite] (client) page reload src/views/reports.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:43:10 AM [vite] (client) page reload src/views/incident.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:43:24 AM [vite] (client) page reload src/views/incident.ts
+4:43:24 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:43:47 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:45:31 AM [vite] (client) hmr update /src/style.css
+4:45:47 AM [vite] (client) page reload src/main.ts
+4:45:47 AM [vite] (client) page reload src/views/access.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:47:52 AM [vite] (client) hmr update /src/style.css
+4:48:24 AM [vite] (client) page reload src/map.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:50:00 AM [vite] (client) hmr update /src/style.css
+4:50:00 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:51:28 AM [vite] (client) page reload src/facility3d.ts
+4:51:28 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:52:03 AM [vite] (client) page reload src/facility3d.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:52:51 AM [vite] (client) page reload src/facility3d.ts
+4:52:51 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:54:22 AM [vite] (client) page reload src/facility3d.ts
+4:54:22 AM [vite] (client) hmr update /src/style.css
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:55:49 AM [vite] (client) page reload src/data/scripted-content.ts
+4:55:49 AM [vite] (client) page reload src/views/warroom.ts
+4:55:49 AM [vite] (client) hmr update /src/style.css
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:56:41 AM [vite] (client) hmr update /src/style.css
+4:57:12 AM [vite] (client) hmr update /src/style.css
+4:57:56 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+4:58:16 AM [vite] (client) page reload src/shell.ts
+4:58:16 AM [vite] (client) hmr update /src/style.css
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:01:23 AM [vite] (client) hmr update /src/style.css
+5:01:23 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:01:28 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:02:36 AM [vite] (client) page reload src/data/roster.ts
+5:02:36 AM [vite] (client) page reload src/data/index.ts
+5:02:36 AM [vite] (client) page reload src/views/incident.ts
+5:02:36 AM [vite] (client) page reload src/shell.ts
+5:02:36 AM [vite] (client) page reload src/views/reports.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:03:03 AM [vite] (client) page reload src/views/access.ts
+5:03:03 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:03:11 AM [vite] (client) page reload src/data/codes.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:03:47 AM [vite] (client) page reload src/views/overview.ts
+5:03:47 AM [vite] (client) hmr update /src/style.css
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:04:35 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:28:58 AM [vite] (client) page reload src/engine.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:31:03 AM [vite] (client) page reload src/views/incident.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:31:37 AM [vite] (client) page reload src/data/roster.ts
+5:31:37 AM [vite] (client) page reload src/data/index.ts
+5:31:37 AM [vite] (client) page reload src/hosts.ts
+5:31:37 AM [vite] (client) page reload src/views/agents.ts
+5:31:37 AM [vite] (client) page reload src/views/overview.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:33:33 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:26 AM [vite] (client) page reload src/views/reports.ts
+5:34:26 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:26 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:26 AM [vite] Internal server error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+      at failureErrorWithLog (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:1467:15)
+      at /Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:736:50
+      at responseCallbacks.<computed> (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:603:9)
+      at handleIncomingPacket (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:658:12)
+      at Socket.readFromStdout (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:581:7)
+      at Socket.emit (node:events:509:28)
+      at addChunk (node:internal/streams/readable:563:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+      at Readable.push (node:internal/streams/readable:394:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:41 AM [vite] (client) page reload src/views/reports.ts
+5:34:41 AM [vite] (client) page reload src/data/codes.ts
+5:34:41 AM [vite] (client) page reload src/views/access.ts
+5:34:41 AM [vite] (client) page reload src/data/source.ts
+5:34:41 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:41 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:41 AM [vite] Internal server error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+      at failureErrorWithLog (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:1467:15)
+      at /Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:736:50
+      at responseCallbacks.<computed> (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:603:9)
+      at handleIncomingPacket (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:658:12)
+      at Socket.readFromStdout (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:581:7)
+      at Socket.emit (node:events:509:28)
+      at addChunk (node:internal/streams/readable:563:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+      at Readable.push (node:internal/streams/readable:394:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:49 AM [vite] (client) page reload src/views/reports.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:49 AM [vite] (client) ✨ new dependencies optimized: spacetimedb
+5:34:49 AM [vite] (client) ✨ optimized dependencies changed. reloading
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:35:25 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:35:29 AM [vite] (client) page reload src/main.ts
+5:35:29 AM [vite] (client) page reload src/data/live.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:35:41 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:36:35 AM [vite] (client) hmr update /src/style.css
+5:45:53 AM [vite] (client) page reload src/live-engine.ts
+5:45:53 AM [vite] (client) hmr update /src/style.css
+5:45:53 AM [vite] (client) page reload src/main.ts
+5:47:52 AM [vite] (client) page reload src/live-engine.ts
+5:47:52 AM [vite] (client) page reload src/views/incident.ts
+5:47:52 AM [vite] (client) page reload src/main.ts
+5:47:52 AM [vite] (client) page reload src/data/live.ts
+5:47:52 AM [vite] (client) page reload src/views/join.ts
+5:49:36 AM [vite] (client) page reload src/views/access.ts
+5:49:39 AM [vite] (client) page reload src/views/access.ts
+5:53:57 AM [vite] (client) page reload src/data/live.ts
+5:53:57 AM [vite] (client) page reload src/main.ts
+5:55:28 AM [vite] (client) page reload src/views/reports.ts
+5:55:28 AM [vite] (client) page reload src/features.ts
+5:55:28 AM [vite] (client) page reload src/live-engine.ts
+5:55:28 AM [vite] (client) page reload src/data/live.ts
+5:55:28 AM [vite] (client) page reload src/main.ts
+5:56:07 AM [vite] (client) page reload src/data/live.ts
+5:56:07 AM [vite] (client) page reload src/views/join.ts
+5:56:07 AM [vite] (client) page reload src/views/reports.ts
+5:58:45 AM [vite] (client) page reload src/views/scope.ts
+5:58:45 AM [vite] (client) page reload src/views/policy.ts
+5:58:45 AM [vite] (client) hmr update /src/style.css
+5:58:51 AM [vite] (client) page reload src/views/policy.ts
+5:59:00 AM [vite] (client) page reload src/views/policy.ts
+6:10:06 AM [vite] (client) page reload src/views/incident.ts

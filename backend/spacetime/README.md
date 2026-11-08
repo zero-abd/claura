@@ -1,156 +1,251 @@
 # Claura SpacetimeDB module
 
 Server module for **Claura** (claura.tech), agentic incident response for AI data centers.
-"Seal the breach before it spreads." Four agents (Sentry detects, Triage sizes the blast radius,
-Warden contains, Scribe writes the forensics) and the operator console share one database.
-Agents write only through reducers; every console subscribes to the public tables.
+"Seal the breach before it spreads." One database holds everything the response needs: the fleet, the
+four agents' work, the **policy gate**, the **access control**, and the **war room** (messages, tasks,
+decisions, a plain-language brief, the scope of the data at risk, NIST SP 800-61 documentation).
 
-- Module name (local): `claura`
-- Source: `spacetimedb/src/index.ts` (TypeScript, SpacetimeDB 2.14)
-- All tables are public. Everything on the wire is snake_case.
+- Source: `spacetimedb/src/` (TypeScript, SpacetimeDB 2.14): `schema.ts` tables, `lib.ts` roles/effects/seeds,
+  `views.ts` gated reads, `index.ts` init + reducers.
+- Everything on the wire is snake_case; TS clients see camelCase (`conn.db.dataAsset`, `row.blastScore`).
+- **Deployed on Maincloud as `claura`** (database identity `c200ccdca8eab81d0159ad2747b29ea7ad2acad20853d5607f8d244eb8fa50b0`,
+  URI `wss://maincloud.spacetimedb.com`, dashboard https://spacetimedb.com/claura). The name was free, so no fallback
+  name (`claura-hackutd`) was needed. The same module also runs as an **isolated appliance** on `ws://127.0.0.1:3000`.
 
-## Run it (local server only)
+## What is real
 
-The `spacetime` CLI on this machine defaults to **maincloud** and is logged in. Always pass
-`--server local`. `spacetime.json` in this folder pins `"server": "local"` as a second guard.
+| real | simulated |
+|---|---|
+| All state, the access control and the policy gate live in SpacetimeDB (Maincloud, or a local server). Authorization is enforced inside the module on every call, not in the clients. | Effects of containment actions are rows in the database (a host becomes `quarantined`, a guest `paused`, a data asset `evidence_preserved`). Nothing touches real infrastructure. |
+| Nemotron runs on-prem (local Ollama) and drives the agents; it can only call tools that call reducers. | Telemetry is a replayed fixture (6 signals). Reachability probes are fixtures. |
+| Identities, roles, one-time enrollment codes, revocation, channel isolation, the audit trail. | Stakeholders in the roster are display-only rows, not identities. The scope inventory (7 data assets) is scenario data. |
 
-```bash
-S=/Users/abd/.local/bin/spacetime
-cd /Users/abd/repos/claura-backend/spacetime
+## Security model (assume the attacker has every internal system)
 
-unset NODE_USE_SYSTEM_CA
-(cd spacetimedb && npm install)                  # first time only
-$S start &                                       # local server on 127.0.0.1:3000
-$S build                                         # compile the module
-$S publish --server local claura --yes           # add -c / --delete-data=always to wipe on schema change
-$S call --server local claura reset_demo         # wipe + reseed (a fresh publish is already seeded via init)
-$S sql  --server local claura "SELECT * FROM policy"
-$S logs --server local claura                    # module logs
+1. **No table is readable.** All 18 tables are private (`*_store`). Clients read through per-user **views** that
+   keep the original names (`host`, `incident`, `message`, ...). A view looks up `ctx.sender` in `operator_store`
+   and returns rows only for an **active** operator whose **role** may see them. A stranger who connects and
+   subscribes receives zero rows from all 18 views; a private table cannot even be named by a non-owner
+   (`no such table`). Enroll, revoke or re-role someone and their cache fills or empties **live**, without reconnecting.
+2. **Every reducer authenticates.** The first line of each is `requireOperator(ctx, roles)`: the caller is
+   `ctx.sender` (the authenticated identity), never an argument. `approve` keeps its old `operator` argument only so
+   old callers compile; it is **ignored**, the approver is recorded from the identity (tested: argument `"anyone"`,
+   recorded `Owner`).
+3. **Joining is out-of-band and single-use.** An admin mints a code (`issue_enrollment`), hands it over on a
+   channel the attacker cannot see (in person, a known phone, paper), and the person calls `enroll(code, name)` from
+   their own identity. The code is consumed. A wrong code and a used code give the **same** error. If the admin put a
+   `name_hint` on the code, that name wins over the typed one, so nobody can pick a different name. Codes must be
+   12 to 64 characters of `A-Za-z0-9_-`; generate 80 random bits (`scripts/new-code.mjs` does).
+4. **Admins can also add by identity**: the person reads the identity hex off their sign-in screen to the admin
+   (`add_operator`). `revoke_operator` cuts an identity off at once (views empty, every write refused). The row stays,
+   so the audit trail keeps the name. The **last active admin cannot be revoked or demoted**.
+5. **Least privilege by role** (matrices below). Agents propose but cannot approve, reset, set policy or add
+   people. An agent can suspect exfiltration, **only a human can confirm it** or mark an asset restored. Agents
+   can only move the NIST phase forward. A commander alone cannot unlock a denied action (`reimage_host`, `power_off_hall`, `delete_vm`): that needs an admin. A human cannot speak as Warden (`post_agent_message` is agent-only), and
+   no human can take an agent's name (`sentry`, `triage`, `warden`, `scribe`, `system`, `claura`, ...). Display
+   names are unique among active operators (case-insensitive) and stripped of control and bidi characters.
+6. **Channel isolation.** `#legal` is for counsel, `#exec` for executives. A **vendor** (an outside party) sees only
+   `#vendors`, its own tasks, the roster and itself: no incident, no scope, no brief, no telemetry.
+7. **Everything is audited.** Every state change writes an `incident_event` with the actor's name (`ACCESS:` lines for
+   enrollments, additions, revocations and issued/voided codes). Codes are never written to events, messages or logs
+   (checked in the test and in the Maincloud logs).
+8. **The policy gate is unchanged**: the `policy` table, not the model, decides run / ask a human / block.
 
-# client bindings for the agents
-$S generate --lang typescript \
-  --out-dir /Users/abd/repos/claura-backend/agents/src/module_bindings \
-  --module-path /Users/abd/repos/claura-backend/spacetime/spacetimedb --yes
-```
+### Honest limits
 
-Stop the server by killing the `spacetime start` process. Data lives in the server's data dir, so
-`spacetime server clear` (or `publish -c`) is the hard reset.
+- The **database owner** (the identity that published, here the `spacetime` CLI login) is root: it can read every private
+  table over SQL and republish the module. Protect `~/.config/spacetime`. It is also the first admin ("Owner").
+- Tokens are **bearer credentials**. A stolen operator token is that operator until an admin revokes it. There is no
+  device binding. Revocation (live) is the answer.
+- `enroll` has **no rate limit or lockout** (a failed call rolls back, so nothing can be counted). 80-bit codes make
+  guessing infeasible; throttling would belong at the network edge. Codes have **no expiry**; `revoke_enrollment` voids one.
+- On Maincloud the data sits on a third party's infrastructure (TLS in transit). For a stronger isolation claim run the
+  **appliance**: SpacetimeDB on the laptop, loopback only (see `../DEMO.md`). Standalone SpacetimeDB speaks plain WS; put
+  TLS in front of it before exposing it to other devices.
+- Messages are not end-to-end encrypted: operators with the role, and the owner, can read them.
+- `init` (which creates the first admin) runs only on a fresh publish or `publish -c`. A hot-swap republish never
+  creates an admin, so nobody can claim admin later. After a schema change, republish with `-c` (this wipes operators).
 
-## Tables
+## Roles
 
-| table | columns | notes |
+`admin`, `commander`, `legal`, `exec`, `comms`, `vendor`, `responder`, `agent`.
+**core** = admin, commander, responder, agent. **internal** = core + legal, exec, comms.
+
+### Reads (the views)
+
+| view (client accessor) | who gets rows |
+|---|---|
+| `host`, `guest_vm` (`guestVm`), `signal`, `finding`, `policy`, `proposal`, `incident_event` (`incidentEvent`), `agent_state` (`agentState`) | core |
+| `incident`, `brief`, `decision`, `data_asset` (`dataAsset`) | internal |
+| `report` | core + legal |
+| `message` | per channel (below) |
+| `task` | internal sees all; a vendor sees only tasks owned by `vendor` |
+| `operator` | admin sees everyone including revoked; other internal roles see active operators; a vendor sees only itself |
+| `enrollment` | admin only (the codes are secrets) |
+| `stakeholder` | every active operator |
+
+A stranger, or a revoked operator, gets nothing from any of them.
+
+### Channels
+
+| channel | read | post |
 |---|---|---|
-| `host` | `host` pk, `hall`, `rack`, `status` | status: `healthy` / `suspect` / `cordoned` / `quarantined` |
-| `guest_vm` | `vm` pk, `host`, `workload`, `status`, `moved_to` | status: `running` / `paused` / `failed_over`. `host` is never rewritten; after failover `moved_to` holds the destination (`''` before) |
-| `signal` | `id` u64 auto pk, `at`, `source`, `message`, `host`, `vm` | raw telemetry |
-| `incident` | `id` u64 auto pk, `title`, `severity`, `host`, `vm`, `status`, `opened_at`, `contained_at`, `blast_score` f64 | status: `open` / `awaiting_approval` / `contained`. **`contained_at` is an Option<Timestamp>** (none until contained; `undefined` on TS clients), not a 0 sentinel |
-| `agent_state` | `agent` pk, `status`, `thought`, `model`, `updated_at` | agent: `sentry` / `triage` / `warden` / `scribe` |
-| `finding` | `id` u64 auto pk, `incident_id`, `agent`, `kind`, `text`, `at` | |
-| `policy` | `action` pk, `mode`, `reversible`, `note` | mode: `auto` / `approval` / `deny` |
-| `proposal` | `id` u64 auto pk, `incident_id`, `agent`, `action`, `target`, `reason`, `status`, `policy_mode`, `at`, `decided_by` | status: `executed` / `pending_approval` / `approved` / `blocked`. `decided_by`: `policy` for auto and blocked, `''` while pending, operator name once approved |
-| `incident_event` | `id` u64 auto pk, `incident_id`, `at`, `kind`, `actor`, `text` | the live "ship's log". kind: `signal` / `incident` / `finding` / `action` / `blocked` / `approval_requested` / `approval` / `state` / `report`. **`incident_id = 0` means not tied to an incident** (a signal before any incident exists, reset and policy-change notices) |
-| `report` | `incident_id` pk, `summary`, `filed_at` | one per incident, upserted |
+| `#command` | admin, commander, responder, agent, legal, exec, comms | admin, commander, responder, agent |
+| `#legal` | admin, commander, legal, agent | same |
+| `#exec` | admin, commander, exec, agent | same |
+| `#comms-pr` | admin, commander, comms, legal, agent | same |
+| `#vendors` | admin, commander, responder, vendor, agent | same |
+
+## Tables (as the client sees them)
+
+Timestamps are `Timestamp` (`.toDate()`), u64 are `bigint`. Auto-increment ids survive `reset_demo` (never assume `#1`).
+
+| table | columns |
+|---|---|
+| `host` | `host` pk, `hall`, `rack`, `status` (`healthy`/`suspect`/`cordoned`/`quarantined`) |
+| `guest_vm` | `vm` pk, `host`, `workload`, `status` (`running`/`paused`/`failed_over`), `moved_to` |
+| `signal` | `id`, `at`, `source`, `message`, `host`, `vm` |
+| `incident` | `id`, `title`, `severity`, `host`, `vm`, `status` (`open`/`awaiting_approval`/`contained`), `opened_at`, `contained_at` (Option), `blast_score` f64, **`category`, `nist_phase`, `functional_impact`, `information_impact`, `recoverability`** |
+| `agent_state` | `agent` pk, `status`, `thought`, `model`, `updated_at` |
+| `finding` | `id`, `incident_id`, `agent`, `kind`, `text`, `at` |
+| `policy` | `action` pk, `mode` (`auto`/`approval`/`deny`), `reversible`, `note` |
+| `proposal` | `id`, `incident_id`, `agent`, `action`, `target`, `reason`, `status` (`executed`/`pending_approval`/`approved`/`blocked`), `policy_mode`, `at`, `decided_by` |
+| `incident_event` | `id`, `incident_id` (0 = none), `at`, `kind`, `actor`, `text`. The audit log. `kind`: signal, incident, finding, action, blocked, approval_requested, approval, state, report |
+| `report` | `incident_id` pk, `summary`, `filed_at` |
+| **`operator`** | `identity` pk, `name`, `role`, `added_by`, `added_at`, `active` |
+| **`enrollment`** | `code` pk, `role`, `name_hint`, `created_by`, `created_at`, `used_by` (`''` unused; `Name (id8)` once used; `revoked by <admin>`) |
+| **`message`** | `id`, `incident_id` (0 = standing room), `channel`, `author_name`, `author_role`, `kind` (`human`/`agent`/`system`), `text`, `at` |
+| **`task`** | `id`, `incident_id`, `title`, `owner_role`, `status` (`open`/`doing`/`done`), `at` |
+| **`decision`** | `id`, `incident_id`, `text`, `by_name`, `at` |
+| **`brief`** | `incident_id` pk (0 = quiet-state brief), `text`, `known` (one fact per line), `unknown` (one question per line), `updated_at`, `author` |
+| **`data_asset`** | `id`, `incident_id` (0 = unassigned inventory), `name`, `system`, `classification` (`restricted`/`confidential`/`internal`), `records` u64, `status` (`intact`/`accessed`/`exfil_suspected`/`exfil_confirmed`/`locked_ransomware`/`restored`/`evidence_preserved`), `note`, `updated_by`, `updated_at` |
+| **`stakeholder`** | `name` pk, `role`, `initials`, `title` (extra column: job title), `verified_out_of_band`. Display-only roster, not identities |
 
 ## Reducers
 
-Reducers return nothing; read results from subscriptions. To learn the id of an incident you just
-opened, read the newest `incident` row.
+Reducers return nothing; read results from the views. Every call checks the role first.
 
-| reducer | args | behaviour |
-|---|---|---|
-| `reset_demo` | none | Wipes every table and reseeds. 13 hosts across Halls A to D (`b14-gpu-07` is Hall B rack 14), 12 guests on `b14-gpu-07` (`vm-7f3a` running `agent-7f3` plus 11 co-resident tenants), clean failover targets `c05-gpu-02` and `c12-gpu-04` (the only Hall C hosts), four idle `agent_state` rows, and the policy table below. Also runs from `init`, so a fresh publish is already seeded. |
-| `ingest_signal` | `source, message, host, vm` | Inserts a `signal`. Logs a `signal` event attached to the newest uncontained incident on the same host/vm, else `incident_id = 0`. |
-| `open_incident` | `title, severity, host, vm` | Inserts an incident (`open`, `blast_score` 0, `contained_at` none). A `healthy` host becomes `suspect`. Logs an `incident` event with actor `sentry`. |
-| `set_agent_state` | `agent, status, thought, model` | Upserts the agent card. Unknown agent names are rejected. Does not write to the event log (it would drown it). |
-| `record_finding` | `incident_id, agent, kind, text, blast_score` | Inserts a finding, logs a `finding` event. `blast_score < 0` (or NaN) leaves `incident.blast_score` unchanged. Unknown incident is rejected. |
-| `propose_action` | `incident_id, agent, action, target, reason` | **The policy gate**, see below. |
-| `approve` | `proposal_id, operator` | Only for `pending_approval`. Marks `approved`, sets `decided_by`, applies the effect, logs `approval` then `state`. `quarantine_host` sets the host `quarantined` and the incident `contained` with `contained_at = now`. Any other approved action returns the incident to `open` once nothing else is pending. |
-| `set_policy` | `action, mode` | Changes (or creates, non-reversible) a policy row. `mode` must be `auto` / `approval` / `deny`. Logs a `state` event. |
-| `file_report` | `incident_id, summary` | Upserts the report, logs a `report` event with actor `scribe`. |
+| reducer | args | who | behaviour |
+|---|---|---|---|
+| `enroll` | `code, name` | anyone (a stranger, or a revoked operator re-admitted) | Consumes an unused code; the caller's identity becomes an operator with the code's role. Logs `ACCESS:` and a system line in `#command`. |
+| `issue_enrollment` | `code, role, name_hint` | admin | Mint a single-use code. |
+| `revoke_enrollment` | `code` | admin | Void an unused code. |
+| `add_operator` | `identity_hex, name, role` | admin | Add, re-role or reactivate an identity. |
+| `revoke_operator` | `identity_hex` | admin | `active = false`, live. Refuses the last active admin. |
+| `set_stakeholder_verified` | `name, verified` | admin, commander | Out-of-band verification flag. |
+| `reset_demo` | none | admin | Wipes all **data** tables and reseeds. **Operators and enrollment codes are kept.** |
+| `ingest_signal`, `open_incident`, `set_agent_state`, `record_finding`, `propose_action`, `file_report` | as before | agent, admin | `open_incident` also sets NIST phase `detection_analysis`, adopts the scope inventory, seeds 3 tasks + 2 decisions + a first brief. |
+| `approve` | `proposal_id, operator` (ignored) | admin, commander | Applies the held action; writes `decision` "Quarantine b14-gpu-07 approved by <name>"; closes the commander's task; `quarantine_host` contains the incident. |
+| `set_policy` | `action, mode` | admin, commander | Policy edit, logged with the name. **Relaxing a denial needs an admin**: a commander cannot turn a `deny` (or an unknown action, denied by default) into `auto`/`approval`; a commander can tighten. |
+| `set_incident_phase` | `incident_id, phase` | agent (forward only), commander, admin | `detection_analysis`, `containment`, `eradication`, `recovery`, `post_incident`. |
+| `set_incident_classification` | `incident_id, category, functional_impact, information_impact, recoverability` | agent, commander, admin | Empty string keeps the old value. |
+| `set_brief` | `incident_id, text, known, unknown` | agent (author `scribe`), commander, admin | Upsert. |
+| `record_decision` | `incident_id, text` | admin, commander, legal, exec | A decision of record. |
+| `post_message` | `incident_id, channel, text` | by channel (table above) | Author name and role come from the operator row. |
+| `post_agent_message` | `incident_id, channel, agent, text` | **agent only** | Speak as `sentry`/`triage`/`warden`/`scribe` (kind `agent`). |
+| `add_task` | `incident_id, title, owner_role` | internal (not vendor) | |
+| `set_task_status` | `id, status` | any operator who can see the task | |
+| `set_asset_status` | `id, status, note` | admin, commander, responder, legal, agent* | *an agent cannot set `exfil_confirmed` or `restored`. Empty note keeps the old one. |
 
-Note on `ctx.timestamp`: every event written by one reducer call shares the same `at`. Order the log
-by `id` (monotonic), not by `at` alone.
+Deliberate differences from the written contract: tables are private with same-named gated views; `post_agent_message`,
+`revoke_enrollment`, `record_decision`, `set_incident_classification`, `set_stakeholder_verified` and `stakeholder.title` are additions;
+channel isolation is stricter than "any active operator"; `approve` ignores its `operator` argument.
 
 ## The policy gate
 
-`propose_action` is the only way an agent changes the world, and **the `policy` table decides, not
-the model**. The agent supplies a proposal; the module looks up `policy.mode` for the (trimmed,
-lower-cased) action:
+`propose_action` is the only way an agent changes the world, and **the `policy` table decides, not the model**.
 
 | result | when | proposal.status | other effects |
 |---|---|---|---|
 | executed | mode `auto` | `executed` | effect applied immediately, `action` event |
-| pending | mode `approval` | `pending_approval` | incident becomes `awaiting_approval`, `approval_requested` event; nothing is applied until `approve` |
-| blocked | mode `deny`, **action not in the table** (fail closed), malformed mode, or a `target` that names no real host/vm | `blocked` | `blocked` event, nothing applied |
+| pending | mode `approval` | `pending_approval` | incident `awaiting_approval`, `approval_requested` event, **an open task "Approve quarantine of b14-gpu-07" for the commander** |
+| blocked | mode `deny`, an unknown action (fail closed), or a target that names no real host/vm | `blocked` | `blocked` event, nothing applied |
 
-An `incident_event` is always appended. An empty `target` falls back to the incident's own
-host/vm (host-level actions use the host, the rest use the vm); the resolved target is what gets
-stored.
+Default policy: `isolate_network`, `revoke_credentials`, `cordon_host`, `pause_guest`, `capture_memory`,
+`failover_guests` are `auto`; `quarantine_host` is `approval`; `reimage_host`, `power_off_hall`, `delete_vm` are `deny`.
+Flipping `quarantine_host` to `auto` (a commander or admin, via `set_policy`) makes the same proposal execute with no human.
 
-Default policy (seeded by `reset_demo`):
+## Scope: the data at risk (requirement 4)
 
-| action | mode | reversible | effect when it runs |
-|---|---|---|---|
-| `isolate_network` | auto | yes | event only |
-| `revoke_credentials` | auto | yes | event only |
-| `cordon_host` | auto | yes | host `cordoned` (never downgrades a quarantined host) |
-| `pause_guest` | auto | yes | guest `paused` |
-| `capture_memory` | auto | no | event only |
-| `failover_guests` | auto | no | the running co-resident guests on the target host (everything except `incident.vm`) become `failed_over`, `moved_to` set round-robin across healthy Hall C hosts (fallback: healthy hosts in other halls) |
-| `quarantine_host` | approval | no | host `quarantined` (via `approve`) |
-| `reimage_host` | deny | no | blocked |
-| `power_off_hall` | deny | no | blocked |
-| `delete_vm` | deny | no | blocked |
+Seven `data_asset` rows are seeded unassigned (`incident_id` 0) by `reset_demo`; `open_incident` adopts them. Statuses move
+through the incident, driven by Triage and by the **effects** the policy gate applies, so the board is always true:
 
-Checked end to end: flipping `quarantine_host` to `auto` with `set_policy` makes the very same
-proposal execute with no human; flipping `isolate_network` to `approval` parks it.
+| asset | records | at open | then | end of the demo |
+|---|---|---|---|---|
+| Tenant model weights (vm-7f3a) | 3 | `intact` | Triage: `accessed` | `pause_guest` -> **`evidence_preserved`** |
+| Guest memory image (64 GiB) | 1 | `intact` | | `capture_memory` -> **`evidence_preserved`** |
+| Workload tokens (agent-7f3) | 2 | `intact` | Triage: **`exfil_suspected`** | `revoke_credentials` keeps `exfil_suspected`, note says **revoked** |
+| Management plane credentials (BMC/IPMI) | 2 | `intact` | | `intact`, note: guest network cut, no BMC login |
+| Co-resident tenant volumes (x11) | 11 | `intact` | | `failover_guests`: `intact`, note says **failed over** |
+| Corporate file share FIN-02 | 18,400 | **`locked_ransomware`** | | unchanged: a parallel ransomware detonation on corporate IT that the same war room tracks |
+| Customer billing DB | 412,000 | **`accessed`** | | unchanged, note: investigating. A human decides what it becomes |
 
-## Using it from the agents
+(`records` and names are scenario data. "revoked" is a note, not a status, because the status vocabulary is fixed.)
 
-`agents/src/module_bindings` is generated. Field and accessor names are camelCase on the TS client
-and map to the snake_case wire names: `conn.db.guestVm`, `conn.db.incidentEvent`,
-`row.incidentId`, `row.blastScore`, `row.containedAt`, `conn.reducers.proposeAction({ incidentId, agent, action, target, reason })`.
-u64 values are `bigint`, timestamps are `Timestamp` (`.toDate()`), and no-arg reducers take `{}`.
-Re-run the generate command above after any schema or reducer change.
+## NIST SP 800-61 documentation (requirement 3)
 
-## Verify from the CLI
+| 800-61 element | where it lives, updated live |
+|---|---|
+| Incident id, handler, status | `incident.id/status`, operators in `operator` |
+| Phase of the lifecycle | `incident.nist_phase`: `detection_analysis` (at open), `containment` (Warden starts), `post_incident` (once contained); `eradication`/`recovery` are for humans |
+| Category / attack vector | `incident.category` |
+| Functional impact | `incident.functional_impact` (None/Low/Medium/High + reason) |
+| Information impact | `incident.information_impact` (None/Privacy/Proprietary breach/Integrity loss + reason) |
+| Recoverability | `incident.recoverability` (Regular/Supplemented/Extended/Not recoverable + reason) |
+| Timeline of events and actions | `incident_event` (every change, with actor), `proposal` |
+| Evidence and scope | `data_asset` (`evidence_preserved`, `exfil_*`, `locked_ransomware`) |
+| Communications log | `message` |
+| Decisions of record | `decision` |
+| Tasks and owners | `task` |
+| Stakeholder summary | `brief` (what we know / what we do not know yet) |
+| Post-incident report | `report` |
+
+## Run it
 
 ```bash
-call() { $S call --server local claura "$@"; }
-call open_incident '"Suspected agent compromise"' '"critical"' '"b14-gpu-07"' '"vm-7f3a"'
-call propose_action 1 '"warden"' '"pause_guest"' '"vm-7f3a"' '"freeze suspect"'      # executed
-call propose_action 1 '"warden"' '"quarantine_host"' '"b14-gpu-07"' '"lateral movement"'  # pending_approval
-call propose_action 1 '"warden"' '"reimage_host"' '"b14-gpu-07"' '"wipe"'            # blocked
-call approve 2 '"abd"'     # the quarantine proposal's id on a fresh DB; then incident is contained
-$S sql --server local claura "SELECT id, kind, actor, text FROM incident_event"
+S=/Users/abd/.local/bin/spacetime
+cd /Users/abd/repos/claura-backend/spacetime
+unset NODE_USE_SYSTEM_CA
+(cd spacetimedb && npm install)                  # first time only
+$S build
+$S publish --server local claura -c --yes        # LOCAL; -c wipes (needed after a schema change; wipes operators too)
+$S publish --server maincloud claura --yes       # Maincloud (first publish makes the publisher the Owner admin)
+$S call --server maincloud claura reset_demo     # admin only (the CLI identity is the Owner)
+$S sql  --server maincloud claura "SELECT name, role, active FROM operator"
+$S logs --server maincloud claura -n 50
 ```
 
-Use real ids: auto-increment ids are not reset by `reset_demo`, so after a reset the first incident
-is not `1`. A negative number argument needs `--` first: `call record_finding 1 '"triage"' '"k"' '"t"' -- -1`.
-The SQL endpoint is a subset: no `GROUP BY`, no `IN (...)`.
+`spacetime.json` pins `"server": "local"` as a guard; Maincloud needs the explicit `--server maincloud`.
+For admin chores use `../scripts/access.sh` (codes, list, revoke, add, reset) and `../scripts/appliance.sh` (local appliance).
 
-## Beyond the written contract
+Client bindings: `../bindings/ts` (clean copy for the dashboard) and `../agents/src/module_bindings`
+(`--import-extension ts`). Regenerate both after any schema or reducer change:
 
-Small additions, all in the direction of "policy, not the model, decides":
+```bash
+$S generate --lang typescript -y --module-path /Users/abd/repos/claura-backend/spacetime/spacetimedb --out-dir /Users/abd/repos/claura-backend/bindings/ts
+$S generate --lang typescript --import-extension ts -y --module-path /Users/abd/repos/claura-backend/spacetime/spacetimedb --out-dir /Users/abd/repos/claura-backend/agents/src/module_bindings
+```
 
-- `approve` rejects operator names `sentry`, `triage`, `warden`, `scribe` and empty names, so an agent
-  cannot approve its own proposal through the reducer.
-- `propose_action` normalises the action (trim, lower-case), validates the target for
-  `cordon_host`, `quarantine_host`, `failover_guests` and `pause_guest`, and records a `blocked`
-  proposal instead of silently "succeeding" on a hallucinated host or vm.
-- Unknown incident ids are rejected (the call errors, nothing is written).
-- `init` seeds the database, so a fresh publish is usable before `reset_demo` is called.
+## Tests
+
+`../agents/test/module.live.ts` is a live access-control suite: separate SDK connections (a stranger, commander,
+legal, exec, vendor, responder, agent) enrolled with one-time codes, admin actions through the CLI.
+137 checks on the local appliance cover: a stranger reads 0 rows of 18 views and is refused by 23 reducers; single-use
+and voided codes; admin-chosen names; role checks per reducer; channel isolation; the incident flow through the gate with
+real roles; denied actions that only an admin can unlock; scope effects; approval attribution; live revoke and re-admit; last-admin protection; `reset_demo` keeping
+access control. `--smoke` runs only the stranger checks (read-only, safe on Maincloud; 22 pass there).
+
+```bash
+cd ../agents && npx tsx test/module.live.ts            # full suite on the LOCAL db "claura" (ends with reset_demo)
+TEST_SERVER=maincloud TEST_URI=wss://maincloud.spacetimedb.com TEST_DB=claura npx tsx test/module.live.ts --smoke
+```
 
 ## Open issues
 
-- **No authentication.** Any connected identity can call any reducer, including `approve` and
-  `set_policy`. Fine for a local demo; a real deployment must allow-list operator identities with
-  `ctx.sender` and keep agents to `propose_action` and the reporting reducers.
-- There is no `reject`/`deny` reducer for a pending proposal (not in the contract). A pending proposal
-  can only be approved or left pending.
-- Duplicate proposals are not de-duplicated. If Warden asks for `quarantine_host` twice, the second
-  stays `pending_approval` after the first is approved.
-- `blast_score` has no defined scale or upper bound; Triage and the console must agree on one.
-- Auto-increment ids survive `reset_demo` (SpacetimeDB cannot reset a sequence from a module).
-- Effects are simulated in the database only (network isolation, credential revocation and memory
-  capture are log events); nothing touches real infrastructure.
+- No rate limit or lockout on `enroll`; codes do not expire (void with `revoke_enrollment`).
+- No presence (who is online now), typing, read receipts or message edit/delete (messages are append-only on purpose).
+- Views are re-evaluated per subscriber on every change: fine for tens of clients, not thousands.
+- There is no `reject` for a pending proposal; it can be approved or left pending. Duplicate proposals are not de-duplicated.
+- Auto-increment ids survive `reset_demo`. Effects are simulated in the database only.
+- `blast_score` is 0.0 to 1.0 by convention (the module stores any f64).
+- A republish that changes the schema needs `-c`, which wipes operators and codes; re-issue them afterwards.

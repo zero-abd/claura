@@ -1,0 +1,94 @@
+<template>
+  <!-- 2. "Your phones are down. Ransomware has the file share." The mail window morphs into a phone whose call fails
+       ("No Service"); the FIN-02 file share lands and its folders lock one by one; we leave by zooming through its
+       server tile into the data center. -->
+  <style>
+    /*COMMON*/
+    #{{P}}phone { left: 330px; top: 110px; width: 420px; height: 860px; border-radius: 76px; }
+    #{{P}}island { position: absolute; left: 145px; top: 22px; width: 130px; height: 38px; border-radius: 19px; background: #05060a; }
+    #{{P}}sbar { position: absolute; left: 40px; right: 36px; top: 24px; height: 34px; font: 600 28px/34px var(--font); color: var(--ink); }
+    #{{P}}sbar .clock { position: absolute; left: 0; top: 0; }
+    #{{P}}sbar .net { position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    #{{P}}sbar .bars { display: flex; align-items: flex-end; gap: 3px; height: 20px; }
+    #{{P}}sbar .bars b { width: 5px; border-radius: 2px; background: var(--ink); }
+    #{{P}}nosvc { color: #ff7a45; font-size: 28px; }
+    #{{P}}call { position: absolute; left: 0; right: 0; top: 150px; text-align: center; }
+    #{{P}}call .av { margin: 0 auto; width: 150px; height: 150px; border-radius: 50%; display: grid; place-items: center; font: 600 52px/1 var(--font); color: #fff; background: linear-gradient(180deg, #5b6dff, #3b4bd8); }
+    #{{P}}call .nm { margin-top: 34px; font: 600 42px/1.1 var(--font); letter-spacing: -0.022em; }
+    #{{P}}call .st { position: relative; height: 40px; margin-top: 14px; font: 500 30px/40px var(--font); }
+    #{{P}}call .st span { position: absolute; left: 0; right: 0; top: 0; }
+    #{{P}}end { position: absolute; left: 150px; top: 640px; width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+      background: linear-gradient(180deg, #ff6a5a, #e8402f); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 16px 34px -10px rgba(232, 64, 47, 0.7); }
+    #{{P}}share { left: 850px; top: 150px; width: 840px; height: 700px; }
+    #{{P}}share .hd { position: absolute; left: 28px; top: 22px; right: 28px; height: 72px; display: flex; align-items: center; gap: 20px; }
+    #{{P}}srv { position: relative; width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; color: #fff; }
+    #{{P}}share .hn { font: 600 38px/1 var(--font); letter-spacing: -0.024em; }
+    #{{P}}share .hs { margin-top: 8px; font: 500 28px/1 var(--font); color: var(--ink-3); }
+    #{{P}}grid { position: absolute; left: 28px; top: 124px; display: grid; grid-template-columns: repeat(3, 248px); gap: 20px; }
+    #{{P}}grid .tile { position: relative; height: 196px; border-radius: 24px; padding: 26px 24px 0; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.08); color: var(--ink-2); }
+    #{{P}}grid .tile .lk { position: absolute; inset: 0; border-radius: 24px; opacity: 0; background: rgba(var(--accent-rgb), 0.16); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.5); }
+    #{{P}}grid .tile .ic { position: relative; height: 62px; }
+    #{{P}}grid .tile .ic > span { position: absolute; left: 0; top: 0; display: block; width: 58px; height: 58px; }
+    #{{P}}grid .tile .ic .lock { opacity: 0; color: #ff7a45; }
+    #{{P}}grid .tile .tn { position: relative; margin-top: 22px; font: 600 30px/1 var(--font); letter-spacing: -0.016em; color: var(--ink); white-space: nowrap; }
+    #{{P}}grid .tile .tn em { font-style: normal; color: #ff7a45; opacity: 0; }
+    #{{P}}grid .tile .tm { position: relative; margin-top: 12px; font: 500 22px/1 var(--font); color: var(--ink-3); }
+    #{{P}}banner { left: 878px; top: 772px; width: 784px; height: 58px; font-size: 28px; justify-content: center; }
+  </style>
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle"><div id="{{P}}cam" class="cam">
+        <div id="{{P}}phone" class="glass thick">
+          <div id="{{P}}island"></div>
+          <div id="{{P}}sbar"><span class="clock">2:14</span>
+            <span id="{{P}}net1" class="net">5G <span class="bars"><b style="height:6px"></b><b style="height:10px"></b><b style="height:14px"></b><b style="height:19px"></b></span></span>
+            <span id="{{P}}net2" class="net" style="opacity:0"><span id="{{P}}nosvc">No Service</span></span>
+          </div>
+          <div id="{{P}}call">
+            <div class="av">IB</div>
+            <div class="nm">Incident bridge</div>
+            <div class="st"><span id="{{P}}st1" style="color: var(--ink-3)">calling…</span><span id="{{P}}st2" style="color: #ff7a45; opacity: 0">Call failed</span></div>
+          </div>
+          <div id="{{P}}end"><!--KIT:icon name="phone" size=50 stroke=2--></div>
+        </div>
+        <div id="{{P}}share" class="win glass thick">
+          <div class="hd"><div id="{{P}}srv" class="glass clear"><!--KIT:icon name="server" size=40 stroke=1.8--></div><div><div class="hn">FIN-02</div><div class="hs">File share</div></div></div>
+          <div id="{{P}}grid">
+{{ ['Finance', 'Legal', 'Payroll', 'Contracts', 'Board', 'Audit'].map((n, i) => `            <div id="${P}t${i}" class="tile"><i class="lk"></i><div class="ic"><span class="fo">${'<!--ICON-->'}</span></div><div class="tn">${n}<em>.locked</em></div><div class="tm" data-layout-ignore>${[412, 233, 96, 588, 41, 170][i]} files</div></div>`).join('\n').replace(/<span class="fo"><!--ICON--><\/span>/g, '<span class="fo"><svg class="ico" width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 7.2a2.2 2.2 0 0 1 2.2-2.2h3.9l2 2.2h6.5a2.2 2.2 0 0 1 2.2 2.2v7.8a2.2 2.2 0 0 1-2.2 2.2H5.8a2.2 2.2 0 0 1-2.2-2.2z"/></svg></span><span class="lock"><svg class="ico" width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5.2" y="10.6" width="13.6" height="9.4" rx="3"/><path d="M8.6 10.6V8.2a3.4 3.4 0 0 1 6.8 0v2.4"/></svg></span>') }}
+          </div>
+        </div>
+        <div id="{{P}}banner" class="chip hot glass pill"><!--KIT:icon name="lock" size=32 stroke=1.9-->Encrypted by ransomware</div>
+      </div></div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S, { morph: { to: [330, 110, 420, 860, 76], target: P + 'phone' } });
+      // the call fails on "down"
+      const down = {{at('down')}};
+      tl.to(P + 'st1', { opacity: 0, filter: 'blur(6px)', duration: 0.14, ease: 'power2.in' }, down - 0.06);
+      tl.fromTo(P + 'st2', { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.18, ease: 'power2.out' }, down + 0.06);
+      tl.to(P + 'net1', { opacity: 0, duration: 0.12, ease: 'power2.in' }, down - 0.04);
+      tl.fromTo(P + 'net2', { opacity: 0 }, { opacity: 1, duration: 0.16, ease: 'power2.out' }, down + 0.08);
+      tl.fromTo(P + 'end', { scale: 1 }, { scale: 0.9, duration: 0.08, ease: 'power2.out' }, down);
+      tl.to(P + 'end', { scale: 1, duration: 0.24, ease: 'power2.out' }, down + 0.09);
+      // the file share lands, then ransomware locks it folder by folder
+      const rw = {{at('Ransomware')}};
+      K.land(tl, P + 'share', rw - 0.4, { from: 0.94, blur: 12, dur: 0.6 });
+      for (let i = 0; i < 6; i++) {
+        const t = rw + 0.22 + i * 0.12, s = P + 't' + i;
+        tl.fromTo(s + ' .lk', { opacity: 0 }, { opacity: 1, duration: 0.18, ease: 'power2.out' }, t);
+        tl.to(s + ' .fo', { opacity: 0, duration: 0.12, ease: 'power2.in' }, t);
+        tl.fromTo(s + ' .lock', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)' }, t + 0.04);
+        tl.fromTo(s + ' .tn em', { opacity: 0 }, { opacity: 1, duration: 0.16, ease: 'power1.out' }, t + 0.08);
+      }
+      K.land(tl, P + 'banner', {{at('has the file share')}} - 0.05, { from: 0.9, blur: 10, dur: 0.5 });
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

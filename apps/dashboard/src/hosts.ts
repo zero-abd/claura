@@ -3,9 +3,8 @@
 // A host id looks like `b14-gpu-07` = hall B, rack 14, slot 7. The facility map, the incident hero,
 // agent lines, reports and War Room messages all route through here, so a click anywhere opens the
 // same Host sheet (window.bulkhead.openHost(id)).
-import { INCIDENT } from "./script";
 import { hash } from "./util";
-import { S, phase } from "./engine";
+import { S, info, phase } from "./engine";
 
 export const HALL_LETTERS = "abcd";
 const HOST_RE = /\b([a-d]\d{2}-gpu-\d{2})\b/g;
@@ -51,7 +50,7 @@ export interface HostInfo {
 export function hostInfo(id: string): HostInfo | null {
   const p = parseHost(id);
   if (!p) return null;
-  const incident = id === INCIDENT.host;
+  const incident = id === info().host;
   let guests = guestsFor(p.hall, p.rack, p.slot);
   let load = 18 + Math.floor(hash(p.hall, p.rack, p.slot, 3) * 50);
   const temp = 57 + Math.floor(hash(p.hall, p.rack, p.slot, 5) * 9);

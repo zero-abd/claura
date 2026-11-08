@@ -355,22 +355,33 @@ export class Page {
     const from = { ...this.mouse }
     const dist = Math.hypot(x - from.x, y - from.y)
     ms = ms ?? Math.min(900, Math.max(260, 180 + dist * 0.55))
-    const steps = Math.max(2, Math.round(ms / 16))
     const nx = -(y - from.y) / (dist || 1), ny = (x - from.x) / (dist || 1)
     const bend = dist * curve * (this.rand() < 0.5 ? -1 : 1)
     const cx = (from.x + x) / 2 + nx * bend, cy = (from.y + y) / 2 + ny * bend
+    // Time-based: the position at each tick comes from the wall clock, not from a step counter. While Chrome is busy (a
+    // screencast at 2x, WebGL) every dispatch takes longer than a frame; counting steps then stretched a 900 ms move to
+    // 1.7 s. Now the move always lasts `ms`; a slow tick just skips ahead along the same path.
+    // The events go out on a fixed ~16 ms clock and are NOT awaited one by one: with Chrome under load each reply took
+    // 25-40 ms, which capped a mostly static page (policy, scope) at 25 unique frames per second. Chrome handles the
+    // events in order; the replies are collected at the end so errors still surface.
     const t0 = Date.now()
-    for (let i = 1; i <= steps; i++) {
-      const lin = i / steps
+    const pending = []
+    let failed = null
+    for (;;) {
+      const tick = Date.now()
+      const lin = Math.min(1, (tick - t0) / ms)
       const t = lin < 0.5 ? 4 * lin * lin * lin : 1 - Math.pow(-2 * lin + 2, 3) / 2
       const px = (1 - t) * (1 - t) * from.x + 2 * (1 - t) * t * cx + t * t * x
       const py = (1 - t) * (1 - t) * from.y + 2 * (1 - t) * t * cy + t * t * y
-      await this.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: px, y: py, modifiers })
+      pending.push(this.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: px, y: py, modifiers }).catch((e) => { failed ??= e }))
       this.mouse = { x: px, y: py }
       this.cursorPath.push([wall(), +px.toFixed(1), +py.toFixed(1)])
-      const wait = t0 + (ms * i) / steps - Date.now()
+      if (lin >= 1) break
+      const wait = 16 - (Date.now() - tick)
       if (wait > 0) await sleep(wait)
     }
+    await Promise.all(pending)
+    if (failed) throw failed
   }
 
   async moveTo(target, opts = {}) {
@@ -464,12 +475,17 @@ export class Page {
   /** Types like a person: per-character key events at a varying (seeded) pace. */
   async type(text, { cps = 14, jitter = 0.45 } = {}) {
     this.log('type', { text })
+    // paced on a schedule (not "send, then sleep"): the key round trips under load no longer slow the typing down
+    let next = Date.now()
     for (const ch of text) {
       if (ch === '\n') await this.key('Enter')
       else if (ch.charCodeAt(0) > 126) await this.insert(ch)
       else await this.key(ch === ' ' ? ' ' : ch)
       const base = 1000 / cps
-      await sleep(base * (1 - jitter / 2 + this.rand() * jitter) + (ch === ' ' ? 25 : 0))
+      next += base * (1 - jitter / 2 + this.rand() * jitter) + (ch === ' ' ? 25 : 0)
+      const wait = next - Date.now()
+      if (wait > 0) await sleep(wait)
+      else next = Date.now() // fell behind: no catch-up burst
     }
   }
 

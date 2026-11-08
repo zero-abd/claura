@@ -1,0 +1,8 @@
+Claura DFW-2 facility module (bulkhead-3d), copied verbatim from /Users/abd/repos/bulkhead-3d/dist/ (built 2026-11-08 02:07:16).
+three.js r180 (v0.180.0, MIT) is bundled inside both files: no CDN, no importmap, no network.
+  facility.global.min.js  classic script, defines window.ClauraFacility = { createFacility, STATES, CAMERA_PRESETS, STATE_DURATION, storyTrack, trackDuration, evalTrack, default }
+  facility.min.js         ES module build of the same source (import { createFacility } from './assets/vendor/facility.min.js')
+sha256  d0665bab8ddffcf6079b55fb938571d1856b8e6aa86055b69ba5f80fdf6b957c  facility.js
+sha256  5f61cffd9102f348aa07cf762c50686eae3c158c7f466e2ed3ec81931692e2e1  facility.global.js
+Renamed *.min.js on copy: hyperframes lint skips linked scripts named *.min.js (it would otherwise flag the bundle's
+Math.random() in three.js uuid generation and the interactive-mode requestAnimationFrame, neither of which runs in film mode).

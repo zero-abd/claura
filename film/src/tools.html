@@ -1,0 +1,77 @@
+<template>
+  <!-- 4. "Six warnings in six tools. No playbook for this attack. Nobody has the whole picture."
+       The three signal chips from the 3D shot carry across into three tool windows; three more tools land; a playbook
+       search is stamped NO MATCH; then the fragments drift apart and collapse into orange points at the centre, where
+       the next scene's orb lands on the drop. Params: sigs [{x, y}] (where the chips were), wins [{x, y, w, tool, k, v, carry?}] -->
+  <style>
+    /*COMMON*/
+    #{{P}}stage .grp { position: absolute; left: 0; top: 0; }
+    #{{P}}stage .wglass { position: absolute; left: 0; top: 0; height: 176px; border-radius: 28px; }
+    #{{P}}stage .wglass .ember { position: absolute; inset: 0; border-radius: inherit; background: #ff5a1f; opacity: 0; }
+    #{{P}}stage .tname { position: absolute; left: 92px; top: 0; height: 56px; display: flex; align-items: center; font: 600 28px/1 var(--font); letter-spacing: -0.012em; color: var(--ink-2); white-space: nowrap; }
+    #{{P}}stage .lights3 { position: absolute; left: 24px; top: 22px; display: flex; gap: 8px; }
+    #{{P}}stage .lights3 i { width: 13px; height: 13px; border-radius: 50%; background: rgba(255, 255, 255, 0.24); }
+    #{{P}}card { left: 680px; top: 300px; width: 560px; height: 286px; padding: 34px 36px 0; }
+    #{{P}}card .ct { font: 600 36px/1 var(--font); letter-spacing: -0.024em; }
+    #{{P}}card .q { position: relative; margin-top: 24px; height: 70px; border-radius: 22px; display: flex; align-items: center; gap: 14px; padding: 0 22px; font: 500 29px/1 var(--font); color: var(--ink); background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.12); }
+    #{{P}}card .r { margin-top: 26px; font: 500 28px/1.2 var(--font); color: var(--ink-3); }
+    #{{P}}stamp { left: 742px; top: 476px; }
+  </style>
+  {{ (() => { globalThis.__tw = p.wins.map((w) => ({ ...w, h: 176, cx: w.x + w.w / 2, cy: w.y + 88 })); return ''; })() }}
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle"><div id="{{P}}cam" class="cam">
+        <div id="{{P}}card" class="glass thick">
+          <div class="ct">Playbooks</div>
+          <div class="q"><!--KIT:icon name="scope" size=32 stroke=1.8-->guest-to-host escape</div>
+          <div id="{{P}}res" class="r">No playbook matches this attack</div>
+        </div>
+        <div id="{{P}}stamp" class="stamp" data-layout-allow-overlap data-layout-allow-occlusion>No match</div>
+{{ __tw.map((w, i) => `        <div id="${P}g${i}" class="grp" style="left:${w.x}px; top:${w.y}px; width:${w.w}px; height:176px">
+          <div id="${P}w${i}" class="wglass glass" style="width:${w.w}px"><i id="${P}e${i}" class="ember"></i><div class="lights3"><i></i><i></i><i></i></div><div class="tname">${esc(w.tool)}</div></div>
+          <div id="${P}s${i}" class="sig glass" style="left:22px; top:76px"><i></i><span class="k">${esc(w.k)}</span><span class="v">${esc(w.v)}</span></div>
+        </div>`).join('\n') }}
+      </div></div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}}, p = {{json(p)}}, W = {{json(__tw)}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S);
+      const tools = {{at('six tools')}}, nob = {{at('No playbook')}}, pb = {{at('playbook')}}, nobody = {{at('Nobody')}};
+      const collapse = {{cue('collapse')}}, cut = S.cut;
+      W.forEach((w, i) => {
+        const g = P + 'g' + i, s = P + 's' + i;
+        if (w.carry !== undefined) {
+          // the chip that landed on the 3D shot flies into its tool; the window builds around it
+          const c = p.sigs[w.carry];
+          tl.fromTo(s, { x: c.x - (w.x + 22), y: c.y - (w.y + 76) }, { x: 0, y: 0, duration: 0.62, ease: 'power3.inOut' }, 0.02);
+          K.glassIn(tl, P + 'w' + i, 0.2 + i * 0.05, { from: 0.94, dur: 0.55 });
+        } else {
+          K.glassIn(tl, P + 'w' + i, tools - 0.12 + (i - 3) * 0.09, { from: 0.92, dur: 0.55 });
+          K.land(tl, s, tools - 0.02 + (i - 3) * 0.09, { from: 0.9, blur: 10, dur: 0.5 });
+        }
+        // drift apart from the centre on "Nobody"
+        const dx = w.cx - 960, dy = w.cy - 480, n = Math.hypot(dx, dy) || 1;
+        const ox = (dx / n) * 150, oy = (dy / n) * 110;
+        tl.fromTo(g, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: ox, y: oy, scale: 0.93, opacity: 0.62, duration: 1.9, ease: 'power2.out', immediateRender: false }, nobody + i * 0.03);
+        tl.to(s, { opacity: 0.55, duration: 1.2, ease: 'power1.out' }, nobody + 0.2);
+        // collapse: every fragment falls into one orange point at the centre (the next scene's orb), accelerating
+        tl.fromTo(g, { x: ox, y: oy, scale: 0.93, opacity: 0.62 }, { x: 960 - w.cx, y: 540 - w.cy, scale: 0.035, opacity: 1, duration: cut - 0.02 - collapse, ease: 'power3.in', immediateRender: false }, collapse);
+        tl.fromTo(P + 'e' + i, { opacity: 0 }, { opacity: 1, duration: 0.28, ease: 'power2.in' }, collapse + 0.12);
+        tl.to(s, { opacity: 0, duration: 0.18, ease: 'power2.in' }, collapse);
+      });
+      // the playbook search: no match
+      K.glassIn(tl, P + 'card', nob - 0.12, { from: 0.94, dur: 0.55 });
+      K.blurLine(tl, P + 'res', nob + 0.28);
+      K.stamp(tl, P + 'stamp', pb + 0.12, { rot: -7, shake: P + 'card' });
+      K.out(tl, P + 'card', nobody - 0.05, { dur: 0.3 });
+      K.out(tl, P + 'stamp', nobody - 0.05, { dur: 0.3 });
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,29 @@
+{
+  "name": "@claura/solana-anchor",
+  "version": "0.1.0",
+  "description": "Claura evidence anchoring: write the SHA-256 of the incident ledger or evidence manifest to Solana devnet in a Memo transaction, then re-read the chain to prove nothing was edited afterwards. Devnet only.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "main": "server.mjs",
+  "exports": {
+    ".": "./server.mjs",
+    "./server": "./server.mjs",
+    "./ui": "./ui.js"
+  },
+  "scripts": {
+    "dev": "node dev.mjs",
+    "start": "node dev.mjs",
+    "smoke": "node smoke.mjs",
+    "fund": "node fund.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@solana/web3.js": "1.98.4"
+  },
+  "devDependencies": {
+    "express": "^5.1.0"
+  }
+}

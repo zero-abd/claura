@@ -34,29 +34,52 @@ import {
 } from "spacetimedb";
 
 // Import all reducer arg schemas
+import AddOperatorReducer from "./add_operator_reducer";
+import AddTaskReducer from "./add_task_reducer";
 import ApproveReducer from "./approve_reducer";
+import EnrollReducer from "./enroll_reducer";
 import FileReportReducer from "./file_report_reducer";
 import IngestSignalReducer from "./ingest_signal_reducer";
+import IssueEnrollmentReducer from "./issue_enrollment_reducer";
 import OpenIncidentReducer from "./open_incident_reducer";
+import PostAgentMessageReducer from "./post_agent_message_reducer";
+import PostMessageReducer from "./post_message_reducer";
 import ProposeActionReducer from "./propose_action_reducer";
+import RecordDecisionReducer from "./record_decision_reducer";
 import RecordFindingReducer from "./record_finding_reducer";
 import ResetDemoReducer from "./reset_demo_reducer";
+import RevokeEnrollmentReducer from "./revoke_enrollment_reducer";
+import RevokeOperatorReducer from "./revoke_operator_reducer";
 import SetAgentStateReducer from "./set_agent_state_reducer";
+import SetAssetStatusReducer from "./set_asset_status_reducer";
+import SetBriefReducer from "./set_brief_reducer";
+import SetIncidentClassificationReducer from "./set_incident_classification_reducer";
+import SetIncidentPhaseReducer from "./set_incident_phase_reducer";
 import SetPolicyReducer from "./set_policy_reducer";
+import SetStakeholderVerifiedReducer from "./set_stakeholder_verified_reducer";
+import SetTaskStatusReducer from "./set_task_status_reducer";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
 import AgentStateRow from "./agent_state_table";
+import BriefRow from "./brief_table";
+import DataAssetRow from "./data_asset_table";
+import DecisionRow from "./decision_table";
+import EnrollmentRow from "./enrollment_table";
 import FindingRow from "./finding_table";
 import GuestVmRow from "./guest_vm_table";
 import HostRow from "./host_table";
 import IncidentRow from "./incident_table";
 import IncidentEventRow from "./incident_event_table";
+import MessageRow from "./message_table";
+import OperatorRow from "./operator_table";
 import PolicyRow from "./policy_table";
 import ProposalRow from "./proposal_table";
 import ReportRow from "./report_table";
 import SignalRow from "./signal_table";
+import StakeholderRow from "./stakeholder_table";
+import TaskRow from "./task_table";
 
 /** Type-only namespace exports for generated type groups. */
 
@@ -65,129 +88,157 @@ const tablesSchema = __schema({
   agentState: __table({
     name: 'agent_state',
     indexes: [
-      { accessor: 'agent', name: 'agent_state_agent_idx_btree', algorithm: 'btree', columns: [
-        'agent',
-      ] },
     ],
     constraints: [
-      { name: 'agent_state_agent_key', constraint: 'unique', columns: ['agent'] },
     ],
   }, AgentStateRow),
+  brief: __table({
+    name: 'brief',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, BriefRow),
+  dataAsset: __table({
+    name: 'data_asset',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, DataAssetRow),
+  decision: __table({
+    name: 'decision',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, DecisionRow),
+  enrollment: __table({
+    name: 'enrollment',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, EnrollmentRow),
   finding: __table({
     name: 'finding',
     indexes: [
-      { accessor: 'id', name: 'finding_id_idx_btree', algorithm: 'btree', columns: [
-        'id',
-      ] },
     ],
     constraints: [
-      { name: 'finding_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, FindingRow),
   guestVm: __table({
     name: 'guest_vm',
     indexes: [
-      { accessor: 'host', name: 'guest_vm_host_idx_btree', algorithm: 'btree', columns: [
-        'host',
-      ] },
-      { accessor: 'vm', name: 'guest_vm_vm_idx_btree', algorithm: 'btree', columns: [
-        'vm',
-      ] },
     ],
     constraints: [
-      { name: 'guest_vm_vm_key', constraint: 'unique', columns: ['vm'] },
     ],
   }, GuestVmRow),
   host: __table({
     name: 'host',
     indexes: [
-      { accessor: 'host', name: 'host_host_idx_btree', algorithm: 'btree', columns: [
-        'host',
-      ] },
     ],
     constraints: [
-      { name: 'host_host_key', constraint: 'unique', columns: ['host'] },
     ],
   }, HostRow),
   incident: __table({
     name: 'incident',
     indexes: [
-      { accessor: 'id', name: 'incident_id_idx_btree', algorithm: 'btree', columns: [
-        'id',
-      ] },
     ],
     constraints: [
-      { name: 'incident_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, IncidentRow),
   incidentEvent: __table({
     name: 'incident_event',
     indexes: [
-      { accessor: 'id', name: 'incident_event_id_idx_btree', algorithm: 'btree', columns: [
-        'id',
-      ] },
     ],
     constraints: [
-      { name: 'incident_event_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, IncidentEventRow),
+  message: __table({
+    name: 'message',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, MessageRow),
+  operator: __table({
+    name: 'operator',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, OperatorRow),
   policy: __table({
     name: 'policy',
     indexes: [
-      { accessor: 'action', name: 'policy_action_idx_btree', algorithm: 'btree', columns: [
-        'action',
-      ] },
     ],
     constraints: [
-      { name: 'policy_action_key', constraint: 'unique', columns: ['action'] },
     ],
   }, PolicyRow),
   proposal: __table({
     name: 'proposal',
     indexes: [
-      { accessor: 'id', name: 'proposal_id_idx_btree', algorithm: 'btree', columns: [
-        'id',
-      ] },
     ],
     constraints: [
-      { name: 'proposal_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, ProposalRow),
   report: __table({
     name: 'report',
     indexes: [
-      { accessor: 'incident_id', name: 'report_incident_id_idx_btree', algorithm: 'btree', columns: [
-        'incidentId',
-      ] },
     ],
     constraints: [
-      { name: 'report_incident_id_key', constraint: 'unique', columns: ['incidentId'] },
     ],
   }, ReportRow),
   signal: __table({
     name: 'signal',
     indexes: [
-      { accessor: 'id', name: 'signal_id_idx_btree', algorithm: 'btree', columns: [
-        'id',
-      ] },
     ],
     constraints: [
-      { name: 'signal_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, SignalRow),
+  stakeholder: __table({
+    name: 'stakeholder',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, StakeholderRow),
+  task: __table({
+    name: 'task',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, TaskRow),
 });
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
 const reducersSchema = __reducers(
+  __reducerSchema("add_operator", AddOperatorReducer),
+  __reducerSchema("add_task", AddTaskReducer),
   __reducerSchema("approve", ApproveReducer),
+  __reducerSchema("enroll", EnrollReducer),
   __reducerSchema("file_report", FileReportReducer),
   __reducerSchema("ingest_signal", IngestSignalReducer),
+  __reducerSchema("issue_enrollment", IssueEnrollmentReducer),
   __reducerSchema("open_incident", OpenIncidentReducer),
+  __reducerSchema("post_agent_message", PostAgentMessageReducer),
+  __reducerSchema("post_message", PostMessageReducer),
   __reducerSchema("propose_action", ProposeActionReducer),
+  __reducerSchema("record_decision", RecordDecisionReducer),
   __reducerSchema("record_finding", RecordFindingReducer),
   __reducerSchema("reset_demo", ResetDemoReducer),
+  __reducerSchema("revoke_enrollment", RevokeEnrollmentReducer),
+  __reducerSchema("revoke_operator", RevokeOperatorReducer),
   __reducerSchema("set_agent_state", SetAgentStateReducer),
+  __reducerSchema("set_asset_status", SetAssetStatusReducer),
+  __reducerSchema("set_brief", SetBriefReducer),
+  __reducerSchema("set_incident_classification", SetIncidentClassificationReducer),
+  __reducerSchema("set_incident_phase", SetIncidentPhaseReducer),
   __reducerSchema("set_policy", SetPolicyReducer),
+  __reducerSchema("set_stakeholder_verified", SetStakeholderVerifiedReducer),
+  __reducerSchema("set_task_status", SetTaskStatusReducer),
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */

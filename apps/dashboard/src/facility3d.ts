@@ -1,6 +1,6 @@
 // Optional 3D facility stage.
 //
-// `#facility3d` (the framed stage, which holds the 2D map as its fallback) is the mount point for a
+// `#facility3d` (the glass-framed stage, which holds the 2D map as its fallback) is the mount point for a
 // separately built module at /bulkhead-3d/facility.js exposing
 //   createFacility(container, { look, background: 'transparent', onPick(hostId) }) -> { setState(s), fly(cam) }
 // `onPick` is how a click on a host in the 3D scene opens the Host sheet (same hook the 2D map uses).
@@ -17,7 +17,9 @@ import type { Phase } from "./engine";
 import { STEPS } from "./script";
 
 export type F3DState = "nominal" | "breach" | "containing" | "approval" | "contained";
-export type F3DCam = "facility" | "hallB" | "rack14" | "orbit";
+export type F3DPose = { preset: "facility" | "hallB" | "rack14" | "orbit"; w?: number; h?: number; az?: number; el?: number; target?: [number, number, number] };
+export type F3DCam = "facility" | "hallB" | "rack14" | "orbit" | F3DPose;
+const camKey = (c: F3DCam) => (typeof c === "string" ? c : JSON.stringify(c));
 interface Facility {
   setState(s: F3DState): void;
   fly(c: F3DCam): void;
@@ -40,7 +42,8 @@ const CONTROLS = false;
 let facility: Facility | null = null;
 let mounted = false;
 let sentState: F3DState | null = null;
-let sentCam: F3DCam | null = null;
+let sentCam: string | null = null;
+let manualBase: string | null = null; // a hand-flown camera (flyFacility) holds until the phase's own camera changes
 let visible = true; // is a stage slot on screen? (the module keeps rendering until paused)
 let want: { state: F3DState; cam: F3DCam } = { state: "nominal", cam: "facility" };
 let onPick: ((hostId: string) => void) | null = null;
@@ -50,18 +53,29 @@ export function setPickHandler(fn: (hostId: string) => void) {
   onPick = fn;
 }
 
-export function facilityTarget(ph: Phase, r: number): { state: F3DState; cam: F3DCam } {
+// The Incident hero is a small window (about 570 x 280 CSS px). The module's labels keep a constant screen size, so the
+// stock hallB / rack14 frames put "Hall C", "C05", "C12" and "b14-gpu-07" / "vm-7f3a" on top of each other there.
+// These poses keep the stock camera angle but frame the rack at a height where the hall and host labels have faded
+// out (the module fades them by view height), leaving the B14 state tag and the failover destinations C05 / C12.
+const HERO_BREACH: F3DPose = { preset: "rack14", w: 9, h: 6.9 };
+const HERO_APPROVAL: F3DPose = { preset: "rack14", w: 8.4, h: 6.9 };
+// Calm and contained: the whole campus, a little tighter than the stock frame so the labels have room (and the
+// "DFW-2 · 2,048 hosts" title, which the module only draws when zoomed far out, stays off).
+const HERO_FACILITY: F3DPose = { preset: "facility", w: 15, h: 11 };
+
+/** compact = the Incident hero (small). The Overview stage is large and uses the stock presets. */
+export function facilityTarget(ph: Phase, r: number, compact = false): { state: F3DState; cam: F3DCam } {
   switch (ph) {
     case "nominal":
-      return { state: "nominal", cam: "facility" };
+      return { state: "nominal", cam: compact ? HERO_FACILITY : "facility" };
     case "breach":
-      return { state: r < STEPS[0].start ? "breach" : "containing", cam: "hallB" };
+      return { state: r < STEPS[0].start ? "breach" : "containing", cam: compact ? HERO_BREACH : "hallB" };
     case "approval":
-      return { state: "approval", cam: "rack14" };
+      return { state: "approval", cam: compact ? HERO_APPROVAL : "rack14" };
     case "isolating":
-      return { state: "containing", cam: "rack14" };
+      return { state: "containing", cam: compact ? HERO_APPROVAL : "rack14" };
     default:
-      return { state: "contained", cam: "facility" };
+      return { state: "contained", cam: compact ? HERO_FACILITY : "facility" };
   }
 }
 
@@ -136,9 +150,11 @@ function applyFacility3D() {
       facility.setState(want.state);
       sentState = want.state;
     }
-    if (sentCam !== want.cam) {
+    const k = camKey(want.cam);
+    if (manualBase !== null && manualBase !== k) manualBase = null; // the phase moved on: back to automatic cameras
+    if (manualBase === null && sentCam !== k) {
       facility.fly(want.cam);
-      sentCam = want.cam;
+      sentCam = k;
     }
     if (!visible) facility.pause?.(); // setState/fly restart the loop; keep it asleep while hidden
   } catch {
@@ -147,8 +163,8 @@ function applyFacility3D() {
 }
 
 /** Called every frame from the render loop. Cheap: only talks to the module on change. */
-export function syncFacility3D(ph: Phase, r: number) {
-  want = facilityTarget(ph, r);
+export function syncFacility3D(ph: Phase, r: number, compact = false) {
+  want = facilityTarget(ph, r, compact);
   applyFacility3D();
 }
 
@@ -161,4 +177,17 @@ export function nudgeFacilityResize() {
     /* ignore */
   }
   window.dispatchEvent(new Event("resize"));
+}
+
+/** Debug and recording aid: fly the 3D camera by hand (a preset name or a pose). It holds until the phase changes. */
+export function flyFacility(cam: F3DCam): boolean {
+  if (!facility) return false;
+  try {
+    facility.fly(cam);
+    sentCam = camKey(cam);
+    manualBase = camKey(want.cam);
+    return true;
+  } catch {
+    return false;
+  }
 }

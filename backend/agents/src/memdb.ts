@@ -5,9 +5,24 @@
 
 import { eventsFor } from './dbCommon.ts';
 import type {
-  AgentStateRow, ClauraDb, EventRow, FindingRow, GuestRow, HostRow, IncidentRow,
-  PolicyRow, ProposalRow, ReportRow, SignalRow,
+  AgentStateRow, AssetRow, BriefRow, ClauraDb, DecisionRow, EventRow, FindingRow, GuestRow, HostRow, IncidentRow,
+  MessageRow, PolicyRow, ProposalRow, ReportRow, SignalRow, TaskRow, WhoAmI,
 } from './types.ts';
+
+const PHASES = ['detection_analysis', 'containment', 'eradication', 'recovery', 'post_incident'];
+const CHANNELS = ['#command', '#legal', '#exec', '#comms-pr', '#vendors'];
+const HUMAN_ONLY = ['exfil_confirmed', 'restored'];
+
+/** [name, system, classification, records, status, note]: the scope inventory, same as the module's seed. */
+const ASSET_SEED: Array<[string, string, string, bigint, string, string]> = [
+  ['Tenant model weights', 'vm-7f3a (tenant agent-7f3)', 'restricted', 3n, 'intact', 'Fine-tuned model checkpoint (3 shards) held by the compromised guest.'],
+  ['Guest memory image', 'vm-7f3a, 64 GiB', 'restricted', 1n, 'intact', 'Live guest memory. Not captured yet.'],
+  ['Workload tokens', 'agent-7f3, 2 tokens', 'restricted', 2n, 'intact', 'Two workload tokens issued to agent-7f3.'],
+  ['Management plane credentials', 'BMC / IPMI 10.0.0.1:623 (mgmt VLAN 40)', 'restricted', 2n, 'intact', 'BMC admin and IPMI user. Not yet probed.'],
+  ['Co-resident tenant volumes', 'b14-gpu-07 (11 co-resident tenants)', 'confidential', 11n, 'intact', '11 tenant volumes share the suspect host.'],
+  ['Corporate file share FIN-02', 'corporate IT, finance file server', 'confidential', 18400n, 'locked_ransomware', 'Parallel ransomware detonation on corporate IT, tracked in this war room.'],
+  ['Customer billing DB', 'corporate IT, billing replica', 'restricted', 412000n, 'accessed', 'Investigating: unusual reads on the billing replica. No exfiltration confirmed.'],
+];
 
 const POLICIES: PolicyRow[] = [
   { action: 'isolate_network', mode: 'auto', reversible: true, note: 'Detach vNIC / drop flows.' },
@@ -51,10 +66,16 @@ export class MemClauraDb implements ClauraDb {
   private proposal = new Map<bigint, ProposalRow>();
   private event: EventRow[] = [];
   private report = new Map<bigint, ReportRow>();
-  private seq = { signal: 1n, incident: 1n, finding: 1n, proposal: 1n, event: 1n };
+  private asset = new Map<bigint, AssetRow>();
+  private task: TaskRow[] = [];
+  private decision: DecisionRow[] = [];
+  private message: MessageRow[] = [];
+  private brief = new Map<bigint, BriefRow>();
+  private seq = { signal: 1n, incident: 1n, finding: 1n, proposal: 1n, event: 1n, asset: 1n, task: 1n, decision: 1n, message: 1n };
 
   async connect() {}
   close() {}
+  who(): WhoAmI | null { return null; }
 
   private now() { return Date.now(); }
   private log(incidentId: bigint, kind: string, actor: string, text: string) {
@@ -65,7 +86,14 @@ export class MemClauraDb implements ClauraDb {
     this.host.clear(); this.guest.clear(); this.signal = []; this.incident.clear();
     this.agentState.clear(); this.finding = []; this.policy.clear(); this.proposal.clear();
     this.event = []; this.report.clear();
-    this.seq = { signal: 1n, incident: 1n, finding: 1n, proposal: 1n, event: 1n };
+    this.asset.clear(); this.task = []; this.decision = []; this.message = []; this.brief.clear();
+    this.seq = { signal: 1n, incident: 1n, finding: 1n, proposal: 1n, event: 1n, asset: 1n, task: 1n, decision: 1n, message: 1n };
+    for (const [name, system, classification, records, status, note] of ASSET_SEED) {
+      const id = this.seq.asset++;
+      this.asset.set(id, { id, incidentId: 0n, name, system, classification, records, status, note, updatedBy: 'seed', updatedAtMs: this.now() });
+    }
+    this.say(0n, '#command', 'scribe', 'system', 'Break-glass channel is quiet. 6 of 6 identities verified.');
+    this.brief.set(0n, { incidentId: 0n, text: 'Nothing to report. All systems are normal.', known: 'No incident is open', unknown: 'Nothing is open right now', updatedAtMs: this.now(), author: 'scribe' });
     for (const [host, hall, rack] of HOSTS) this.host.set(host, { host, hall, rack, status: 'healthy' });
     for (const [vm, workload] of GUESTS) this.guest.set(vm, { vm, host: 'b14-gpu-07', workload, status: 'running', movedTo: '' });
     for (const agent of ['sentry', 'triage', 'warden', 'scribe'])
@@ -83,10 +111,20 @@ export class MemClauraDb implements ClauraDb {
     const id = this.seq.incident++;
     this.incident.set(id, {
       id, title, severity, host, vm, status: 'open', openedAtMs: this.now(), containedAtMs: null, blastScore: 0,
+      category: 'Unclassified (pending triage)', nistPhase: 'detection_analysis',
+      functionalImpact: 'Not yet assessed', informationImpact: 'Not yet assessed', recoverability: 'Not yet assessed',
     });
     const h = this.host.get(host);
     if (h) h.status = 'suspect';
     this.log(id, 'incident', 'sentry', `Incident opened (${severity}): ${title}`);
+    for (const [ttl, owner] of [['Assess notification obligations', 'legal'], ['Prepare a holding statement', 'comms'], ['Confirm the vGPU hypervisor patch', 'vendor']] as const) {
+      this.task.push({ id: this.seq.task++, incidentId: id, title: ttl, ownerRole: owner, status: 'open', atMs: this.now() });
+    }
+    for (const [text, by] of [['Internal email and chat are treated as visible to the attacker.', 'standing order'], ['Reversible containment may run without a human. Quarantine needs a commander.', 'guest-escape playbook (policy)']] as const) {
+      this.decision.push({ id: this.seq.decision++, incidentId: id, text, byName: by, atMs: this.now() });
+    }
+    for (const a of this.asset.values()) if (a.incidentId === 0n) a.incidentId = id;
+    this.brief.set(id, { incidentId: id, text: 'An incident was just opened. Scribe is preparing the first plain-language brief.', known: `An incident was opened on one server, ${host}`, unknown: 'How far it went', updatedAtMs: this.now(), author: 'system' });
   }
 
   async setAgentState(agent: string, status: string, thought: string, model: string) {
@@ -124,13 +162,25 @@ export class MemClauraDb implements ClauraDb {
       if (action === 'quarantine_host') this.contain(inc, detail);
     } else if (status === 'pending_approval') {
       inc.status = 'awaiting_approval';
+      this.task.push({ id: this.seq.task++, incidentId, title: `Approve ${action === 'quarantine_host' ? 'quarantine' : action} of ${target}`, ownerRole: 'commander', status: 'open', atMs: this.now() });
       this.log(incidentId, 'approval_requested', agent, `${action} -> ${target} needs human approval. Reason: ${reason}`);
     } else {
       this.log(incidentId, 'blocked', agent, `${action} -> ${target} BLOCKED by policy (${pol ? 'deny' : 'unknown action'}). Reason: ${reason}`);
     }
   }
 
+  private touch(incidentId: bigint, prefix: string, needle: string, status: string | null, note: string) {
+    for (const a of this.asset.values()) {
+      if (a.incidentId !== incidentId || !a.name.startsWith(prefix)) continue;
+      if (needle && !a.system.includes(needle)) continue;
+      a.status = status ?? a.status; a.note = note; a.updatedBy = 'policy gate'; a.updatedAtMs = this.now();
+    }
+  }
+
   private applyEffect(inc: IncidentRow, action: string, target: string): string {
+    if (action === 'capture_memory') this.touch(inc.id, 'Guest memory image', target, 'evidence_preserved', 'Captured read-only and stored off the network.');
+    if (action === 'revoke_credentials') this.touch(inc.id, 'Workload tokens', target, null, 'Revoked by the policy gate; they cannot be replayed.');
+    if (action === 'pause_guest') this.touch(inc.id, 'Tenant model weights', target, 'evidence_preserved', 'Guest paused: weights frozen in place.');
     if (action === 'cordon_host') {
       const h = this.host.get(target);
       if (h) h.status = 'cordoned';
@@ -152,6 +202,7 @@ export class MemClauraDb implements ClauraDb {
         g.movedTo = dest.host;
         n++;
       }
+      if (n > 0) this.touch(inc.id, 'Co-resident tenant volumes', inc.host, null, `${n} tenants failed over to clean hosts.`);
       return `${n} co-resident guests failed over to hall C`;
     }
     if (action === 'quarantine_host') {
@@ -175,6 +226,8 @@ export class MemClauraDb implements ClauraDb {
     p.status = 'approved';
     p.decidedBy = operator;
     this.log(p.incidentId, 'approval', operator, `${operator} approved ${p.action} -> ${p.target}`);
+    this.decision.push({ id: this.seq.decision++, incidentId: p.incidentId, text: `${p.action === 'quarantine_host' ? 'Quarantine' : p.action} ${p.target} approved by ${operator}`, byName: operator, atMs: this.now() });
+    for (const tk of this.task) if (tk.incidentId === p.incidentId && tk.title.startsWith('Approve ') && tk.title.endsWith(` of ${p.target}`)) tk.status = 'done';
     if (p.action === 'quarantine_host') {
       const inc = this.incident.get(p.incidentId);
       const detail = this.applyEffect(inc!, p.action, p.target);
@@ -194,6 +247,48 @@ export class MemClauraDb implements ClauraDb {
     this.log(incidentId, 'report', 'scribe', 'Report filed.');
   }
 
+  private say(incidentId: bigint, channel: string, authorName: string, kind: string, text: string) {
+    this.message.push({ id: this.seq.message++, incidentId, channel, authorName, authorRole: 'agent', kind, text, atMs: this.now() });
+  }
+
+  async postAgentMessage(incidentId: bigint, channel: string, agent: string, text: string) {
+    if (!CHANNELS.includes(channel)) throw new Error(`unknown channel ${channel}`);
+    if (!['sentry', 'triage', 'warden', 'scribe'].includes(agent)) throw new Error(`unknown agent ${agent}`);
+    this.say(incidentId, channel, agent, 'agent', text);
+  }
+
+  async setBrief(incidentId: bigint, text: string, known: string, unknown: string) {
+    this.brief.set(incidentId, { incidentId, text, known, unknown, updatedAtMs: this.now(), author: 'scribe' });
+    this.log(incidentId, 'state', 'scribe', 'Brief updated by scribe.');
+  }
+
+  async setAssetStatus(id: bigint, status: string, note: string) {
+    const a = this.asset.get(id);
+    if (!a) throw new Error(`data asset ${id} not found`);
+    if (HUMAN_ONLY.includes(status)) throw new Error(`agents cannot set '${status}': a human must confirm it`);
+    a.status = status; a.note = note || a.note; a.updatedBy = 'mem-agent'; a.updatedAtMs = this.now();
+    this.log(a.incidentId, 'state', 'mem-agent', `Scope: ${a.name} -> ${status}`);
+  }
+
+  async setIncidentPhase(incidentId: bigint, phase: string) {
+    const inc = this.incident.get(incidentId);
+    if (!inc) throw new Error(`incident ${incidentId} not found`);
+    if (!PHASES.includes(phase)) throw new Error(`phase must be one of ${PHASES.join(', ')}`);
+    if (PHASES.indexOf(phase) < PHASES.indexOf(inc.nistPhase)) throw new Error('agents can only move the phase forward');
+    inc.nistPhase = phase;
+    this.log(incidentId, 'state', 'mem-agent', `NIST SP 800-61 phase -> ${phase}`);
+  }
+
+  async setIncidentClassification(incidentId: bigint, category: string, functionalImpact: string, informationImpact: string, recoverability: string) {
+    const inc = this.incident.get(incidentId);
+    if (!inc) throw new Error(`incident ${incidentId} not found`);
+    if (category) inc.category = category;
+    if (functionalImpact) inc.functionalImpact = functionalImpact;
+    if (informationImpact) inc.informationImpact = informationImpact;
+    if (recoverability) inc.recoverability = recoverability;
+    this.log(incidentId, 'state', 'mem-agent', 'Classification updated.');
+  }
+
   // Reads return copies so callers cannot mutate the "database" by accident.
   hosts() { return [...this.host.values()].map(x => ({ ...x })); }
   guests() { return [...this.guest.values()].map(x => ({ ...x })); }
@@ -207,4 +302,9 @@ export class MemClauraDb implements ClauraDb {
   }
   events(incidentId: bigint) { return eventsFor(this.event.map(x => ({ ...x })), incidentId); }
   reports() { return [...this.report.values()].map(x => ({ ...x })); }
+  assets(incidentId?: bigint) { return [...this.asset.values()].filter(a => incidentId === undefined || a.incidentId === incidentId).map(x => ({ ...x })); }
+  tasks(incidentId?: bigint) { return this.task.filter(a => incidentId === undefined || a.incidentId === incidentId).map(x => ({ ...x })); }
+  decisions(incidentId?: bigint) { return this.decision.filter(a => incidentId === undefined || a.incidentId === incidentId).map(x => ({ ...x })); }
+  messages(incidentId?: bigint) { return this.message.filter(a => incidentId === undefined || a.incidentId === incidentId).map(x => ({ ...x })); }
+  briefs() { return [...this.brief.values()].map(x => ({ ...x })); }
 }

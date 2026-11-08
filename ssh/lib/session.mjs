@@ -13,7 +13,8 @@ import path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 import { SSH } from './ca.mjs';
 import { hostById } from './hosts.mjs';
-import { newId } from './util.mjs';
+import { newId, sha256hex } from './util.mjs';
+import { GENESIS } from './ledger.mjs';
 
 const WS_OPEN = 1;
 const iso = (ms) => new Date(ms).toISOString();
@@ -153,10 +154,40 @@ export class SessionManager {
     this.live = new Map(); // sessionId -> state
     this.finished = new Map(); // sessionId -> summary (this process)
     this.user = os.userInfo().username;
+    this.recChain = GENESIS;
   }
 
   async init() {
     await fsp.mkdir(this.dir, { recursive: true, mode: 0o700 });
+    // the recording chain continues from the last finished session in the ledger
+    const last = this.ledger.list({ kind: 'ssh.session.closed', limit: 1 })[0];
+    this.recChain = last?.data?.recording?.chain ?? GENESIS;
+  }
+
+  /**
+   * Recompute everything from disk: every recording's SHA-256 against what the ledger recorded, and the
+   * recording chain  chain(n) = SHA-256( chain(n-1) \n sessionId \n sha256(recording n) ).
+   * Replacing, editing, removing or re-ordering a recording breaks the chain from that session on.
+   */
+  async verifyRecordings() {
+    const rows = this.ledger.list({ kind: 'ssh.session.closed', limit: 1_000_000 });
+    let prev = GENESIS;
+    const problems = [];
+    for (const e of rows) {
+      const rec = e.data?.recording ?? {};
+      const id = e.data?.sessionId;
+      let actual = null;
+      try {
+        actual = sha256hex(await fsp.readFile(this.recordingPath(id)));
+      } catch {
+        problems.push({ sessionId: id, problem: 'recording file is missing' });
+      }
+      if (actual && actual !== rec.sha256) problems.push({ sessionId: id, problem: 'recording does not match the hash in the ledger' });
+      const chain = sha256hex(`${prev}\n${id}\n${rec.sha256}`);
+      if (rec.chain && rec.chain !== chain) problems.push({ sessionId: id, problem: 'recording chain is broken here' });
+      prev = rec.chain ?? chain;
+    }
+    return { ok: problems.length === 0, count: rows.length, head: prev, problems };
   }
 
   recordingPath(id) {
@@ -294,6 +325,10 @@ export class SessionManager {
       if (!s.exit) s.tr.kill('SIGKILL');
     }
     const recInfo = s.rec.close();
+    // no await between reading and advancing the chain: two sessions ending together cannot fork it
+    const prevChain = this.recChain;
+    const chain = sha256hex(`${prevChain}\n${s.id}\n${recInfo.sha256}`);
+    this.recChain = chain;
     const endedAt = Date.now();
     const req = s.req;
     const cert = req.cert;
@@ -303,7 +338,7 @@ export class SessionManager {
       sessionId: s.id, requestId: req.id, host: req.host, operator: req.operator, principal: cert.principal, readOnly: req.policy.readOnly,
       certSerial: cert.serial, certId: cert.keyId, startedAt: s.startedAt, endedAt, durationMs: endedAt - s.startedAt, reason,
       transport: s.tr.kind, exitCode: s.exit?.code ?? null,
-      recording: { file: `${s.id}.cast`, bytes: recInfo.bytes, sha256: recInfo.sha256, events: recInfo.events },
+      recording: { file: `${s.id}.cast`, bytes: recInfo.bytes, sha256: recInfo.sha256, events: recInfo.events, prevChain, chain },
       bytesIn: recInfo.bytesIn, bytesOut: recInfo.bytesOut,
       commands: { total: cmds.length, denied: cmds.filter((r) => r.verdict === 'denied').length },
     };

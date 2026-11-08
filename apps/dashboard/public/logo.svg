@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Claura</title>
+  <!-- Cradle: a C-shaped aura (id="ring") holding the contained breach (id="seal"). Tint #seal to #2FBF71 when sealed. -->
+  <path id="ring" fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z"/>
+  <path id="seal" fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z"/>
+</svg>

@@ -9,12 +9,12 @@ import { EVENTS, END, fmt, type Event } from "./incident";
 
 /* ───────────────────────── Edit these when assets change ─────────────────────────
    - PROTOTYPE_URL: where "Open the console" points.
-   - POSTER: video poster in public/shots/.
+   - POSTER: video poster in public/media/.
    - VIDEO_SRC: the demo video. If the file is missing, the page shows a "being cut" state.
 ─────────────────────────────────────────────────────────────────────────────────── */
 const PROTOTYPE_URL = "http://localhost:4317/?demo=1";
-const POSTER = "shots/contained.png";
-const VIDEO_SRC = "media/bulkhead-demo.mp4";
+const POSTER = "media/claura-poster.png";
+const VIDEO_SRC = "media/claura-demo.mp4";
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 

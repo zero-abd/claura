@@ -6,15 +6,58 @@ import {
   APPROVAL_AT,
   CANON_APPROVE,
   CONTAINED_AT,
+  INCIDENT,
   ISOLATE_DUR,
+  RESOLUTION,
   STEPS,
+  TIMEZONE,
   type AgentDef,
 } from "./script";
 import { hash } from "./util";
 
 export type Phase = "nominal" | "breach" | "approval" | "isolating" | "contained" | "report";
-export type View = "overview" | "incident" | "live" | "warroom" | "shells" | "agents" | "policy" | "reports";
-export const VIEWS: View[] = ["overview", "incident", "live", "warroom", "shells", "agents", "policy", "reports"];
+export type View = "overview" | "incident" | "warroom" | "scope" | "shells" | "agents" | "policy" | "reports" | "integrations" | "access";
+export const VIEWS: View[] = ["overview", "incident", "warroom", "scope", "shells", "agents", "policy", "reports", "integrations", "access"];
+/** Floating panels that are not sheets: the "Isolated · out-of-band" popover. */
+export type Popover = "isolation";
+
+// ------------------------------------------------------------------ live mode seam
+// Scripted mode (the default, and ?demo=1) leaves LIVE.hooks null, so every function below runs exactly as it always did.
+// Live mode (live-engine.ts) installs the hooks: step and agent state, and the time to contain, then come from the
+// SpacetimeDB rows. The clock itself (S.started, S.r, S.A) is driven from the same rows by liveFrame(), so the 2D map,
+// the 3D stage, the attack path, the approval sheet and phase() need no changes at all.
+export interface IncidentInfo {
+  id: string;
+  title: string;
+  host: string;
+  vm: string;
+  agent: string;
+  where: string;
+  /** "02:14:07 CST" */
+  opened: string;
+  resolution: { full: string; overview: string; hero: string };
+}
+export interface LiveHooks {
+  stepState(i: number): StepState;
+  stepProgress(i: number): number;
+  agentNow(a: AgentDef): AgentNow;
+  ttc(): number | null;
+  info(): IncidentInfo;
+}
+export const LIVE: { hooks: LiveHooks | null } = { hooks: null };
+export const isLive = () => LIVE.hooks !== null;
+const SCRIPT_INFO: IncidentInfo = {
+  id: INCIDENT.id,
+  title: INCIDENT.title,
+  host: INCIDENT.host,
+  vm: INCIDENT.vm,
+  agent: INCIDENT.agent,
+  where: INCIDENT.where,
+  opened: `02:14:07 ${TIMEZONE}`,
+  resolution: { full: RESOLUTION, overview: RESOLUTION.replace(" · memory captured", ""), hero: RESOLUTION.split(" · ").slice(1, 2)[0] },
+};
+/** Who and where the incident on screen is: the scripted INC-0419, or the live incident row. */
+export const info = (): IncidentInfo => (LIVE.hooks ? LIVE.hooks.info() : SCRIPT_INFO);
 
 export const S = {
   started: false,
@@ -35,6 +78,7 @@ export const S = {
   shellNote: false, // "Secure shell module not loaded" note is showing
   micOn: false,
   demo: false,
+  popover: null as Popover | null,
 };
 
 export const CPS = 66; // typewriter characters per second
@@ -59,13 +103,14 @@ export function phase(): Phase {
   return S.view === "reports" && S.open.get(REPORT_KEY) ? "report" : "contained";
 }
 
-/** Visual tone of the whole app: drives the status tone and accents. */
+/** Visual tone of the whole app: drives wallpaper tint and accents. */
 export type Tone = "nominal" | "breach" | "contained";
 export function tone(ph: Phase = phase()): Tone {
   return ph === "nominal" ? "nominal" : ph === "contained" || ph === "report" ? "contained" : "breach";
 }
 
 export function ttc(): number | null {
+  if (LIVE.hooks) return LIVE.hooks.ttc();
   if (!S.started) return null;
   if (S.A === null) return Math.min(S.r, CANON_APPROVE);
   const cA = Math.min(S.A, CANON_APPROVE);
@@ -77,6 +122,7 @@ export function ttc(): number | null {
 // ------------------------------------------------------------------ steps
 export type StepState = "idle" | "pending" | "running" | "done";
 export function stepState(i: number): StepState {
+  if (LIVE.hooks) return LIVE.hooks.stepState(i);
   const st = STEPS[i];
   if (!S.started) return "idle";
   if (S.r < st.start) return "pending";
@@ -84,6 +130,7 @@ export function stepState(i: number): StepState {
   return "done";
 }
 export const stepProgress = (i: number) => {
+  if (LIVE.hooks) return LIVE.hooks.stepProgress(i);
   const s = stepState(i);
   return s === "done" ? 1 : s === "running" ? (S.r - STEPS[i].start) / (STEPS[i].end - STEPS[i].start) : 0;
 };
@@ -134,6 +181,7 @@ export interface AgentNow {
   index: number; // index of the current thought
 }
 export function agentNow(a: AgentDef): AgentNow {
+  if (LIVE.hooks) return LIVE.hooks.agentNow(a);
   let cur = a.thoughts[0];
   let idx = 0;
   let el = 1e9;

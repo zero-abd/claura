@@ -52,6 +52,8 @@ export const LOGS: LogLine[] = [
   { t: 2.4, src: "warden", msg: "vNIC detached (vm-7f3a) · flow to :623 dropped", tone: "act" },
   { t: 2.9, src: "warden", msg: "2 workload tokens revoked (agent-7f3)", tone: "act" },
   { t: 3.3, src: "warden", msg: "host b14-gpu-07 cordoned · no new placements", tone: "act" },
+  { t: 3.5, src: "corp-edr", msg: "FIN-02 file share: mass rename + encrypt · ransomware", tone: "hot" },
+  { t: 3.7, src: "triage", msg: "billing DB read by svc-billing-sync off schedule · marked Accessed", tone: "info" },
   { t: 3.8, src: "warden", msg: "vm-7f3a paused · vCPU 0–15 frozen", tone: "act" },
   { t: 4.6, src: "warden", msg: "guest memory captured via mgmt path · 64 GiB · sha256 9f3c…e1a0", tone: "act" },
   { t: 5.3, src: "warden", msg: "failover: 11/11 co-resident guests running on clean hosts", tone: "act" },
@@ -60,7 +62,7 @@ export const LOGS: LogLine[] = [
   { u: 0.7, src: "warden", msg: "b14-gpu-07 fabric ports down · removed from pool", tone: "act" },
   { u: 1.4, src: "warden", msg: "BMC b14-gpu-07: IPMI LAN off · mgmt VLAN 40 pruned", tone: "act" },
   { u: 2.0, src: "warden", msg: "host b14-gpu-07 quarantined · incident contained", tone: "safe" },
-  { u: 5.0, src: "scribe", msg: "report INC-0419 filed · 15 entries · synced to 3 operators", tone: "info" },
+  { u: 5.0, src: "scribe", msg: "report INC-0419 filed · 20 entries · synced to 6 operators", tone: "info" },
 ];
 
 export type AgentId = "sentry" | "triage" | "warden" | "scribe";
@@ -102,7 +104,8 @@ export const AGENTS: AgentDef[] = [
       { t: 1.0, text: "b14-gpu-07 runs 12 guests. 11 are co-resident with vm-7f3a.", status: "Scoring", tone: "busy" },
       { t: 1.5, text: "2 exposed tokens. The mgmt plane is reachable from this host, not compromised.", status: "Scoring", tone: "busy" },
       { t: 2.0, text: "2 exposed tokens. The mgmt plane is reachable from this host, not compromised.", status: "Scored 0.87", tone: "hot", quiet: true },
-      { u: 2.3, text: "Scope closed. 0 co-resident guests affected.", status: "Closed", tone: "done" },
+      { t: 3.7, text: "Billing database read by a corp service account in the same window. Marked Accessed in the data scope.", status: "Scoring", tone: "busy" },
+      { u: 2.3, text: "Escape scope closed. 0 co-resident guests affected. Billing database stays open.", status: "Closed", tone: "done" },
     ],
   },
   {
@@ -126,8 +129,8 @@ export const AGENTS: AgentDef[] = [
     thoughts: [
       { t: -1, text: "Idle. INC-0418 filed 6 days ago.", status: "Idle", tone: "idle", quiet: true },
       { t: 2.5, text: "Logging each step. Hashing the memory capture as it lands.", status: "Recording", tone: "busy" },
-      { u: 2.2, text: "Writing INC-0419: 15 entries, 1 human approval, 3 evidence files.", status: "Writing", tone: "busy" },
-      { u: 5.0, text: "Report filed and synced to all 3 operators.", status: "Filed", tone: "done" },
+      { u: 2.2, text: "Writing INC-0419: 20 entries, 1 human approval, 3 evidence files.", status: "Writing", tone: "busy" },
+      { u: 5.0, text: "Report filed and synced to all 6 operators.", status: "Filed", tone: "done" },
     ],
   },
 ];
@@ -156,10 +159,12 @@ export const FINAL_STEP = {
   button: "Approve quarantine",
 };
 
+// Titles match the War Room and People & Access: RK is the Incident Commander (shift lead, admin), JT is Legal
+// counsel, AL is the CISO. Access roles (admin, legal, exec ...) live in the data layer.
 export const OPERATORS = [
-  { initials: "RK", role: "shift lead" },
-  { initials: "JT", role: "network" },
-  { initials: "AL", role: "platform" },
+  { initials: "RK", role: "Incident Commander" },
+  { initials: "JT", role: "Legal counsel" },
+  { initials: "AL", role: "CISO" },
 ];
 export const APPROVER = OPERATORS[0];
 
@@ -167,31 +172,6 @@ export const EVIDENCE = [
   { name: "vm-7f3a.mem", meta: "64 GiB · sha256 9f3c…e1a0" },
   { name: "qemu-2231.core", meta: "1.2 GiB · sha256 41be…07d2" },
   { name: "b14-gpu-07-flows.pcap", meta: "38 MB · sha256 c0a7…5f19" },
-];
-
-export interface ReportRow {
-  t?: number;
-  u?: number;
-  actor: string;
-  action: string;
-  by: string;
-}
-export const REPORT: ReportRow[] = [
-  { t: 0.0, actor: "Sentry", action: "VMM audit: unexpected ioctl 0xC0186441 on vm-7f3a", by: "detector" },
-  { t: 0.3, actor: "Sentry", action: "IOMMU fault: DMA write outside guest range", by: "detector" },
-  { t: 0.5, actor: "Sentry", action: "host EDR: qemu spawned /bin/sh", by: "detector" },
-  { t: 1.0, actor: "Sentry", action: "Correlated 6 signals, opened INC-0419", by: "detector" },
-  { t: 1.8, actor: "Triage", action: "Attack graph: 1 suspect host, 11 co-resident guests, 2 exposed tokens, mgmt plane reachable", by: "model" },
-  { t: 2.4, actor: "Warden", action: "Isolated network: detached vNIC of vm-7f3a", by: "playbook policy" },
-  { t: 2.9, actor: "Warden", action: "Revoked workload credentials (2 tokens)", by: "playbook policy" },
-  { t: 3.3, actor: "Warden", action: "Cordoned host b14-gpu-07", by: "playbook policy" },
-  { t: 3.8, actor: "Warden", action: "Paused guest vm-7f3a", by: "playbook policy" },
-  { t: 4.6, actor: "Warden", action: "Captured guest memory via trusted management path", by: "playbook policy" },
-  { t: 5.3, actor: "Warden", action: "Failed over 11 co-resident guests to clean hosts", by: "playbook policy" },
-  { t: 5.5, actor: "Warden", action: "Requested approval: quarantine host b14-gpu-07", by: "playbook policy" },
-  { u: 0.0, actor: "RK", action: "Approved quarantine with ⌘↵", by: "RK · shift lead" },
-  { u: 2.0, actor: "Warden", action: "Quarantined host b14-gpu-07. Incident contained", by: "RK · shift lead" },
-  { u: 5.0, actor: "Scribe", action: "Filed report, synced to 3 operators", by: "—" },
 ];
 
 // Ambient "nominal" signal lines, generated from a fixed seed.
@@ -247,6 +227,7 @@ export const TOOLS: Record<AgentId, ToolCall[]> = {
     { t: 1.0, call: "attack_graph(host=b14-gpu-07)", result: "11 co-resident guests" },
     { t: 1.5, call: "scan_tokens(agent-7f3)", result: "2 exposed" },
     { t: 2.0, call: "score_blast_radius()", result: "0.87" },
+    { t: 3.7, call: "query_iam(billing-db, window=60s)", result: "1 unexpected reader" },
     { u: 2.3, call: "close_scope(INC-0419)", result: "0 guests affected" },
   ],
   warden: [
@@ -264,8 +245,8 @@ export const TOOLS: Record<AgentId, ToolCall[]> = {
   scribe: [
     { t: 2.5, call: "log.append(step)", result: "streaming" },
     { t: 4.6, call: "evidence.hash(vm-7f3a.mem)", result: "sha256 9f3c…e1a0" },
-    { u: 2.2, call: "report.write(INC-0419)", result: "15 entries" },
-    { u: 5.0, call: "report.file()", result: "synced to 3 operators" },
+    { u: 2.2, call: "report.write(INC-0419)", result: "20 entries" },
+    { u: 5.0, call: "report.file()", result: "synced to 6 operators" },
   ],
 };
 
@@ -320,13 +301,13 @@ export const PAST_REPORTS: PastReport[] = [
     title: "Suspicious ptrace from a sandboxed agent",
     when: "6 days ago",
     ttc: 8.1,
-    approver: "JT · network",
+    approver: "RK · Incident Commander",
     rows: [
       { t: 0.0, actor: "Sentry", action: "ptrace on a host process from agent-2c9" },
       { t: 0.8, actor: "Sentry", action: "Correlated 3 signals, opened INC-0418" },
       { t: 1.6, actor: "Triage", action: "Scoped to 1 host, 4 co-resident guests" },
       { t: 2.2, actor: "Warden", action: "Isolated network and revoked 1 token" },
-      { t: 5.9, actor: "JT", action: "Approved quarantine of c07-gpu-11" },
+      { t: 5.9, actor: "RK", action: "Approved quarantine of c07-gpu-11" },
       { t: 8.1, actor: "Warden", action: "Quarantined c07-gpu-11. Incident contained" },
     ],
   },
@@ -335,12 +316,12 @@ export const PAST_REPORTS: PastReport[] = [
     title: "Credential replay from a guest agent",
     when: "3 weeks ago",
     ttc: 12.4,
-    approver: "AL · platform",
+    approver: "RK · Incident Commander",
     rows: [
       { t: 0.0, actor: "Sentry", action: "Workload token reused from a second guest" },
       { t: 1.1, actor: "Triage", action: "2 guests share one identity" },
       { t: 2.0, actor: "Warden", action: "Revoked the token, detached both vNICs" },
-      { t: 9.4, actor: "AL", action: "Approved quarantine of a21-gpu-03" },
+      { t: 9.4, actor: "RK", action: "Approved quarantine of a21-gpu-03" },
       { t: 12.4, actor: "Warden", action: "Quarantined a21-gpu-03. Incident contained" },
     ],
   },
@@ -349,7 +330,7 @@ export const PAST_REPORTS: PastReport[] = [
     title: "Unexpected DMA from a passthrough device",
     when: "5 weeks ago",
     ttc: 10.9,
-    approver: "RK · shift lead",
+    approver: "RK · Incident Commander",
     rows: [
       { t: 0.0, actor: "Sentry", action: "IOMMU fault on a passthrough device" },
       { t: 1.2, actor: "Triage", action: "Scoped to 1 host, 8 co-resident guests" },

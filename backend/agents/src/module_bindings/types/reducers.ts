@@ -6,23 +6,53 @@
 import { type Infer as __Infer } from "spacetimedb";
 
 // Import all reducer arg schemas
+import AddOperatorReducer from "../add_operator_reducer.ts";
+import AddTaskReducer from "../add_task_reducer.ts";
 import ApproveReducer from "../approve_reducer.ts";
+import EnrollReducer from "../enroll_reducer.ts";
 import FileReportReducer from "../file_report_reducer.ts";
 import IngestSignalReducer from "../ingest_signal_reducer.ts";
+import IssueEnrollmentReducer from "../issue_enrollment_reducer.ts";
 import OpenIncidentReducer from "../open_incident_reducer.ts";
+import PostAgentMessageReducer from "../post_agent_message_reducer.ts";
+import PostMessageReducer from "../post_message_reducer.ts";
 import ProposeActionReducer from "../propose_action_reducer.ts";
+import RecordDecisionReducer from "../record_decision_reducer.ts";
 import RecordFindingReducer from "../record_finding_reducer.ts";
 import ResetDemoReducer from "../reset_demo_reducer.ts";
+import RevokeEnrollmentReducer from "../revoke_enrollment_reducer.ts";
+import RevokeOperatorReducer from "../revoke_operator_reducer.ts";
 import SetAgentStateReducer from "../set_agent_state_reducer.ts";
+import SetAssetStatusReducer from "../set_asset_status_reducer.ts";
+import SetBriefReducer from "../set_brief_reducer.ts";
+import SetIncidentClassificationReducer from "../set_incident_classification_reducer.ts";
+import SetIncidentPhaseReducer from "../set_incident_phase_reducer.ts";
 import SetPolicyReducer from "../set_policy_reducer.ts";
+import SetStakeholderVerifiedReducer from "../set_stakeholder_verified_reducer.ts";
+import SetTaskStatusReducer from "../set_task_status_reducer.ts";
 
+export type AddOperatorParams = __Infer<typeof AddOperatorReducer>;
+export type AddTaskParams = __Infer<typeof AddTaskReducer>;
 export type ApproveParams = __Infer<typeof ApproveReducer>;
+export type EnrollParams = __Infer<typeof EnrollReducer>;
 export type FileReportParams = __Infer<typeof FileReportReducer>;
 export type IngestSignalParams = __Infer<typeof IngestSignalReducer>;
+export type IssueEnrollmentParams = __Infer<typeof IssueEnrollmentReducer>;
 export type OpenIncidentParams = __Infer<typeof OpenIncidentReducer>;
+export type PostAgentMessageParams = __Infer<typeof PostAgentMessageReducer>;
+export type PostMessageParams = __Infer<typeof PostMessageReducer>;
 export type ProposeActionParams = __Infer<typeof ProposeActionReducer>;
+export type RecordDecisionParams = __Infer<typeof RecordDecisionReducer>;
 export type RecordFindingParams = __Infer<typeof RecordFindingReducer>;
 export type ResetDemoParams = __Infer<typeof ResetDemoReducer>;
+export type RevokeEnrollmentParams = __Infer<typeof RevokeEnrollmentReducer>;
+export type RevokeOperatorParams = __Infer<typeof RevokeOperatorReducer>;
 export type SetAgentStateParams = __Infer<typeof SetAgentStateReducer>;
+export type SetAssetStatusParams = __Infer<typeof SetAssetStatusReducer>;
+export type SetBriefParams = __Infer<typeof SetBriefReducer>;
+export type SetIncidentClassificationParams = __Infer<typeof SetIncidentClassificationReducer>;
+export type SetIncidentPhaseParams = __Infer<typeof SetIncidentPhaseReducer>;
 export type SetPolicyParams = __Infer<typeof SetPolicyReducer>;
+export type SetStakeholderVerifiedParams = __Infer<typeof SetStakeholderVerifiedReducer>;
+export type SetTaskStatusParams = __Infer<typeof SetTaskStatusReducer>;
 

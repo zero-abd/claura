@@ -1,130 +1,108 @@
-# Claura: Devpost write-up
+# Claura
 
-Paste each section into the matching Devpost field. Fill the three links, run the checklist at the bottom, and delete
-this block before pasting.
+**Tagline:** Your network is compromised. Your command isn't.
 
-**Project name:** Claura
+**Elevator pitch (short field):** The immune system for AI data centers: on-prem NVIDIA Nemotron agents contain a breached GPU host under policy, while an isolated command center keeps every human on one live record.
 
-**Tagline:** Seal the breach before it spreads.
+**Links:** Try it: https://claura.tech · Code: https://github.com/zero-abd/claura · Video: [paste the public link]
 
-**Elevator pitch:**
-Incident response for AI data centers. When a sandboxed AI workload tries to escape its VM, four Nemotron agents
-contain it, reversible steps first, through a policy gate in SpacetimeDB. Quarantine waits for a person.
+**Tracks:** Winstead PC (Cyber Incident Response Dashboard) · Spacetime (Build on Spacetime) · NVIDIA (Use Nemotron Beyond a Chatbot). Built with NMC²'s "Keep the World Running" problems in mind too: missed warnings, unclear handoffs, wrong information at the wrong time.
 
-**Tracks to select** (cap reported as three, see HACKATHON.md §6): NMC² Keep the World Running, NVIDIA Use Nemotron
-Beyond a Chatbot, Spacetime.
-
-**Try it out:** [landing page link] · **Video:** [public link] · **Repo:** https://github.com/zero-abd/claura
+> **What's live and what's simulated.** Live: the console, the SpacetimeDB module on Maincloud (all incident state, identities and roles, the policy gate, War Room, data scope, documentation), four agents driven by Nemotron running locally, and the Secure Shell certificate flow. Simulated: the attack telemetry is a replayed fixture, containment changes state in the database rather than touching real hypervisors, and the shell targets are real OpenSSH daemons in sandboxes standing in for GPU hosts. The 9.4 s, 2,048 hosts and 61,207 agent sandboxes on screen are illustrative.
 
 ---
 
 ## Inspiration
 
-AI agents now run model-written code inside sandboxes, and each sandbox is a guest VM on a shared GPU host. The VM is
-the wall between one tenant's code and everyone else's. Guest-to-host escapes are real: public examples include a
-QEMU vhost-user-gpu out-of-bounds write (CVE-2021-3546) and a guest-to-host escape through a QEMU/KVM virtio device
-shown at Black Hat Asia 2020. When one happens, the first minutes decide how far it spreads, and the response today is
-a page, a runbook and a person doing six things in the right order.
+Winstead's track brief asked us to assume the worst: the attacker can see normal communications, ransomware has locked the data, phones are down, email is sporadic, and nobody has information. That isn't paranoia. CISA and the FBI document a crew, Scattered Spider, that searches victims' Slack, Teams and Exchange for conversations about the response and "frequently join[s] incident remediation and response calls" ([CISA AA23-320A](https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a)). Every tool in a normal response (the SIEM, the tickets, the chat, the bridge call, the runbook on the file share, the long-lived SSH keys) lives on the network the attacker owns. You don't investigate in front of the suspect.
 
-We wanted a responder that is fast like an agent but cannot do anything a person hasn't allowed.
+Then we put that night inside an AI data center. A GPU host there carries many customers' workloads, and the wall between them is software that cracks. On 30 Sep 2026 NVIDIA disclosed CVE-2026-47498, which lets a user inside a guest VM trigger an out-of-bounds write in the host's vGPU Manager ([NVD](https://nvd.nist.gov/vuln/detail/CVE-2026-47498)). A year earlier, Wiz's NVIDIAScape showed a three-line Dockerfile taking root on a GPU host ([The Hacker News](https://thehackernews.com/2025/07/critical-nvidia-container-toolkit-flaw.html)). The attackers are speeding up too: in a campaign Anthropic disrupted, AI did 80 to 90 percent of the work ([Anthropic](https://www.anthropic.com/news/disrupting-AI-espionage)), and the fastest breakout CrowdStrike recorded in 2025 took 27 seconds ([CrowdStrike](https://www.crowdstrike.com/en-us/press-releases/2026-crowdstrike-global-threat-report/)).
+
+So we set three rules. The first responder has to be a machine. The last word has to be a human. Everything in between has to be policy. And the command post has to live outside the crime scene.
 
 ## What it does
 
-Claura handles one scenario end to end: an AI workload in guest VM `vm-7f3a` tries to escape through the vGPU path on
-host `b14-gpu-07`, which carries 11 other tenants.
+Claura is the immune system for AI data centers. It turns a scattered attack into one incident, one policy-gated containment decision and one live record for every responder. In our demo scenario, one customer's AI workload tries to break out of its virtual machine toward the shared GPU host where eleven other tenants are working. Claura's agents detect it in the replayed telemetry, map the blast radius and propose containment; policy and one human approval decide what happens; and every stakeholder coordinates and documents the response in a command plane hosted outside the compromised network.
 
-Four defender agents work the incident:
+**The machine side**
+- **Overview.** A real-time 3D data center you can click: halls, racks and hosts, with the suspect host lighting up.
+- **Four defender agents on NVIDIA Nemotron, on-prem.** In plain terms, they connect the clues, measure who could be affected, recommend a safe response and write the handoff. Sentry correlates six weak signals (an IOMMU fault, a vGPU driver fault, qemu spawning a shell, a flow to the management port and more) and opens the incident. Triage queries host inventory and reachability and records the blast radius: one host, eleven co-resident neighbors. Warden proposes containment, reversible steps first: isolate the network, revoke credentials, cordon the host, pause the guest, capture memory, fail the neighbors over to clean hosts. In the demo these effects are recorded as state in SpacetimeDB rather than executed on real infrastructure. Scribe writes the plain-language brief and the shift handoff.
+- **A policy gate the model can't talk its way past.** Every agent action is a proposal to a SpacetimeDB reducer, which rules from the policy table: auto, needs approval, or denied. Unknown actions and hosts that don't exist fail closed. A labelled red-team probe from our test harness (not Nemotron) asks to reimage the host, and the gate blocks it. Policy, not the model, decides.
+- **One human step.** Quarantining the host needs a person: evidence, scope and rollback on one card, approved with Cmd+Enter.
 
-- **Sentry** reads six signals (an IOMMU fault, a vGPU driver fault, a VMM audit ioctl, host EDR seeing `qemu` spawn
-  a shell, a flow to the IPMI port, a workload token used outside its scope) and opens one incident.
-- **Triage** checks the host inventory and network reachability and scores the blast radius (0.87).
-- **Warden** contains it, reversible steps first: isolate the guest's network, revoke its credentials, cordon the
-  host, pause the guest, capture its memory, fail the 11 neighbors over to clean hosts. No live migration off a
-  suspect host, because that copies guest memory through a hypervisor we no longer trust.
-- **Scribe** writes the incident report from the database's own event log.
+**The human side (Winstead's five requirements)**
 
-The agents never execute anything. Each action is a proposal to a **policy gate inside SpacetimeDB**, which runs it,
-blocks it or holds it for a person, based on a policy table. Quarantining the host is held: an operator approves it
-from one card showing evidence, scope and rollback (or presses ⌘↵). Destructive actions like reimaging the host are
-denied outright, and the gate refuses an approval that comes from an agent.
+| Requirement | What Claura does |
+|---|---|
+| Highly secure, isolated inside a compromised network | The command plane is hosted outside the corporate network, on SpacetimeDB, and needs no corporate SSO, email or phones. Approvals and admin actions are identity-checked in the reducers: only admins can add people or change policy. |
+| Access control, admin adds individuals | **People & Access:** the admin adds someone (outside counsel, say) with a role by issuing a single-use break-glass enrollment code. No email, no phone, no SSO. The access event lands in the audit log. |
+| Documentation to incident standards, real-time status | **Reports:** the incident record is structured to NIST SP 800-61, with live phase status, a SHA-256 chain of custody for evidence, and a PDF export for counsel to review. |
+| Scope of compromised data and its status | **Data Scope:** every data asset carries a status: intact, accessed, exfiltration suspected, exfiltration confirmed, locked by ransomware, restored, or evidence preserved. |
+| Real-time communications | **War Room:** channels for #command, #legal, #exec, #comms-pr and #vendors; Scribe's brief ("what we know / what we don't know yet"); tasks with owners; a decision log recording who decided what, and when; example notification clocks labelled "confirm with counsel". Every console updates live. The admin controls enrollment; counsel, not the channel name or the software, decides privilege and distribution. |
 
-The operator console has two parts. A **replay** of the incident tells the story in 10 seconds. A **Live** view
-shows the real database rows as the agents write them, and its buttons call the real reducers, so a judge can try to
-have Warden approve its own quarantine and watch SpacetimeDB refuse.
-
-**What is real and what is simulated.** Real: the SpacetimeDB module and its policy gate, the four agents calling
-tools on NVIDIA Nemotron 3 Nano 4B running locally through Ollama, human approval, the report, the Live view.
-Simulated: the telemetry (fixture signals), the fleet (seeded hosts and guests), and the effects of containment, which
-change database rows and touch no real infrastructure. The replay's 9.4 s is a scripted timeline; a live run on a
-laptop takes about a minute.
+**Secure Shell.** Click a host and Claura's own SSH certificate authority mints a just-in-time OpenSSH user certificate that expires within minutes. The host presents a CA-signed host certificate, so there's no trust-on-first-use. A passkey or Touch ID step-up is required, a suspect host needs a second approver and accepts only a read-only forensic principal, and every session is recorded into a hash-chained ledger.
 
 ## How we built it
 
-- **SpacetimeDB module (TypeScript).** Tables for hosts, guests, signals, incidents, findings, policy, proposals, the
-  incident event log, agent state and reports. Reducers are the only way to change state. `propose_action` is the
-  policy gate: it fails closed on unknown actions or malformed policy, checks that the target exists (no hallucinated
-  hosts), and either applies the effect, blocks it, or marks it pending. `approve` rejects agent names as approvers
-  and contains the incident when the quarantine is approved. The rule that quarantine needs a human is a seeded
-  policy row, not code.
-- **Agents (Node.js).** Each agent runs a tool loop against Nemotron 3 Nano 4B on Ollama (temperature 0, fixed seed,
-  no thinking mode). Tool calls are schema-checked, duplicate calls are refused, transient errors retried, and an
-  agent is done only when the database shows its work, not when the model says so. If the model fails, a
-  deterministic fallback does only the missing work, and the agent's card says which one ran. In both logged live
-  runs, all four agents finished on the model with zero bad tool calls.
-- **Operator console (TypeScript, Vite, no framework).** One animation clock drives the replay from a single script
-  file. The Live view subscribes to the module through generated bindings and calls `approve` and `propose_action`.
-- **Landing page.** A dithered floor plan of the four data halls that replays the incident with a scrubber.
-- **3D facility (three.js)** and a **secure shell** design (short-lived SSH certificates, passkey step-up, a
-  hash-chained ledger) are in the repo but not wired into the console yet.
+```
+ ON-PREM (next to the hardware)                      OUT-OF-BAND (outside the corporate network)
+
+ Agent runner (Node + TypeScript)  ── reducers ──▶   SpacetimeDB module on Maincloud
+   Nemotron 3 Nano 4B via Ollama   ◀─ subscribe ──     tables: hosts, guests, signals, incidents,
+   Sentry · Triage · Warden · Scribe                   findings, proposals, policy, operators, roles,
+                                                       War Room messages, data scope, evidence, reports
+ Secure Shell gateway                                  reducers: policy gate, approvals, access
+   SSH CA · passkeys · session ledger                  control, documentation
+                                                               ▲
+                                                               │ live subscriptions
+                                                     Liquid Glass consoles (every operator, every device)
+```
+
+- **SpacetimeDB is the backend.** One TypeScript module on Maincloud holds every piece of incident state, plus operator identities, roles and the War Room. The policy gate lives in the `propose_action` reducer: in one transaction it reads the policy row and validates the target, then commits the proposal as executed, pending approval, or blocked. A blocked proposal stays in the record for audit and live sync, but its action is never applied. Admin-only reducers handle enrollment and policy changes, and every console is a live subscription, which is how two laptops show the same incident at the same moment. The only processes outside SpacetimeDB are the two that must sit next to hardware: the on-prem agent runner and the SSH gateway.
+- **Nemotron agents, beyond a chatbot.** A Node and TypeScript runner drives NVIDIA Nemotron 3 Nano (`nemotron-3-nano:4b`, 2.9 GB) through Ollama on local hardware. No model API sits in the loop. Four agents share nine tools (`list_recent_signals`, `open_incident`, `get_host_inventory`, `check_reachability`, `record_finding`, `get_policy`, `propose_action`, `list_events`, `file_report`), and every effect is a reducer call. The loop has real guardrails: JSON-schema validation of every argument, one retry with the error fed back to the model, stall detection, step and time limits, completion judged by database state rather than by the model's say-so, and a deterministic fallback per agent. Every output is tagged `model`, `model+fallback` or `fallback`, so you can always see what Nemotron did.
+- **The console.** TypeScript and Vite, with a Liquid Glass design and progressive disclosure: calm when nothing is wrong, one card when it needs you. The 3D data center is three.js and deterministic, so the film and the live view match.
+- **Secure Shell.** A Node, Express and WebSocket gateway with xterm.js in the browser, passkeys through SimpleWebAuthn, and OpenSSH certificates signed by `ssh-keygen`: one principal per user certificate and a 15-minute maximum. Each target `sshd` accepts only the principals in its `AuthorizedPrincipalsFile` (no keys, no passwords), and presents a host certificate signed by Claura's host CA, which the client trusts instead of trusting on first use. The session ledger chains each entry to the previous one with SHA-256, so editing history breaks every hash after it.
+- **Brand and film.** claura.tech and the mark (a C-shaped aura ring whose seal bar closes the gap), and a demo film built with HyperFrames.
 
 ## Challenges we ran into
 
-- **Making a 4B model reliable at tool calling.** It would stop early, repeat calls or answer in prose. The fix was a
-  loop that checks done-ness against the database, refuses duplicates, salvages prose answers, nudges, and falls back
-  deterministically, while recording honestly which path ran.
-- **Ordering the response.** The hard question was not what to do but in what order: reversible steps first, evidence
-  before anything destructive, and the one step that takes a host out of service waiting for a person.
-- **No live migration.** The obvious move, migrating the neighbors away, copies their memory through the host we are
-  trying not to trust. We fail them over to clean hosts instead.
-- **Honest demo.** A fast scripted replay can look like a finished product. We split the console into a labelled
-  replay and a Live view on the real database, so nothing on screen claims more than it does.
+- **Making a 4B model a reliable tool user.** Early runs produced malformed arguments and early stops. Schema checks with readable errors, a single retry, and judging "done" from the database fixed it. In one live run Nemotron wrote a finding shorter than the minimum, was told why, and fixed it on the retry.
+- **Honesty about the forbidden action.** We wanted to show the gate refusing a destructive step. Across four prompt variants, Nemotron never proposed one on its own. So the demo doesn't attribute it to the model: a clearly labelled red-team probe from our test harness submits it to the same policy gate, and the gate blocks it (details in `backend/agents/README.md`).
+- **Isolation without the usual identity stack.** If SSO, email and phones are compromised, you can't use them to invite people. Single-use break-glass enrollment codes and identities held in SpacetimeDB solved it.
+- **SSH without trust-on-first-use.** That meant a host CA as well as a user CA, short certificate lifetimes, and a principal model where a suspect host accepts only the read-only forensic role.
+- **Data scope is not infrastructure scope.** "One host, eleven guests" says nothing about whether a dataset was encrypted or copied. We modelled data assets and their status separately.
 
 ## Accomplishments that we're proud of
 
-- A policy gate the model cannot get around, because it lives in the database rather than in the prompt.
-- Agents that run fully on a local model, with every fallback recorded instead of hidden.
-- A judge can try to break it from the console: an agent approving its own quarantine is refused, a reimage is
-  blocked, and a person's approval contains the incident.
+- The decision loop runs live on a laptop: in one logged run Nemotron made 15 turns and 14 tool calls with zero malformed calls, every proposal was ruled by the policy gate, and after a human approval the simulated containment state committed in SpacetimeDB (`backend/runs/`).
+- Changing one policy row changes behavior with no code change: set quarantine to auto and the same proposal executes with no human; set it back and it waits (verified end to end, `backend/spacetime/README.md`).
+- All five Winstead requirements in one console, usable under stress: one card, one keystroke, one plain-language brief.
+- Two consoles, one truth, with no refresh.
+- Real OpenSSH certificates and a tamper-evident session ledger behind a single click.
 
 ## What we learned
 
-- Separating who proposes from who permits is the whole idea. Models are good at reading messy signals and writing
-  reports; permission should come from deterministic policy.
-- For a small model, checking "done" against the system's state matters more than prompt wording.
-- For incident response the interface is part of the safety design: a person decides faster when evidence, scope and
-  rollback are on one screen.
+- **Policy, not the model, decides.** A deterministic gate is what makes a small, local model safe to act on production systems.
+- **Incident response is a coordination problem.** Detection gets the headlines, but the night is lost when people can't talk safely or can't agree on what's true. The communications plane has to sit outside the blast radius.
+- **Plain language is a security feature.** "What we know / what we don't know yet" stops guessing from spreading.
+- **Label the simulated parts.** It cost us nothing, and it makes everything we show live more believable.
 
 ## What's next for Claura
 
-1. Bind operator identities to reducers. Today `approve` checks a name, not the caller.
-2. Real signal sources: hypervisor audit, IOMMU fault logs, host EDR, BMC and IPMI flows, workload identity.
-3. Effects that call the hypervisor and network, not just database rows.
-4. Wire the secure shell and the 3D facility into the console.
-5. Measure: time to contain, false-positive rate, the cost of a wrong fail-over, and prompt injection through
-   telemetry.
+All of this is roadmap and not built yet.
+
+- **Real senses:** hypervisor, IOMMU, vGPU, EDR, BMC and identity connectors, with design partners measuring time-to-contain and false-positive rates to replace our illustrative numbers.
+- **The agent firewall:** the same policy gate in front of every AI agent's tool calls in the building.
+- **Voice briefings:** "Ask Claura" lets an executive on the move ask out loud and hear the answer from the incident record, spoken by ElevenLabs in their own language.
+- **Autonomous recovery:** reimage, re-attest and return hosts to the pool, with a human signing once.
+- **DPU enforcement:** containment on NVIDIA BlueField-class DPUs, below the hypervisor, so a compromised host can't undo its own quarantine.
+- **Confidential-computing attestation:** prove a destination host and GPU are clean before any tenant fails over onto it.
+- **Insurance and compliance evidence:** signed proof-of-containment packs for auditors, regulators and cyber insurers.
+- **Cross-cloud threat sharing on SpacetimeDB:** operators exchange signed "antibodies" (escape fingerprints and policy rules, never tenant data), so every breach makes the whole fleet immune.
+- **Sovereign on-prem defense:** an air-gapped edition with on-prem Nemotron and self-hosted SpacetimeDB for national AI compute and critical infrastructure.
+
+Why it matters: McKinsey projects $6.7 trillion of data-center capex by 2030, $5.2 trillion of it for AI ([McKinsey](https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/the-cost-of-compute-a-7-trillion-dollar-race-to-scale-data-centers)). The customers we want first, multi-tenant GPU clouds, passed $25 billion in revenue in 2025, and Synergy forecasts close to $400 billion by 2031 ([Synergy Research](https://srgresearch.com/articles/neocloud-market-forecast-to-approach-400b-by-2031-driven-by-surging-ai-infrastructure-demand)). We haven't validated pricing yet; customer discovery with GPU-cloud operators is the next step. The average breach now costs a record $4.99 million ([IBM via Baker Donelson](https://www.bakerdonelson.com/ten-takeaways-from-ibms-2026-cost-of-a-data-breach-report)).
 
 ## Built with
 
-TypeScript, SpacetimeDB, NVIDIA Nemotron 3 Nano, Ollama, Node.js, Vite, three.js, HTML Canvas, Geist
-
----
-
-## Pre-submit checklist
-
-- [ ] The three links are filled in and public
-- [ ] The tracks selected match the three above (or fewer)
-- [ ] The video shows the Live view, not only the replay
-- [ ] The "What is real" paragraph still matches the repo
-- [ ] CVE references: CVE-2021-3546 is at https://nvd.nist.gov/vuln/detail/CVE-2021-3546 ; check NVIDIA's bulletin
-      before naming a vGPU Manager CVE
-- [ ] The no-live-migration rationale matches the team's intent
+spacetimedb · maincloud · nvidia-nemotron · nemotron-3-nano · ollama · typescript · node.js · vite · three.js · openssh · webauthn · simplewebauthn · passkeys · xterm.js · express · websockets · hyperframes

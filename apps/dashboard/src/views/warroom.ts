@@ -1,38 +1,32 @@
+import { BANNER, CHANNELS, OBLIGATIONS, OBLIGATIONS_LABEL } from "../warroom-data";
 import {
-  BANNER,
-  BRIEFS,
-  CHANNELS,
-  DECISIONS,
-  MESSAGES,
-  OBLIGATIONS,
-  OBLIGATIONS_LABEL,
-  PEOPLE,
-  TASKS,
-  type AgentSpeaker,
-  type BriefStage,
+  TASK_LABEL,
+  TASK_TONE,
+  avatarStyle,
+  data,
+  isAlertStatus,
+  fmtClock,
+  initialsOf,
+  nextTaskStatus,
+  roleLabel,
+  roster,
+  summarize,
   type ChannelId,
   type Message,
-  type PersonId,
-  type Speaker,
-} from "../warroom-data";
-import { AGENTS, CLOCK_BASE, STEPS } from "../script";
+  type Task,
+} from "../data";
 import { AGENT_ICON, icon } from "../icons";
-import { $, $$, disc, setAttr, setHTML, setText } from "../dom";
-import { S, at, finalState, since, type Phase } from "../engine";
-import { fmtT } from "../util";
-import { linkHosts } from "../hosts";
+import { $, disc, setAttr, setHTML, setText } from "../dom";
+import { type Phase } from "../engine";
+import { esc, linkHosts } from "../hosts";
 
-// War Room: the out-of-band coordination channel. A plain-language brief, channels and people,
-// the live thread, and (collapsed) tasks, decisions and notification clocks.
 
-interface LocalMsg {
-  text: string;
-  clock: string;
-}
+// War Room: the out-of-band coordination channel. A plain-language brief, channels and people, the live thread,
+// and (collapsed) tasks, decisions and notification clocks. Everything is read through the data layer.
+
 export const wr = {
   selected: "#command" as ChannelId,
   seen: {} as Record<string, number>,
-  local: {} as Record<string, LocalMsg[]>,
   threadKey: "",
   lastCount: {} as Record<string, number>,
 };
@@ -48,40 +42,28 @@ export function selectChannel(c: string): boolean {
   return true;
 }
 
-export function onlineCount(): number {
-  return PEOPLE.filter((p) => p.joinT === null || (S.started && S.r >= p.joinT)).length;
-}
-const isOnline = (joinT: number | null) => joinT === null || (S.started && S.r >= joinT);
+export const onlineCount = () => summarize(roster(data())).online;
 
-const clockAt = (sec: number) => {
-  const total = CLOCK_BASE.h * 3600 + CLOCK_BASE.m * 60 + CLOCK_BASE.s + Math.floor(Math.max(0, sec));
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(Math.floor(total / 3600) % 24)}:${p(Math.floor(total / 60) % 60)}:${p(total % 60)}`;
+const agentIcon = (name: string) => AGENT_ICON[name.toLowerCase()];
+const isAgentMsg = (m: Message) => m.kind === "agent";
+
+const avatarHTML = (m: Message) => {
+  if (isAgentMsg(m)) return `<span class="m-av agent" data-who="${esc(m.authorName)}">${icon(agentIcon(m.authorName) ?? "cpu")}</span>`;
+  const ini = initialsOf(m.authorName);
+  return `<span class="m-av${ini.length > 2 ? " long" : ""}" style="${avatarStyle(ini)}">${esc(ini)}</span>`;
 };
 
-function stage(ph: Phase): BriefStage {
-  if (ph === "nominal") return "quiet";
-  if (ph === "breach") return S.r < STEPS[0].start ? "detect" : "contain";
-  if (ph === "approval") return "approval";
-  if (ph === "isolating") return "quarantine";
-  return "contained";
+/** "Label: value" lines -> pairs. Anything that is not in that shape becomes one "Summary" line. */
+export function parseBrief(text: string): [string, string][] {
+  const rows: [string, string][] = [];
+  for (const line of text.split("\n")) {
+    const m = /^([^:]{3,40}):\s+(.+)$/.exec(line.trim());
+    if (m) rows.push([m[1], m[2]]);
+    else if (line.trim()) rows.push(["Summary", line.trim()]);
+  }
+  return rows;
 }
-
-const personOf = (id: string) => PEOPLE.find((p) => p.id === id);
-const avatar = (who: Speaker) => {
-  if (who in AGENT_ICON) return `<span class="m-av agent" data-who="${who}">${icon(AGENT_ICON[who])}</span>`;
-  const p = personOf(who)!;
-  return `<span class="m-av h-${p.id}${p.initials.length > 2 ? " long" : ""}">${p.initials}</span>`;
-};
-const nameOf = (who: Speaker) => {
-  if (who in AGENT_ICON) return { name: AGENTS.find((a) => a.id === (who as AgentSpeaker))!.name, role: "", agent: true };
-  const p = personOf(who as PersonId)!;
-  return { name: p.initials, role: p.role === p.initials ? "" : p.role, agent: false };
-};
-
-function visibleMessages(ch: ChannelId): Message[] {
-  return MESSAGES.filter((m) => m.ch === ch && since(m) >= 0);
-}
+const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 
 export const warroom = {
   html(): string {
@@ -90,15 +72,11 @@ export const warroom = {
         <span class="ch-name">${c.id}</span><span class="ch-n" id="chn-${c.id.slice(1)}"></span>
       </button>`,
     ).join("");
-    const people = PEOPLE.map(
-      (p) => `<div class="person" id="pp-${p.id}" data-online="0">
-        <span class="m-av h-${p.id}${p.initials.length > 2 ? " long" : ""}">${p.initials}</span>
-        <div><b>${p.role}</b><span class="ver">${icon("seal")}verified out-of-band</span></div>
-        <i class="pdot"></i>
-      </div>`,
-    ).join("");
 
-    const rail = `<aside class="wr-rail panel group">
+    const rail = `<aside class="wr-rail glass group">
+      <button type="button" class="row-link" data-go="scope" data-target="wr-scope">
+        <span class="r-ico">${icon("database")}</span><span class="r-title">Data scope</span><span class="r-val" id="scVal"></span>${icon("chevron", "chev")}
+      </button>
       ${disc("tasks", `<span class="r-ico">${icon("tasks")}</span><span class="r-title">Tasks</span><span class="r-val" id="tkVal"></span>`, `<div class="row-body wr-pad"><div id="tkList"></div></div>`, "row")}
       ${disc("decisions", `<span class="r-ico">${icon("seal")}</span><span class="r-title">Decision log</span><span class="r-val" id="dcVal"></span>`, `<div class="row-body wr-pad"><div id="dcList"></div></div>`, "row")}
       ${disc(
@@ -116,9 +94,9 @@ export const warroom = {
     </aside>`;
 
     return `<section class="view" id="v-warroom" data-view="warroom">
-      <div class="panel wr-banner"><span class="wr-ico">${icon("radio")}</span><span>${BANNER}</span><span class="tag">SpacetimeDB cloud</span></div>
+      <div class="glass wr-banner"><span class="wr-ico">${icon("radio")}</span><span>${BANNER}</span><span class="tag">SpacetimeDB cloud</span></div>
 
-      <div class="panel wr-brief">
+      <div class="glass wr-brief">
         <div class="wr-brief-main">
           <div class="card-head"><h2>Brief for stakeholders</h2><div class="head-r"><span class="meta" id="wrStamp"></span><button type="button" class="btn-chip play" data-act="play-brief" data-tip="Play brief" aria-label="Play brief" data-target="play-brief">${icon("speaker")}<span>Play brief</span></button></div></div>
           <dl class="brief-lines" id="wrLines"></dl>
@@ -127,12 +105,12 @@ export const warroom = {
       </div>
 
       <div class="wr-body">
-        <aside class="panel wr-side">
+        <aside class="glass wr-side">
           <div class="side-sec"><h3>Channels</h3><div class="chs">${channels}</div></div>
-          <div class="side-sec"><h3>People<span id="wrOnline"></span></h3><div class="people">${people}</div></div>
+          <div class="side-sec"><h3>People<span id="wrOnline"></span></h3><div class="people" id="wrPeople"></div></div>
         </aside>
 
-        <section class="panel wr-thread">
+        <section class="glass wr-thread">
           <header class="th-head">
             <div><h2 id="thName">#command</h2><span id="thBlurb"></span></div>
             <span class="tag">out-of-band</span>
@@ -149,142 +127,144 @@ export const warroom = {
     </section>`;
   },
 
-  send(text: string) {
+  /** Post to the selected channel as the signed-in person. Returns the error text, or null when it went through. */
+  send(text: string): string | null {
     const t = text.trim();
-    if (!t) return false;
-    (wr.local[wr.selected] ??= []).push({ text: t, clock: clockAt(S.started ? S.r : 0) });
+    if (!t) return "Nothing to send";
+    const r = data().postMessage(wr.selected, t);
     wr.threadKey = "";
-    return true;
+    return r.ok ? null : r.error;
   },
 
-  render(ph: Phase) {
-    const st = stage(ph);
-    const b = BRIEFS[st];
-    setText($("#wrStamp"), b.stamp);
-    setHTML($("#wrLines"), st, () =>
-      [
-        ["What happened", b.happened],
-        ["What is contained", b.contained],
-        ["Impact", b.impact],
-        ["What we need from you", b.need],
-      ]
-        .map(([k, v]) => `<div class="bl"><dt>${k}</dt><dd>${linkHosts(v)}</dd></div>`)
-        .join(""),
-    );
-    setHTML($("#wrPair"), st, () => {
-      const list = (items: string[], ico: string) => items.map((i) => `<li>${icon(ico)}<span>${linkHosts(i)}</span></li>`).join("");
-      return `<div><h3>What we know</h3><ul class="know">${list(b.know, "check")}</ul></div>
-        <div><h3>What we don't know yet</h3><ul class="dont">${list(b.dont, "info")}</ul></div>`;
-    });
+  render(_ph: Phase) {
+    const d = data();
+    const v = d.version();
+    const inc = d.incident();
+
+    // ---- brief
+    const b = d.brief();
+    if (b) {
+      setText($("#wrStamp"), `${b.author} · updated ${fmtClock(b.updatedAt)}`);
+      setHTML($("#wrLines"), `b${v}`, () =>
+        parseBrief(b.text)
+          .map(([k, val]) => `<div class="bl"><dt>${esc(k)}</dt><dd>${linkHosts(val)}</dd></div>`)
+          .join(""),
+      );
+      setHTML($("#wrPair"), `p${v}`, () => {
+        const list = (items: string[], ico: string) => items.map((i) => `<li>${icon(ico)}<span>${linkHosts(i)}</span></li>`).join("");
+        return `<div><h3>What we know</h3><ul class="know">${list(lines(b.known), "check")}</ul></div>
+        <div><h3>What we don't know yet</h3><ul class="dont">${list(lines(b.unknown), "info")}</ul></div>`;
+      });
+    }
 
     // ---- channels + unread
     const sel = wr.selected;
     for (const c of CHANNELS) {
-      const n = visibleMessages(c.id).length + (wr.local[c.id]?.length ?? 0);
+      const n = d.messages(c.id).length;
       if (c.id === sel || wr.seen[c.id] === undefined || wr.seen[c.id] > n) wr.seen[c.id] = n;
       const unread = c.id === sel ? 0 : n - wr.seen[c.id];
-      const btn = $(`.ch[data-ch="${c.id}"]`);
-      setAttr(btn, "aria-selected", String(c.id === sel));
+      setAttr($(`.ch[data-ch="${c.id}"]`), "aria-selected", String(c.id === sel));
       const badge = $(`#chn-${c.id.slice(1)}`);
       setText(badge, unread > 0 ? String(unread) : "");
       badge.dataset.on = unread > 0 ? "1" : "0";
     }
 
-    // ---- people
-    for (const p of PEOPLE) setAttr($(`#pp-${p.id}`), "data-online", isOnline(p.joinT) ? "1" : "0");
-    setText($("#wrOnline"), `${onlineCount()} online`);
+    // ---- people (the roster: identities, pending codes and directory rows merged; revoked people stay listed, struck)
+    const people = roster(d).filter((p) => p.kind !== "pending");
+    setText($("#wrOnline"), `${summarize(roster(d)).online} online`);
+    setHTML($("#wrPeople"), `pp${v}`, () =>
+      people
+        .map((p) => {
+          const sub = !p.active
+            ? `<span class="ver off">${icon("x")}access revoked</span>`
+            : p.verified
+              ? `<span class="ver">${icon("seal")}verified out-of-band</span>`
+              : `<span class="ver off">${icon("info")}not verified</span>`;
+          return `<div class="person" data-online="${p.online ? "1" : "0"}" data-active="${p.active ? "1" : "0"}">
+          <span class="m-av${p.initials.length > 2 ? " long" : ""}" style="${avatarStyle(p.initials)}">${esc(p.initials)}</span>
+          <div><b>${esc(p.title)}</b>${sub}</div>
+          <i class="pdot"></i>
+        </div>`;
+        })
+        .join(""),
+    );
 
     // ---- thread
     const ch = CHANNELS.find((c) => c.id === sel)!;
     setText($("#thName"), ch.id);
     setText($("#thBlurb"), ch.blurb);
     const input = $("#wrInput") as HTMLInputElement;
-    if (input.placeholder !== `Message ${ch.id}`) input.placeholder = `Message ${ch.id}`;
-    const msgs = visibleMessages(sel);
-    const loc = wr.local[sel] ?? [];
-    const pending = finalState() === "request";
-    const key = `${sel}:${msgs.length}:${loc.length}:${pending}:${S.A ?? ""}`;
+    if (input.placeholder !== `Message ${ch.id}` && !input.dataset.err) input.placeholder = `Message ${ch.id}`;
+    const msgs = d.messages(sel);
+    const pending = inc?.status === "awaiting_approval";
+    const key = `${sel}:${v}:${pending}`;
     if (wr.threadKey !== key) {
-      const prev = wr.lastCount[sel] ?? msgs.length + loc.length;
+      const prev = wr.lastCount[sel] ?? msgs.length;
       const sameChannel = wr.threadKey.startsWith(sel + ":");
       wr.threadKey = key;
-      const total = msgs.length + loc.length;
       const box = $("#thMsgs");
-      const rows = [
-        ...msgs.map((m) => {
-          const who = nameOf(m.who);
-          const clock = clockAt(at(m) < 0 ? 0 : at(m));
-          if (m.system) return `<div class="msg system"><span>${m.text}</span></div>`;
-          return `<div class="msg ${who.agent ? "is-agent" : "is-human"}">
-            ${avatar(m.who)}
+      box.innerHTML = msgs
+        .map((m) => {
+          if (m.kind === "system") return `<div class="msg system"><span>${linkHosts(m.text)}</span></div>`;
+          const agent = isAgentMsg(m);
+          const person = people.find((p) => p.name === m.authorName);
+          const role = agent ? "" : person && person.title !== m.authorName ? person.title : m.authorRole === "responder" ? "" : roleLabel(m.authorRole);
+          return `<div class="msg ${agent ? "is-agent" : "is-human"}">
+            ${avatarHTML(m)}
             <div class="m-main">
-              <div class="m-head"><b>${who.name}</b>${who.agent ? `<span class="m-tag">agent</span>` : who.role ? `<span class="m-role">${who.role}</span>` : ""}<time>${clock}</time></div>
+              <div class="m-head"><b>${esc(m.authorName)}</b>${agent ? `<span class="m-tag">agent</span>` : role ? `<span class="m-role">${esc(role)}</span>` : ""}<time>${fmtClock(m.at)}</time></div>
               <p>${linkHosts(m.text)}</p>
               ${m.action === "review" && pending ? `<button type="button" class="btn-chip accent" data-act="review">Review and approve</button>` : ""}
             </div>
           </div>`;
-        }),
-        ...loc.map(
-          (m) => `<div class="msg is-human">
-            ${avatar("RK")}
-            <div class="m-main"><div class="m-head"><b>RK</b><span class="m-role">Incident Commander</span><time>${m.clock}</time></div><p></p></div>
-          </div>`,
-        ),
-      ];
-      box.innerHTML = rows.join("");
-      // local messages carry user text: set it as text, never as markup
-      $$(".msg.is-human", box)
-        .slice(msgs.filter((m) => !m.system && !personIsAgent(m.who)).length)
-        .forEach((el, i) => {
-          const p = el.querySelector("p");
-          if (p) p.textContent = loc[i]?.text ?? "";
-        });
-      if (S.animate && sameChannel && total > prev) {
+        })
+        .join("");
+      if (sameChannel && msgs.length > prev) {
         const kids = Array.from(box.children).slice(prev);
         kids.forEach((k) => k.classList.add("fresh"));
       }
-      wr.lastCount[sel] = total;
+      wr.lastCount[sel] = msgs.length;
       box.scrollTop = box.scrollHeight;
     }
 
+    // ---- data scope link
+    const assets = d.assets();
+    const flagged = assets.filter((a) => isAlertStatus(a.status)).length;
+    setText($("#scVal"), assets.length ? `${flagged} flagged` : "none open");
+
     // ---- tasks
-    const tasks = TASKS.map((t) => {
-      const shown = t.steps.filter((s) => since(s) >= 0);
-      return { t, now: shown[shown.length - 1] ?? null, born: t.steps[0] };
-    }).filter((x) => x.now);
-    const open = tasks.filter((x) => x.now!.tone !== "done").length;
-    setText($("#tkVal"), !S.started ? "none" : `${open} open`);
-    setHTML($("#tkList"), tasks.map((x) => x.t.id + x.now!.status).join("|") || "none", () =>
+    const tasks = d.tasks();
+    const open = tasks.filter((t) => t.status !== "done").length;
+    setText($("#tkVal"), tasks.length ? `${open} open` : "none");
+    setHTML($("#tkList"), `t${v}`, () =>
       tasks.length
-        ? tasks
-            .map((x) => {
-              const o = personOf(x.t.owner)!;
-              return `<div class="task"><div><b>${x.t.title}</b><span>${o.role}</span></div><span class="chip" data-tone="${x.now!.tone === "idle" ? "idle" : x.now!.tone}"><i></i><span>${x.now!.status}</span></span></div>`;
-            })
-            .join("")
+        ? tasks.map(taskRow).join("")
         : `<p class="ob-note" style="margin:0">No open tasks.</p>`,
     );
 
     // ---- decisions
-    const items = DECISIONS.map((d) => {
-      const done = since(d) >= 0;
-      const pending = !done && d.pendingText !== undefined && finalState() === "request";
-      return { d, done, pending };
-    }).filter((x) => x.done || x.pending);
-    setText($("#dcVal"), `${items.filter((x) => x.done).length} logged`);
-    setHTML($("#dcList"), items.map((x) => `${x.d.what}${x.pending}${S.A ?? ""}`).join("|") || "none", () =>
-      items.length
-        ? items
-            .map((x) =>
-              x.done
-                ? `<div class="dec"><time>${fmtT(at(x.d))}</time><div><b>${linkHosts(x.d.what)}</b><span>${x.d.by}</span></div></div>`
-                : `<div class="dec wait"><time>now</time><div><b>${linkHosts(x.d.pendingText ?? "")}</b><span>waiting</span></div></div>`,
-            )
-            .join("")
-        : `<p class="ob-note" style="margin:0">No decisions yet.</p>`,
-    );
-    setText($("#obNote"), S.started ? "Clocks start only when counsel makes the call. Counsel has not made it yet." : "Clocks start only when counsel makes the call.");
+    const decs = d.decisions();
+    setText($("#dcVal"), `${decs.length} logged`);
+    setHTML($("#dcList"), `d${v}:${pending}`, () => {
+      const rows = decs.map(
+        (x) => `<div class="dec"><time>${fmtClock(x.at)}</time><div><b>${linkHosts(x.text)}</b><span>${esc(x.byName)}</span></div></div>`,
+      );
+      if (pending) rows.push(`<div class="dec wait"><time>now</time><div><b>${linkHosts(`Quarantine of ${inc!.host} is waiting for the Incident Commander`)}</b><span>waiting</span></div></div>`);
+      return rows.join("") || `<p class="ob-note" style="margin:0">No decisions yet.</p>`;
+    });
+    setText($("#obNote"), inc ? "Clocks start only when counsel makes the call. Counsel has not made it yet." : "Clocks start only when counsel makes the call.");
   },
 };
 
-const personIsAgent = (who: Speaker) => who in AGENT_ICON;
+function taskRow(t: Task): string {
+  return `<div class="task"><div><b>${linkHosts(t.title)}</b><span>${esc(roleLabel(t.ownerRole))}</span></div>
+    <button type="button" class="chip task-st" data-task="${t.id}" data-tone="${TASK_TONE[t.status]}" data-target="task:${t.id}" title="Click to move to ${TASK_LABEL[nextTaskStatus(t.status)]}"><i></i><span>${TASK_LABEL[t.status]}</span></button></div>`;
+}
+
+/** Click on a task chip: advance it open -> in progress -> done -> open. */
+export function cycleTask(id: number): boolean {
+  const d = data();
+  const t = d.tasks().find((x) => x.id === id);
+  if (!t) return false;
+  return d.setTaskStatus(id, nextTaskStatus(t.status)).ok;
+}

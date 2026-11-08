@@ -2,7 +2,6 @@ import "./style.css";
 
 import {
   APPROVAL_AT,
-  APPROVER,
   CANON_APPROVE,
   CONTAINED_AT,
   ISOLATE_DUR,
@@ -17,6 +16,7 @@ import {
   S,
   U,
   VIEWS,
+  isLive,
   phase,
   setOpen,
   isOpen,
@@ -25,7 +25,7 @@ import {
 } from "./engine";
 import { $, $$, installSprings, setAttr, syncDisclosures } from "./dom";
 import { FacilityMap } from "./map";
-import { mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
+import { flyFacility, mountFacility3D, nudgeFacilityResize, setFacilitySelection, setFacilityVisible, setPickHandler, stageMode, syncFacility3D } from "./facility3d";
 import { renderSheet, renderShell, shellHTML, sheetWanted } from "./shell";
 import { parseHost } from "./hosts";
 import { overview } from "./views/overview";
@@ -33,12 +33,20 @@ import { incident } from "./views/incident";
 import { agents } from "./views/agents";
 import { policy } from "./views/policy";
 import { reports } from "./views/reports";
-import { selectChannel, warroom } from "./views/warroom";
+import { cycleTask, selectChannel, warroom } from "./views/warroom";
 import { shells } from "./views/shells";
-import { liveView } from "./views/live";
-import { approve as liveApprove, connect as liveConnect, live, proposeReimage } from "./live";
+import { scope, applyAssetStatus, setScopeFilter } from "./views/scope";
+import { access, cancelCode, closePerson, copyCode, issueCode, openPerson, pickRole, personSheetOpen, revoke, showCode } from "./views/access";
+import { anchorEvidence, exportReport } from "./views/reports";
+import { integrations, retryIntegrations, toggleFeature } from "./views/integrations";
+import { copyIdentity, leaveToReplay, submitJoin } from "./views/join";
+import { canApprove, data, scriptedSource, selectSource, setDataSource, type AssetStatus, type DataSource, type OperatorRole } from "./data";
+import { LiveSource, resolveServer } from "./data/live";
+import { debugState, enterLive, leaveLive, liveFrame, liveSource } from "./live-engine";
+import { bootFeatures, features, resolveGateway } from "./features";
+import { toast } from "./toast";
 
-const VIEW_MODULES = { overview, incident, live: liveView, warroom, shells, agents, policy, reports } as const;
+const VIEW_MODULES = { overview, incident, warroom, scope, shells, agents, policy, reports, integrations, access } as const;
 
 // ------------------------------------------------------------------ boot DOM
 let map!: FacilityMap;
@@ -127,8 +135,8 @@ function render() {
   VIEW_MODULES[S.view].render(ph);
   syncDisclosures();
   renderSheet(ph);
-  if (S.view === "overview" || S.view === "incident") map.draw({ amb: S.amb, started: S.started, r: S.started ? S.r : -1e9, u: U() });
-  syncFacility3D(ph, S.r);
+  if ((S.view === "overview" || S.view === "incident") && stageMode() !== "mounted") map.draw({ amb: S.amb, started: S.started, r: S.started ? S.r : -1e9, u: U() });
+  syncFacility3D(ph, S.r, S.view === "incident");
   if (S.hostSheet !== lastHost) {
     lastHost = S.hostSheet;
     setFacilitySelection(lastHost); // outline the host in the 3D scene while its sheet is open
@@ -145,7 +153,8 @@ function frame(now: number) {
   const dt = Math.min(0.25, Math.max(0, (now - last) / 1000));
   last = now;
   S.amb += dt;
-  if (S.running) {
+  if (isLive()) liveFrame(dt); // live: the script clock follows the SpacetimeDB rows (live-engine.ts)
+  else if (S.running) {
     S.r += dt;
     if (S.A === null && S.autoApprove !== null) {
       const when = Math.max(S.autoApprove, APPROVAL_AT);
@@ -186,23 +195,24 @@ function ownerView(key: string): View | null {
 function reveal(key: string, smooth: boolean) {
   const el = document.querySelector(`.disc[data-key="${key}"]`) as HTMLElement | null;
   if (!el) return;
-  const target = (el.closest(".agent-card, .rep") as HTMLElement | null) ?? el;
+  const target = key.startsWith("rs:") ? el : ((el.closest(".agent-card, .rep") as HTMLElement | null) ?? el); // report sections scroll to themselves
   const sc = $("#scroll");
   const run = () => {
     const sr = sc.getBoundingClientRect();
     const r = target.getBoundingClientRect();
     if (r.top >= sr.top + 90 && r.bottom <= sr.bottom - 12) return;
-    sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - 24), behavior: smooth ? "smooth" : "auto" });
+    sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - 100), behavior: smooth ? "smooth" : "auto" });
   };
   if (smooth) window.setTimeout(run, 280);
   else run();
 }
 function knownKey(key: string) {
-  return !!document.querySelector(`.disc[data-key="${key}"]`);
+  return key === "isolation" || !!document.querySelector(`.disc[data-key="${key}"]`);
 }
 
 const api = {
   reset() {
+    if (isLive()) return; // live: the incident is whatever the database says
     settle(() => {
       S.started = false;
       S.running = false;
@@ -212,11 +222,15 @@ const api = {
       S.ambFrozen = null;
       S.stepOv.clear();
       S.sheetDismissed = false;
+      S.popover = null;
       clearStream();
+      data().reset?.();
+      closePerson();
     });
   },
   /** Run the incident from T+0. Optional { approveAt } auto-approves at that script time (canonical 7.4). */
   play(opts: { approveAt?: number } = {}) {
+    if (isLive()) return;
     if (S.started) api.reset();
     S.ambFrozen = AMB_PREFILL + Math.floor(S.amb / AMB_DT);
     S.started = true;
@@ -230,7 +244,9 @@ const api = {
   },
   /** Approve the quarantine step (same as the button or ⌘↵). */
   approve() {
+    if (isLive()) return liveApprove();
     if (!S.started || S.A !== null) return false;
+    if (!canApprove(data().me().role)) return false; // backend: approve() needs admin or commander
     if (S.r < APPROVAL_AT) {
       S.autoApprove = APPROVAL_AT; // queue: approve the moment the gate opens
       return true;
@@ -253,6 +269,7 @@ const api = {
   },
   /** Jump to script time t (seconds) and hold. approveAt defaults to 7.4. */
   seek(t: number, opts: { approveAt?: number | null; run?: boolean; report?: boolean } = {}) {
+    if (isLive()) return;
     settle(() => {
       const ap = opts.approveAt === undefined ? CANON_APPROVE : opts.approveAt;
       if (!S.started) S.ambFrozen = AMB_PREFILL;
@@ -277,7 +294,7 @@ const api = {
   },
 
   // ---- navigation + disclosures (new)
-  /** 'overview' | 'incident' | 'agents' | 'policy' | 'reports' */
+  /** 'overview' | 'incident' | 'warroom' | 'scope' | 'shells' | 'agents' | 'policy' | 'reports' | 'access' */
   go(view: View) {
     if (!VIEWS.includes(view)) return false;
     if (view === S.view) return true;
@@ -290,6 +307,7 @@ const api = {
    *  'agent:sentry|triage|warden|scribe' | 'report:INC-0419' (+ older ids) | 'authorized' | 'files'. */
   expand(key: string, opts: { scroll?: boolean } = {}) {
     if (!knownKey(key)) return false;
+    if (key === "isolation") return api.popover("isolation");
     const owner = ownerView(key);
     if (owner && owner !== S.view && document.body.dataset.sheet !== "1") api.go(owner);
     setOpen(key, true);
@@ -299,6 +317,7 @@ const api = {
   },
   collapse(key: string) {
     if (!knownKey(key)) return false;
+    if (key === "isolation") return api.popover(null);
     setOpen(key, false);
     syncDisclosures();
     return true;
@@ -307,7 +326,7 @@ const api = {
     return isOpen(key) ? api.collapse(key) : api.expand(key);
   },
   isOpen(key: string) {
-    return isOpen(key);
+    return key === "isolation" ? S.popover === "isolation" : isOpen(key);
   },
   keys() {
     return Array.from(new Set($$(".disc[data-key]").map((e) => e.dataset.key!)));
@@ -350,6 +369,90 @@ const api = {
     render();
     return true;
   },
+  // ---- access control, scope, documentation (new)
+  /** Open or close the "Isolated · out-of-band" popover: popover('isolation') | popover(null). */
+  popover(name: "isolation" | null) {
+    S.popover = name;
+    render();
+    return true;
+  },
+  /** Open the Add person sheet (admins only). { name, role } prefill it; { issue: true } issues the code at once. */
+  addPerson(opts: { name?: string; role?: OperatorRole; issue?: boolean } = {}) {
+    if (S.view !== "access") api.go("access");
+    const ok = openPerson(opts);
+    render();
+    return ok;
+  },
+  closePerson() {
+    const ok = closePerson();
+    render();
+    return ok;
+  },
+  /** Print INC-0419 as a clean PDF (window.print with the print stylesheet). */
+  exportReport() {
+    if (S.view !== "reports") api.go("reports"); // the document is only drawn while its view is on screen
+    return exportReport();
+  },
+  /** Sign in as someone else in the scripted data to see the console with their role: 'JT', 'legal', 'AL'... */
+  as(who: string) {
+    if (isLive()) return false; // live: you are whoever your enrollment says
+    const ok = scriptedSource.setIdentity(who);
+    render();
+    return ok;
+  },
+  /** Scripted only: the person behind the newest unused break-glass code enrolls on their own device. */
+  simulateEnroll(code?: string) {
+    if (isLive()) return false;
+    const r = scriptedSource.simulateEnroll(code);
+    render();
+    return r.ok;
+  },
+  /** Swap the data source (a LiveSource) without touching any view. */
+  setDataSource(src: DataSource) {
+    setDataSource(src);
+    render();
+  },
+  /** Pick a registered source by name ('scripted', or 'live' once a LiveSource registers itself). */
+  async useSource(name: string) {
+    if (name === "live") return startLive(new URLSearchParams(location.search));
+    if (name === "scripted" && isLive()) stopLive();
+    const ok = await selectSource(name);
+    if (ok) render();
+    return ok;
+  },
+  /** Live mode, for tests and recorders: the connection, who you are, and what the adapter derived from the rows. */
+  get live() {
+    const s = liveSource();
+    if (!s) return null;
+    return {
+      server: { ...s.server },
+      link: s.linkState(),
+      access: s.access(),
+      identity: s.identityHex(),
+      applied: s.isApplied(),
+      state: () => debugState(),
+      enroll: (code: string, name = "") => s.enroll(code, name),
+      approve: () => s.approvePending(),
+      forgetIdentity: () => s.forgetIdentity(),
+      /** call fn right when rows change (as the SDK delivers them); returns the unsubscribe */
+      watch: (fn: () => void) => s.watch(fn),
+      /** test aid: drop the socket; the console reconnects by itself and keeps its rows meanwhile */
+      dropConnection: () => s.dropConnection(),
+    };
+  },
+  /** The feature gateway: what it listed and whether its client module loaded. */
+  get features() {
+    return { gateway: features.gateway, base: features.base, list: features.list.map((f) => ({ ...f })), moduleLoaded: features.moduleLoaded, error: features.error };
+  },
+  /** Fly the 3D camera by hand: fly3d('hallB') or fly3d({ preset: 'rack14', w: 8, h: 6.3 }). Holds until the phase changes. */
+  fly3d(cam: Parameters<typeof flyFacility>[0]) {
+    return flyFacility(cam);
+  },
+  /** The active data source, for recorders and tests: window.claura.data.assets() ... */
+  get data(): DataSource {
+    return data();
+  },
+
   /** Click targets in CSS px (centre + size) for driving a real cursor. visible=false when off-screen or hidden. */
   targets() {
     const out: Record<string, { x: number; y: number; w: number; h: number; visible: boolean }> = {};
@@ -474,21 +577,85 @@ function voiceCall(fn: "toggle" | "playBrief", btn: HTMLElement) {
   return true;
 }
 
+/** Print the break-glass card for the code on screen (the print stylesheet shows only #printCard). */
+function printCard() {
+  document.body.dataset.print = "card";
+  const off = () => {
+    delete document.body.dataset.print;
+    window.removeEventListener("afterprint", off);
+  };
+  window.addEventListener("afterprint", off);
+  window.requestAnimationFrame(() => window.print());
+}
+
+// ------------------------------------------------------------------ live mode
+/** Approve the pending quarantine through the module's approve reducer (it records the approver from the caller's identity). */
+function liveApprove(): boolean {
+  const s = liveSource();
+  if (!s || !s.pendingApproval()) return false;
+  const me = s.me();
+  if (!canApprove(me.role)) return false;
+  void s.approvePending();
+  return true;
+}
+/** Select the SpacetimeDB source: connect, route the engine to the rows, and say so in the isolation popover. */
+async function startLive(params: URLSearchParams): Promise<boolean> {
+  if (isLive()) return true;
+  const src = new LiveSource(resolveServer(params));
+  setDataSource(src);
+  enterLive(src);
+  src.onNotice((n) => toast(n.text, n.kind));
+  src.start();
+  S.started = false;
+  S.running = false;
+  render();
+  return true;
+}
+function stopLive() {
+  liveSource()?.stop();
+  leaveLive();
+  setDataSource(scriptedSource);
+  delete document.body.dataset.source;
+  api.reset();
+}
+
 // ------------------------------------------------------------------ input
 document.addEventListener("click", (e) => {
   const t = e.target as HTMLElement;
 
-  const hostEl = t.closest("[data-host]") as HTMLElement | null;
-  if (hostEl) return void api.openHost(hostEl.dataset.host!);
+  // popovers close on any click outside them (the click itself still goes through)
+  if (S.popover && !t.closest("#isoPop") && !t.closest("#isoBtn")) S.popover = null;
+  if (t.closest("#isoBtn")) return void (S.popover = S.popover === "isolation" ? null : "isolation");
 
-  const lv = t.closest("[data-live]") as HTMLElement | null;
-  if (lv) {
-    const a = lv.dataset.live;
-    if (a === "approve") void liveApprove(APPROVER.initials);
-    else if (a === "approve-agent") void liveApprove("warden");
-    else if (a === "reimage") void proposeReimage();
+  // access control, data scope and tasks
+  const roleOpt = t.closest("[data-role-pick]") as HTMLElement | null;
+  if (roleOpt) return void pickRole(roleOpt.dataset.rolePick!);
+  const setSt = t.closest("[data-set-status]") as HTMLElement | null;
+  if (setSt) {
+    const note = setSt.closest(".as-set")?.querySelector(".as-note-in") as HTMLInputElement | null;
+    return void applyAssetStatus(+setSt.dataset.asset!, setSt.dataset.setStatus as AssetStatus, note);
+  }
+  const filt = t.closest("[data-sc-filter]") as HTMLElement | null;
+  if (filt) return void setScopeFilter(filt.dataset.scFilter!);
+  const taskSt = t.closest(".task-st[data-task]") as HTMLElement | null;
+  if (taskSt) return void cycleTask(+taskSt.dataset.task!);
+  if (t.closest("#issueBtn")) return void issueCode();
+  if (t.closest("#personCancel") || t.closest("#codeDone")) return void closePerson();
+  if (t.closest("#copyBtn")) return void copyCode();
+  if (t.closest("#printBtn")) return void printCard();
+
+  // live: the break-glass sheet
+  if (t.closest("#joinBtn")) return void submitJoin();
+  if (t.closest("#joinCopy")) return void copyIdentity();
+  if (t.closest("#joinReplay") || t.closest("#offReplay")) return void leaveToReplay();
+  if (t.closest("#offRetry")) return void liveSource()?.retryNow();
+  if (t.closest("#offForget")) {
+    if (window.confirm("Forget this device's identity? You will need a new break-glass code to join again.")) liveSource()?.forgetIdentity();
     return;
   }
+
+  const hostEl = t.closest("[data-host]") as HTMLElement | null;
+  if (hostEl) return void api.openHost(hostEl.dataset.host!);
 
   const d = t.closest("[data-disc]") as HTMLElement | null;
   if (d) return void api.toggle(d.dataset.disc!);
@@ -506,6 +673,15 @@ document.addEventListener("click", (e) => {
       api.go("incident");
       api.play();
     } else if (a === "reset") api.reset();
+    else if (a === "add-person") api.addPerson();
+    else if (a === "show-code") void showCode(act.dataset.ref!);
+    else if (a === "cancel-code") void cancelCode(act.dataset.ref!);
+    else if (a === "revoke") void revoke(act.dataset.key!);
+    else if (a === "sim-enroll") api.simulateEnroll();
+    else if (a === "export") void exportReport();
+    else if (a === "anchor") void anchorEvidence();
+    else if (a === "int-open") void toggleFeature(act.dataset.target!.replace(/^int-open:/, ""));
+    else if (a === "int-retry") retryIntegrations();
     return;
   }
 
@@ -541,31 +717,34 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("submit", (e) => {
   const f = e.target as HTMLElement;
-  if (f.id === "lvForm") {
-    e.preventDefault();
-    const uri = ($("#lvUri") as HTMLInputElement).value.trim() || live.uri;
-    const db = ($("#lvDb") as HTMLInputElement).value.trim() || live.db;
-    try {
-      localStorage.setItem("claura-live", JSON.stringify({ uri, db }));
-    } catch {
-      // storage blocked: the address lasts for this visit
-    }
-    void liveConnect(uri, db);
-    return;
-  }
   if (f.id !== "wrForm") return;
   e.preventDefault();
   const input = $("#wrInput") as HTMLInputElement;
-  if (warroom.send(input.value)) input.value = "";
+  if (isLive()) {
+    // live: warroom.send() answers with the refusal text, or null once the message is on its way
+    const err = warroom.send(input.value);
+    if (err && err !== "Nothing to send") toast(err, "error");
+    else if (!err) input.value = "";
+  } else if (warroom.send(input.value)) input.value = "";
   render();
 });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
-    if (S.view === "live") void liveApprove(APPROVER.initials);
-    else api.approve();
+    api.approve();
   } else if (e.key === "Escape") {
-    if (!api.closeHost()) api.closeApproval();
+    if (S.popover) S.popover = null;
+    else if (personSheetOpen()) closePerson();
+    else if (!api.closeHost()) api.closeApproval();
+  } else if (e.key === "Enter" && ((e.target as HTMLElement).id === "joinCode" || (e.target as HTMLElement).id === "joinName")) {
+    e.preventDefault();
+    submitJoin();
+  } else if (e.key === "Enter" && (e.target as HTMLElement).id === "pName") {
+    e.preventDefault();
+    issueCode();
+  } else if ((e.key === "Enter" || e.key === " ") && (e.target as HTMLElement).matches?.("[data-go][role=link]")) {
+    e.preventDefault();
+    (e.target as HTMLElement).click();
   } else if ((e.key === "Enter" || e.key === " ") && (e.target as HTMLElement).classList?.contains("switch")) {
     e.preventDefault();
     (e.target as HTMLElement).click();
@@ -573,20 +752,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ------------------------------------------------------------------ boot
-/** The Live view's address: ?stdb=ws://host:port and ?db=name win, then the last address used, then the defaults. */
-function loadLiveAddress(params: URLSearchParams) {
-  let saved: { uri?: string; db?: string } = {};
-  try {
-    saved = JSON.parse(localStorage.getItem("claura-live") ?? "{}");
-  } catch {
-    // storage blocked or empty
-  }
-  live.uri = params.get("stdb") ?? saved.uri ?? live.uri;
-  live.db = params.get("db") ?? saved.db ?? live.db;
-}
-
 installSprings();
-loadLiveAddress(new URLSearchParams(location.search));
 build();
 exposeApi();
 setPickHandler((id) => void api.openHost(id));
@@ -594,6 +760,15 @@ void mountFacility3D(stageEl);
 
 const params = new URLSearchParams(location.search);
 S.demo = params.get("demo") === "1";
+// ?live=1 (or ?source=live) reads the SpacetimeDB rows. The scripted replay stays the default, and ?demo=1 always means replay
+// (the film is recorded from it). ?stdb=local points live mode at the local appliance instead of Maincloud.
+const wantLive = !S.demo && (params.get("live") === "1" || params.get("source") === "live");
+void bootFeatures(resolveGateway(params)); // optional modules from the local gateway; never awaited, never fatal
+if (wantLive) void startLive(params);
+const asParam = params.get("as"); // ?as=JT (or legal, AL, ...): see the console with that person's role (replay only)
+if (asParam && !wantLive) scriptedSource.setIdentity(asParam);
+const sourceParam = params.get("source");
+if (sourceParam && sourceParam !== "scripted" && sourceParam !== "live") void selectSource(sourceParam);
 S.amb = 6.0; // fixed ambient start so first frames are identical every load
 
 const want = params.get("phase");
@@ -604,7 +779,9 @@ settle(() => {
     viewParam && VIEWS.includes(viewParam) ? viewParam : want === "report" ? "reports" : want || tParam !== null ? "incident" : "overview";
   setView(v, false);
 });
-if (tParam !== null) api.seek(parseFloat(tParam));
+if (wantLive) {
+  /* live: the clock follows the rows, nothing to seek */
+} else if (tParam !== null) api.seek(parseFloat(tParam));
 else if (want === "breach") api.seek(4.4, { approveAt: null });
 else if (want === "approval") api.seek(6.8, { approveAt: null });
 else if (want === "contained") api.seek(CANON_APPROVE + SCRIPT_END_U);
@@ -620,11 +797,13 @@ if (expand)
   });
 const channelParam = params.get("channel"); // ?channel=exec (or %23exec)
 if (channelParam) selectChannel(channelParam);
+if (params.get("pop") === "isolation") S.popover = "isolation"; // ?pop=isolation
+const sheetParam = params.get("sheet"); // ?sheet=person (form) | person-code (code issued)
+if (sheetParam === "person" || sheetParam === "person-code")
+  settle(() => void api.addPerson({ name: "Forensics lead", role: "responder", issue: sheetParam === "person-code" }));
 const hostParam = params.get("host"); // ?host=b14-gpu-07 opens its Host sheet
 if (hostParam) settle(() => void api.openHost(hostParam));
-// ?live=1 connects the Live view to SpacetimeDB (address set before build(), see loadLiveAddress).
-if (params.get("live") === "1" || params.has("stdb")) void liveConnect();
-if (params.get("play") === "1") api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });
+if (params.get("play") === "1" && !wantLive) api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });
 
 document.fonts.ready.then(() => {
   map.resize();

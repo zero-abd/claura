@@ -1,0 +1,76 @@
+<template>
+  <!-- 27. "Next: an immune system for every AI cloud, sharing attack fingerprints, never tenant data." ROADMAP.
+       The contained DFW-2 facility (3D, slow orbit) pulls back to become one node of a calm glass network of AI clouds;
+       an attack fingerprint travels from it to every node; "never tenant data" stays put. -->
+  <style>
+    /*COMMON*/
+    #{{P}}glw { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+    #{{P}}gl { position: absolute; inset: 0; }
+    #{{P}}frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 120px; opacity: 0; box-shadow: inset 0 0 0 7px rgba(255, 255, 255, 0.5); }
+    #{{P}}tag { left: 48px; top: 30px; }
+    #{{P}}links { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    #{{P}}stage .node { position: absolute; width: 230px; height: 150px; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+    #{{P}}stage .node .nl { font: 600 28px/1 var(--font); letter-spacing: -0.014em; color: var(--ink-2); white-space: nowrap; }
+    #{{P}}stage .fp { position: absolute; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: rgba(255, 90, 31, 0.92); box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.45); opacity: 0; }
+    #{{P}}fpc { left: 768px; top: 64px; height: 64px; font-size: 28px; }
+    #{{P}}ntd { left: 760px; top: 760px; height: 64px; font-size: 28px; }
+    #{{P}}dfw { position: absolute; left: 860px; top: 698px; width: 200px; text-align: center; font: 600 28px/1 var(--font); color: var(--ink-2); opacity: 0; }
+  </style>
+  {{ (() => {
+    const cx = 960, cy = 530, rx = 650, ry = 300;
+    globalThis.__vn = [0, 60, 120, 180, 240, 300].map((a) => ({ x: Math.round(cx + rx * Math.cos((a * Math.PI) / 180)), y: Math.round(cy + ry * Math.sin((a * Math.PI) / 180)) }));
+    return '';
+  })() }}
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle"><div id="{{P}}cam" class="cam">
+        <svg id="{{P}}links" viewBox="0 0 1920 1080" aria-hidden="true" data-layout-ignore>
+{{ __vn.map((n, i) => `          <path id="${P}ln${i}" d="M960 530 L${n.x} ${n.y}" fill="none" stroke="rgba(255,255,255,0.34)" stroke-width="2.5" />`).join('\n') }}
+{{ __vn.map((n, i) => { const m = __vn[(i + 1) % 6]; return `          <path id="${P}lr${i}" d="M${n.x} ${n.y} L${m.x} ${m.y}" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2" stroke-dasharray="6 10" />`; }).join('\n') }}
+        </svg>
+        <div id="{{P}}glw"><div id="{{P}}gl" data-layout-allow-overflow></div><i id="{{P}}frame"></i></div>
+{{ __vn.map((n, i) => `        <div id="${P}n${i}" class="node glass" style="left:${n.x - 115}px; top:${n.y - 75}px"><svg viewBox="24 17 209 222" width="44" height="47" aria-hidden="true"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg><span class="nl">AI cloud</span></div>`).join('\n') }}
+{{ __vn.map((n, i) => `        <div id="${P}fp${i}" class="fp"><svg class="ico" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.2 5.6A8 8 0 0 1 20 12c0 1.6-.2 3.2-.6 4.6M4 9.2A8 8 0 0 0 4 12v3.4M8.4 19.6c.8-2.4 1.2-5 1.2-7.6a2.4 2.4 0 0 1 4.8 0c0 3-.4 5.8-1.4 8.4M12 12c0 3.2-.6 6.2-1.8 8.8M16.6 14.4c-.2 1.8-.6 3.6-1.2 5.2"/></svg></div>`).join('\n') }}
+        <div id="{{P}}dfw">DFW-2</div>
+        <div id="{{P}}fpc" class="chip glass pill"><!--KIT:icon name="fingerprint" size=32 stroke=1.8-->Attack fingerprints, shared</div>
+        <div id="{{P}}ntd" class="chip glass pill"><!--KIT:icon name="lock" size=32 stroke=1.8-->Never tenant data</div>
+        <div id="{{P}}tag" class="tag glass pill hot"><i></i>Roadmap</div>
+      </div></div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script src="assets/vendor/facility.global.min.js"></script>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}}, p = {{json(timed(p))}}, N = {{json(__vn)}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S, { morph: { out: [P + 'links', P + 'fpc', P + 'ntd', P + 'tag', P + 'dfw'].concat(N.map((n, i) => P + 'n' + i), N.map((n, i) => P + 'fp' + i)), inner: [P + 'glw'] } });
+      K.facility({ el: P + 'gl', key: '{{ID}}', from: S.from, dur: S.dur, track: p.track });
+      K.blurLine(tl, P + 'tag', {{at('Next')}});
+      // one facility becomes one node among many
+      const every = {{at('every AI cloud')}} - 0.45, k = 0.3;
+      tl.fromTo(P + 'glw', { scale: 1, x: 0, y: 0, transformOrigin: '960px 530px' }, { scale: k, duration: 1.25, ease: 'power3.inOut' }, every);
+      tl.fromTo(P + 'frame', { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.inOut' }, every + 0.5);
+      K.blurLine(tl, P + 'dfw', every + 1.0);
+      N.forEach((n, i) => {
+        K.glassIn(tl, P + 'n' + i, every + 0.55 + i * 0.07, { from: 0.85, dur: 0.6 });
+        tl.fromTo(P + 'ln' + i, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, every + 0.75 + i * 0.07);
+        tl.fromTo(P + 'lr' + i, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, every + 1.0 + i * 0.05);
+      });
+      // a fingerprint leaves the facility for every node at once
+      const fpT = {{at('attack fingerprints')}};
+      K.land(tl, P + 'fpc', fpT - 0.3, { from: 0.9, blur: 10, dur: 0.5 });
+      N.forEach((n, i) => {
+        tl.set(P + 'fp' + i, { x: 960, y: 530 }, 0);
+        tl.fromTo(P + 'fp' + i, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power2.out' }, fpT);
+        tl.fromTo(P + 'fp' + i, { x: 960, y: 530 }, { x: n.x, y: n.y - 2, duration: 0.85, ease: 'power2.inOut', immediateRender: false }, fpT + 0.05);
+        tl.to(P + 'fp' + i, { scale: 0.62, duration: 0.3, ease: 'power2.out' }, fpT + 0.9);
+      });
+      // what never travels
+      K.land(tl, P + 'ntd', {{at('never tenant data')}} - 0.1, { from: 0.9, blur: 10, dur: 0.5 });
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

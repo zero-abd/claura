@@ -28,6 +28,12 @@ export function clip(s: string, n: number): string {
   return one.length <= n ? one : one.slice(0, Math.max(0, n - 1)) + '…';
 }
 
+/** Truncate but keep line breaks (clip() flattens them). */
+export function cut(s: string, n: number): string {
+  const t = s.trim();
+  return t.length <= n ? t : t.slice(0, Math.max(0, n - 1)) + '…';
+}
+
 export function errMsg(e: unknown): string {
   if (e instanceof Error) return e.message || e.name;
   return String(e);

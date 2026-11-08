@@ -255,7 +255,7 @@ function sceneCtx(sp) {
     if (Array.isArray(v)) return v.map(timed);
     if (v && typeof v === 'object') {
       const o = {};
-      for (const [k, x] of Object.entries(v)) o[k] = (k === 't' || k === 'at' || k === 'until') && x !== undefined && x !== null ? r3(T(x)) : timed(x);
+      for (const [k, x] of Object.entries(v)) o[k] = (k === 't' || k === 'at' || k === 'until' || /^[a-z]+(At|Until)$/.test(k)) && x !== undefined && x !== null && (typeof x !== 'object' || x.phrase || x.abs !== undefined || x.cue) ? r3(T(x)) : timed(x);
       return o;
     }
     return v;
@@ -277,8 +277,20 @@ function sceneCtx(sp) {
       return [cue(name, fallback)];
     },
     w: (i) => local(WORDS[i].s), we: (i) => local(WORDS[i].e), W: (i) => WORDS[i].s, WE: (i) => WORDS[i].e,
-    json, esc, words,
+    json, esc, words, still,
   };
+}
+
+// a freeze frame of a clip at clip time t (a hold in a footage map), extracted once with ffmpeg into assets/clips/stills/
+function still(src, t) {
+  const dir = 'assets/clips/stills';
+  fs.mkdirSync(dir, { recursive: true });
+  const out = path.join(dir, `${path.basename(src, path.extname(src))}${src.includes('/proxy/') ? '-proxy' : ''}-${(+t).toFixed(3)}.png`);
+  if (!fs.existsSync(out)) {
+    if (!fs.existsSync(src)) throw new Error(`still: ${src} missing`);
+    execFileSync(FFMPEG, ['-v', 'error', '-ss', (+t).toFixed(3), '-i', src, '-frames:v', '1', '-y', out], { stdio: ['ignore', 'pipe', 'pipe'] });
+  }
+  return out;
 }
 
 // ------------------------------------------------------------------ media durations (ffmpeg)
@@ -311,7 +323,9 @@ function captionData() {
       let j = i, txt = '';
       while (j < WORDS.length && letter(WORDS[j])) { txt += WORDS[j].text[0]; j++; }
       const tail = WORDS[j - 1].text.slice(2);
-      toks.push({ text: txt + tail, s: w.s, e: WORDS[j - 1].e });
+      const nx = WORDS[j];
+      const stop = !tail && nx && /^[A-Z][a-z]/.test(nx.text) && /\.$/.test(WORDS[j - 1].text);
+      toks.push({ text: txt + (stop ? '.' : tail), s: w.s, e: WORDS[j - 1].e });
       i = j - 1;
     } else toks.push({ text: w.text, s: w.s, e: w.e });
   }
@@ -346,6 +360,8 @@ function captionData() {
     let best = Math.round(size);
     // prefer a break just after a comma near the balanced point
     for (let d = 0; d <= 2; d++) for (const c of [Math.round(size) + d, Math.round(size) - d]) if (c > 0 && c < g.length && /[,;:—]$/.test(g[c - 1].text)) { best = c; d = 9; break; }
+    // else break before a preposition or conjunction near the middle ("breaking out | of its virtual machine")
+    if (!/[,;:—]$/.test(g[best - 1]?.text || '')) for (let d = 0; d <= 1; d++) for (const c of [Math.round(size) + d, Math.round(size) - d]) if (c > 1 && c < g.length - 1 && /^(of|in|with|through|for|to|and|or|on|from|into|via|no|where)$/i.test(g[c].text)) { best = c; d = 9; break; }
     return [...chunk(g.slice(0, best)), ...chunk(g.slice(best))];
   };
   let groups = sentences.flatMap(chunk);
@@ -415,6 +431,57 @@ if (CAPS) {
 for (const f of oldManifest) if (!built.includes(f) && fs.existsSync(f)) { fs.unlinkSync(f); log('removed stale', f); }
 fs.writeFileSync(manifestFile, JSON.stringify(built, null, 1));
 
+
+// ------------------------------------------------------------------ music ducking (volume lane from the VO word times)
+// level(t): 1 in the gaps, 10^(db/20) under speech (attack before a span, release after), lighter (hitDb) for hitHold s
+// from each music hit so the hits land; sampled every 20 ms and simplified (RDP) to at most 512 points.
+function duckLane(d, clipStart, clipDur) {
+  const duck = Math.pow(10, (d.db ?? -7) / 20), hitLvl = Math.pow(10, (d.hitDb ?? -3) / 20);
+  const atk = d.attack ?? 0.12, rel = d.release ?? 0.4, merge = d.merge ?? 0.55, hold = d.hitHold ?? 0.9;
+  const spans = [];
+  for (const w of WORDS) {
+    const last = spans[spans.length - 1];
+    if (last && w.s - last[1] < merge) last[1] = Math.max(last[1], w.e); else spans.push([w.s, w.e]);
+  }
+  const base = (t) => {
+    let v = 1;
+    for (const [a, b] of spans) {
+      if (t < a - atk || t > b + rel) continue;
+      const x = t < a ? 1 + (duck - 1) * ((t - (a - atk)) / atk) : t <= b ? duck : duck + (1 - duck) * ((t - b) / rel);
+      v = Math.min(v, x);
+    }
+    return v;
+  };
+  const level = (t) => {
+    let v = base(t);
+    for (const h of d.hits || []) {
+      const w = t >= h - 0.04 && t <= h + hold ? 1 : t > h + hold && t < h + hold + 0.35 ? 1 - (t - h - hold) / 0.35 : 0;
+      if (w > 0) v = v + w * Math.max(0, hitLvl - v);
+    }
+    return v;
+  };
+  const pts = [];
+  for (let t = 0; t <= clipDur + 1e-9; t += 0.02) pts.push([+t.toFixed(3), +level(clipStart + t).toFixed(4)]);
+  const rdp = (P, eps) => {
+    if (P.length < 3) return P;
+    const [x0, y0] = P[0], [x1, y1] = P[P.length - 1];
+    let iMax = 0, dMax = 0;
+    for (let i = 1; i < P.length - 1; i++) {
+      const [x, y] = P[i];
+      const yl = y0 + ((y1 - y0) * (x - x0)) / (x1 - x0 || 1);
+      const dd = Math.abs(y - yl);
+      if (dd > dMax) { dMax = dd; iMax = i; }
+    }
+    if (dMax <= eps) return [P[0], P[P.length - 1]];
+    return [...rdp(P.slice(0, iMax + 1), eps).slice(0, -1), ...rdp(P.slice(iMax), eps)];
+  };
+  let eps = 0.003, out = rdp(pts, eps);
+  while (out.length > 500) { eps *= 1.5; out = rdp(pts, eps); }
+  const lane = { version: 1, lanes: [{ target: 'volume', points: out.map(([t, v]) => ({ t, v })) }] };
+  log(`music duck lane: ${out.length} points, ${spans.length} speech spans, ${(d.db ?? -7)} dB (hits ${(d.hits || []).join(', ')})`);
+  return JSON.stringify(lane).replace(/"/g, '&quot;');
+}
+
 // ------------------------------------------------------------------ audio: VO, music, SFX
 const audio = [];
 if (cfg.vo?.audio) {
@@ -427,7 +494,8 @@ if (cfg.music?.src) {
     const md = mediaDuration(cfg.music.src);
     const start = cfg.music.start ?? 0;
     const dur = r3(Math.min(TOTAL - start, md ? md - (cfg.music.mediaStart ?? 0) : TOTAL - start));
-    audio.push(`      <audio id="music" class="clip" data-start="${start}" data-duration="${dur}"${cfg.music.mediaStart ? ` data-media-start="${cfg.music.mediaStart}"` : ''} data-track-index="11" data-volume="${cfg.music.volume ?? 0.14}" data-fade-in="${cfg.music.fadeIn ?? 0.4}" data-fade-out="${cfg.music.fadeOut ?? 1.5}" src="${cfg.music.src}"></audio>`);
+    const lane = cfg.music.duck ? duckLane(cfg.music.duck, start, dur) : null;
+    audio.push(`      <audio id="music" class="clip" data-start="${start}" data-duration="${dur}"${cfg.music.mediaStart ? ` data-media-start="${cfg.music.mediaStart}"` : ''} data-track-index="11" data-volume="${cfg.music.volume ?? 0.14}" data-fade-in="${cfg.music.fadeIn ?? 0.4}" data-fade-out="${cfg.music.fadeOut ?? 1.5}"${lane ? ` data-automation="${lane}"` : ''} src="${cfg.music.src}"></audio>`);
   }
 }
 const sfxList = [...(cfg.sfx ?? [])];

@@ -1,0 +1,8 @@
+node_modules/
+# the devnet keypair lives in ~/.config/claura/solana-devnet.json, outside the repo; these keep a stray copy out of git
+solana-devnet*.json
+*keypair*.json
+id.json
+solana-anchors*.jsonl
+.env
+.env.*
