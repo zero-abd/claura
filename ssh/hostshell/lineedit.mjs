@@ -100,8 +100,10 @@ export class LineEditor {
     switch (k) {
       case '\r':
       case '\n': {
-        this.pos = this.buf.length;
-        this.render();
+        if (this.pos !== this.buf.length) {
+          this.pos = this.buf.length;
+          this.render();
+        }
         this.write('\r\n');
         const line = this.buf;
         this.buf = '';

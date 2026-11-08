@@ -1,0 +1,19 @@
+You are a panel of 8 hackathon judges at HackUTD 2026 reviewing pitch drafts for "Claura" (claura.tech): agentic incident response for AI data centers. Read these four drafts fully:
+/Users/abd/repos/claura/pitch/drafts/immune-system.md
+/Users/abd/repos/claura/pitch/drafts/bulkheads.md
+/Users/abd/repos/claura/pitch/drafts/crime-scene.md
+/Users/abd/repos/claura/pitch/drafts/agents-vs-agents.md
+
+Context the judges know: tracks targeted are Winstead PC "Cyber Incident Response Dashboard" (required: (1) highly secure, operating as an isolated system inside potentially compromised networks; (2) access control with admin ability to add individuals; (3) incident documentation reflecting cyber-incident documentation standards with real-time updating and status monitoring; (4) scope definitions: range of compromised data and its status — locked for ransomware, exfiltrated, etc.; (5) real-time communications inside the system; judged on security assuming the attacker has all internal systems, ease of use under stress, creativity; organizer clarified attacker sees normal comms, email sporadic, phones down, nobody has information, stakeholders must coordinate), NMC2 "Keep the World Running" (help data-center teams stay one step ahead: missed warnings, unclear handoffs, wrong info at the wrong time), NVIDIA "Use Nemotron Beyond a Chatbot" (multi-step tool-using agents, real-world applicability), Spacetime "Build on Spacetime" (majority of backend on SpacetimeDB, public repo). Judging is science-fair style, ~3-4 minutes per table; demo video under 2 minutes.
+
+Judge personas:
+1. CISO / veteran security engineer (skeptical of AI hype; false positives, blast radius, auditability, chain of custody)
+2. Seed-stage VC partner (market, why now, wedge, moat, venture scale)
+3. Winstead PC attorney (cyber incident response & privacy; the 5 required components above; comms when email/phones are down; privilege; notification obligations)
+4. NMC2 data-center operations lead (uptime, NOC workflow, handoffs, would my team use it)
+5. NVIDIA developer-relations engineer (genuine Nemotron multi-step tool use, on-prem/sovereign AI, depth)
+6. Clockwork Labs SpacetimeDB engineer (is Spacetime essential: state, reducers, subscriptions, real-time multi-user)
+7. MLH generalist judge (clear in 15 s, wow demo, polish, memorable)
+8. Non-technical first-year student judge (do I understand and remember it)
+
+For EACH persona and EACH draft give: overall score 1-10, one-sentence verdict. Then for each persona: which draft they'd rank first and why, and the 3 most important concrete fixes (with example rewritten wording). Then a final section "SYNTHESIS": the recommended angle (or combination), the 10 best lines across all drafts (verbatim), the 8 biggest weaknesses to fix, how to explicitly hit all 5 Winstead requirements in the pitch and demo, and a recommended 2-minute table-pitch outline. Be brutally honest and specific. Do not modify any files. Output markdown.

@@ -25,11 +25,15 @@ export function buildReport(env: Env, inc: IncidentRow): string {
   parts.push(`Triage scored the blast radius at ${fresh.blastScore.toFixed(2)}${finding ? `: ${clip(finding.text, 320)}` : '.'}`);
   parts.push(
     executed.length
-      ? `Warden's policy gate executed ${executed.length} reversible actions automatically: ${executed.map(p => `${p.action} (${p.target})`).join(', ')}.`
+      ? `Warden's policy gate executed ${executed.length} action(s) automatically under policy mode auto: ${executed.map(p => `${p.action} (${p.target})`).join(', ')}.`
       : 'No containment action was executed automatically.',
   );
   if (blocked.length) {
-    parts.push(`Policy blocked ${blocked.length} action(s): ${blocked.map(p => `${p.action} (${p.target})`).join(', ')}. ${blocked.some(p => p.reason.includes('RED-TEAM')) ? 'This was a labelled red-team probe, not a model decision.' : ''}`.trim());
+    const probes = blocked.filter(p => p.reason.includes('RED-TEAM'));
+    parts.push(
+      `Policy blocked ${blocked.length} action(s): ${blocked.map(p => `${p.action} (${p.target})`).join(', ')}.` +
+        (probes.length ? ` ${probes.map(p => p.action).join(', ')} was a labelled red-team probe, not a model decision.` : ''),
+    );
   }
   if (approved.length) {
     parts.push(`${approved.map(p => `${p.action} on ${p.target}`).join(', ')} required human approval and was approved by ${approved.map(p => p.decidedBy || 'an operator').join(', ')}.`);

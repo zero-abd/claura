@@ -31,10 +31,12 @@ const INIT = String.raw`(() => {
   const events = (window.__capEvents = [])
   const wall = () => (performance.timeOrigin + performance.now()) / 1000
   const plain = (d) => { try { return d === undefined ? null : JSON.parse(JSON.stringify(d)) } catch { return String(d) } }
-  window.__capLog = (type, detail) => events.push({ t: wall(), type, detail: plain(detail) })
+  // each event also goes to Node at once through the __capPush binding, so a navigation (which resets this array) loses nothing
+  const emit = (type, detail) => { const ev = { t: wall(), type, detail: plain(detail) }; events.push(ev); try { if (window.__capPush) window.__capPush(JSON.stringify(ev)) } catch {} }
+  window.__capLog = emit
   const dispatch = window.dispatchEvent.bind(window)
   window.dispatchEvent = (e) => {
-    try { if (e && /^(bulkhead|claura):/.test(e.type)) events.push({ t: wall(), type: e.type, detail: plain(e.detail) }) } catch {}
+    try { if (e && /^(bulkhead|claura):/.test(e.type)) emit(e.type, e.detail) } catch {}
     return dispatch(e)
   }
   const mount = () => {
@@ -108,6 +110,7 @@ export class Page {
     this.rand = rng(opts.seed ?? 7)
     this.mouse = { x: opts.width * 0.6, y: opts.height * 0.55 }
     this.eventLog = [] // node-side events: {t, type, ...}; t = wall-clock seconds
+    this.pageEvents = [] // events pushed from the page (phase/view changes, passkey requests), same clock
     this.cursorPath = [] // [t, x, y]
     this.problems = [] // console errors, uncaught exceptions, failed requests
     this.authenticator = null
@@ -124,6 +127,10 @@ export class Page {
       for (const [, cb] of this.pending) cb({ error: { message: 'CDP connection closed (Chrome exited or the tab was closed)' } })
       this.pending.clear()
     }
+    this.on('Runtime.bindingCalled', (d) => {
+      if (d.params.name !== '__capPush') return
+      try { this.pageEvents.push(JSON.parse(d.params.payload)) } catch { /* ignore a malformed payload */ }
+    })
     this.on('Runtime.exceptionThrown', (d) => {
       const x = d.params.exceptionDetails
       this.problems.push({ t: wall(), kind: 'exception', text: (x.exception?.description ?? x.text ?? 'exception').split('\n')[0].slice(0, 300), url: x.url, line: x.lineNumber })
@@ -184,6 +191,7 @@ export class Page {
   async setup({ scheme = 'dark', ua = true, cursor = true, lights = false, timezone, locale } = {}) {
     await this.send('Page.enable')
     await this.send('Runtime.enable')
+    await this.send('Runtime.addBinding', { name: '__capPush' })
     await this.send('Log.enable').catch(() => {})
     await this.send('Emulation.setDeviceMetricsOverride', { width: this.W, height: this.H, deviceScaleFactor: this.scale, mobile: false, screenWidth: this.W, screenHeight: this.H })
     await this.send('Emulation.setFocusEmulationEnabled', { enabled: true })
@@ -233,11 +241,9 @@ export class Page {
   log(type, data = {}) { this.eventLog.push({ t: wall(), type, ...data }) }
   mark(label, data = {}) { this.log('mark', { label, ...data }) }
 
-  /** Node-side events plus the in-page ones (app phase/view changes), sorted by time. */
+  /** Node-side events plus the ones the page pushed (app phase/view changes, passkey requests), sorted by time. */
   async events() {
-    let inPage = []
-    try { inPage = (await this.eval('window.__capEvents || []')) ?? [] } catch { /* page navigated away */ }
-    return [...this.eventLog, ...inPage].sort((a, b) => a.t - b.t)
+    return [...this.eventLog, ...this.pageEvents].sort((a, b) => a.t - b.t)
   }
 
   // ------------------------------------------------------------ the app under capture
@@ -380,7 +386,12 @@ export class Page {
     await sleep(opts.settle ?? 140)
     const button = opts.button ?? 'left'
     const mods = (opts.mods ?? []).reduce((a, m) => a | MODS[m], 0)
-    const what = await this.eval(`(() => { const e = document.elementFromPoint(${this.mouse.x}, ${this.mouse.y}); const c = e && e.closest('[data-target]'); return c ? '@' + c.dataset.target : ((e && e.textContent) || '').replace(/\\s+/g, ' ').trim().slice(0, 48) })()`).catch(() => '')
+    const what = await this.eval(`(() => {
+      const e = document.elementFromPoint(${this.mouse.x}, ${this.mouse.y}); if (!e) return ''
+      const c = e.closest('[data-target]'); if (c) return '@' + c.dataset.target
+      const b = e.closest('button,a,[role=button],input,textarea,select,label') || e
+      return (b.getAttribute('aria-label') || b.placeholder || (b.id ? '#' + b.id : '') || (b.textContent || '').replace(/\\s+/g, ' ').trim()).slice(0, 48)
+    })()`).catch(() => '')
     this.log('click', { x: +this.mouse.x.toFixed(1), y: +this.mouse.y.toFixed(1), target: typeof target === 'string' ? target : what, hit: what, button })
     await this.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: this.mouse.x, y: this.mouse.y, button, buttons: button === 'left' ? 1 : 2, clickCount: opts.count ?? 1, modifiers: mods })
     await sleep(opts.hold ?? 70)
@@ -463,6 +474,12 @@ export class Page {
   }
 
   async insert(text) { await this.send('Input.insertText', { text }) }
+
+  /** Empties the focused input/textarea/contenteditable (click it first). */
+  async clearFocused() {
+    await this.eval(`(() => { const e = document.activeElement; if (!e) return; if (e.select) e.select(); else { const r = document.createRange(); r.selectNodeContents(e); const s = getSelection(); s.removeAllRanges(); s.addRange(r) } })()`)
+    await this.key('Backspace')
+  }
 
   // ------------------------------------------------------------ WebAuthn: a virtual authenticator (passkeys without a human)
   /**
@@ -592,10 +609,10 @@ export async function newTab(port, url = 'about:blank') {
  * Connects to the first page whose URL contains `match` (any page when empty) and applies the capture setup.
  * opts: { width=1728, height=1080, scale=2, scheme='dark', match='', seed=7, ua, cursor, lights, timezone, locale }
  */
-export async function connect(port, { width = 1728, height = 1080, scale = 2, scheme = 'dark', match = '', seed = 7, ...setup } = {}) {
+export async function connect(port, { width = 1728, height = 1080, scale = 2, scheme = 'dark', match = '', seed = 7, targetId, ...setup } = {}) {
   const list = await cdpList(port)
   const pages = list.filter((p) => p.type === 'page')
-  const target = pages.find((p) => p.url.includes(match)) ?? (match ? null : pages[0])
+  const target = targetId ? pages.find((p) => p.id === targetId) : (pages.find((p) => p.url.includes(match)) ?? (match ? null : pages[0]))
   if (!target) throw new Error(`no page matching "${match}" on port ${port} (pages: ${pages.map((p) => p.url).join(', ') || 'none'})`)
   const ws = new WebSocket(target.webSocketDebuggerUrl)
   await new Promise((resolve, reject) => {

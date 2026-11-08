@@ -118,7 +118,10 @@ export class MemClauraDb implements ClauraDb {
     if (badTarget) {
       this.log(incidentId, 'blocked', agent, `BLOCKED ${action} on ${target}: unknown host or vm`);
     } else if (status === 'executed') {
-      this.log(incidentId, 'action', agent, `${action} -> ${target}: ${this.applyEffect(inc, action, target)}. Reason: ${reason}`);
+      const detail = this.applyEffect(inc, action, target);
+      this.log(incidentId, 'action', agent, `${action} -> ${target}: ${detail}. Reason: ${reason}`);
+      // like the module: quarantine_host under policy mode auto still contains the incident
+      if (action === 'quarantine_host') this.contain(inc, detail);
     } else if (status === 'pending_approval') {
       inc.status = 'awaiting_approval';
       this.log(incidentId, 'approval_requested', agent, `${action} -> ${target} needs human approval. Reason: ${reason}`);
@@ -151,7 +154,18 @@ export class MemClauraDb implements ClauraDb {
       }
       return `${n} co-resident guests failed over to hall C`;
     }
+    if (action === 'quarantine_host') {
+      const h = this.host.get(target);
+      if (h) h.status = 'quarantined';
+      return `host ${target} quarantined`;
+    }
     return `${action} applied to ${target}`;
+  }
+
+  /** Quarantine contains the incident whoever authorised it; an already-contained incident keeps its contained time. */
+  private contain(inc: IncidentRow, detail: string) {
+    if (inc.status !== 'contained') { inc.status = 'contained'; inc.containedAtMs = this.now(); }
+    this.log(inc.id, 'state', 'system', `${detail}. Incident #${inc.id} contained.`);
   }
 
   async approve(proposalId: bigint, operator: string) {
@@ -162,11 +176,9 @@ export class MemClauraDb implements ClauraDb {
     p.decidedBy = operator;
     this.log(p.incidentId, 'approval', operator, `${operator} approved ${p.action} -> ${p.target}`);
     if (p.action === 'quarantine_host') {
-      const h = this.host.get(p.target);
-      if (h) h.status = 'quarantined';
       const inc = this.incident.get(p.incidentId);
-      if (inc) { inc.status = 'contained'; inc.containedAtMs = this.now(); }
-      this.log(p.incidentId, 'state', 'warden', `Host ${p.target} quarantined. Incident contained.`);
+      const detail = this.applyEffect(inc!, p.action, p.target);
+      if (inc) this.contain(inc, detail);
     }
   }
 

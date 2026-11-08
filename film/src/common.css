@@ -162,7 +162,7 @@
 .dev-screen > img, .dev-screen > video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
 
 /* ------------------------------------------------------------ the cursor (only where the footage has none) */
-.cursor { position: absolute; left: 0; top: 0; width: 52px; height: 52px; z-index: 40; transform-origin: 6px 4px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+.cursor { position: absolute; left: 0; top: 0; width: 52px; height: 52px; z-index: 40; opacity: 0; transform-origin: 11.5px 6.7px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
 
 /* ------------------------------------------------------------ callouts on footage */
 .callout { position: absolute; left: 0; top: 0; transform-origin: 0 50%; }

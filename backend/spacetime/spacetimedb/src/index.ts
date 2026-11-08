@@ -350,6 +350,19 @@ function applyEffect(
   }
 }
 
+/**
+ * Quarantining the suspect host is what contains an incident, whoever authorised it:
+ * a human through `approve`, or the policy table itself when an operator has set
+ * quarantine_host to `auto`. Idempotent: an already-contained incident keeps its
+ * original contained_at.
+ */
+function containIncident(ctx: Ctx, inc: IncidentRow, detail: string): void {
+  if (inc.status !== 'contained') {
+    ctx.db.incident.id.update({ ...inc, status: 'contained', contained_at: ctx.timestamp });
+  }
+  logEvent(ctx, inc.id, 'state', 'system', `${detail}. Incident #${inc.id} contained.`);
+}
+
 function seedPolicy(ctx: Ctx): void {
   const rows: Array<[string, string, boolean, string]> = [
     ['isolate_network', 'auto', true, 'Cut network for the suspect guest. Undo by restoring the security group.'],
@@ -565,6 +578,7 @@ export const record_finding = spacetimedb.reducer(
 /**
  * THE POLICY GATE. An agent proposes an action; the policy table decides.
  *   auto      -> effect applied now, proposal.status = executed
+ *                (quarantine_host under auto also marks the incident contained)
  *   approval  -> proposal.status = pending_approval, incident awaiting_approval
  *   deny / unknown action / unusable target -> proposal.status = blocked
  * An incident_event is always appended.
@@ -659,6 +673,8 @@ export const propose_action = spacetimedb.reducer(
         pol!.reversible ? ', reversible' : ''
       }): ${detail}. Reason: ${reason}`
     );
+    // An operator can set quarantine_host to auto. The quarantine still contains the incident.
+    if (act === 'quarantine_host') containIncident(ctx, inc, detail);
   }
 );
 
@@ -698,18 +714,7 @@ export const approve = spacetimedb.reducer(
     );
 
     if (prop.action === 'quarantine_host') {
-      ctx.db.incident.id.update({
-        ...inc,
-        status: 'contained',
-        contained_at: ctx.timestamp,
-      });
-      logEvent(
-        ctx,
-        inc.id,
-        'state',
-        'system',
-        `${detail}. Incident #${inc.id} contained.`
-      );
+      containIncident(ctx, inc, detail);
     } else {
       // Not the containing step: fall back to open once nothing else is pending.
       const stillPending = [...ctx.db.proposal.iter()].some(

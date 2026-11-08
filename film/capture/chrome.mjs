@@ -75,7 +75,7 @@ export async function cdpVersion(port) {
   } catch { return null }
 }
 
-export function chromeArgs({ port, width, height, scale, profile, headful }) {
+export function chromeArgs({ port, width, height, scale, profile, headful, extraArgs = [] }) {
   return [
     `--remote-debugging-port=${port}`,
     '--remote-debugging-address=127.0.0.1',
@@ -96,6 +96,7 @@ export function chromeArgs({ port, width, height, scale, profile, headful }) {
     '--disable-ipc-flooding-protection',
     // never ask the macOS keychain for anything
     '--password-store=basic', '--use-mock-keychain',
+    ...extraArgs,
   ]
 }
 
@@ -105,7 +106,7 @@ export function chromeArgs({ port, width, height, scale, profile, headful }) {
  * Returns { pid, port, profile, url, version, logFile, started: true, stop() }.
  */
 export async function startChrome(opts = {}) {
-  const { url = 'about:blank', port = DEFAULT_PORT, width = 1728, height = 1080, scale = 2, headful = false, detach = false } = opts
+  const { url = 'about:blank', port = DEFAULT_PORT, width = 1728, height = 1080, scale = 2, headful = false, detach = false, extraArgs = [] } = opts
   if (await portInUse(port)) {
     const v = await cdpVersion(port)
     const known = readState(port)
@@ -119,7 +120,7 @@ export async function startChrome(opts = {}) {
   const out = fs.openSync(logFile, 'w')
   const env = { ...process.env }
   delete env.NODE_USE_SYSTEM_CA
-  const child = spawn(bin, [...chromeArgs({ port, width, height, scale, profile, headful }), url], {
+  const child = spawn(bin, [...chromeArgs({ port, width, height, scale, profile, headful, extraArgs }), url], {
     detached: true, // own process group: `stop` signals the whole tree
     stdio: ['ignore', out, out],
     env,

@@ -69,7 +69,8 @@ export async function runWarden(env: Env, inc: IncidentRow): Promise<AgentOutcom
         if (have(step.action)) continue;
         await pace();
         const target = targetOf(inc, step);
-        const pending = step.action === 'quarantine_host';
+        // Whether this step will wait for a human is the policy table's call, not the playbook's.
+        const pending = env.db.policies().find(p => p.action === step.action)?.mode === 'approval';
         await setState(env, 'warden', pending ? 'Awaiting approval' : 'Executing', `${step.action} -> ${target}: ${step.reason}`, label);
         await proposeThroughGate(env, inc.id, step.action, target, step.reason);
       }
@@ -82,10 +83,20 @@ export async function runWarden(env: Env, inc: IncidentRow): Promise<AgentOutcom
   const order = env.db.proposals(inc.id).filter(p => p.agent === 'warden').map(p => p.action);
   const idx = PLAYBOOK.map(s => order.indexOf(s.action));
   const orderOk = idx.every(i => i >= 0) && idx.every((v, i) => i === 0 || v > idx[i - 1]!);
+  // What state Warden is in depends on what the policy gate ruled for quarantine_host. Normally it is
+  // pending a human; if an operator edited the policy table it may already have run (auto) or been blocked (deny).
   const pend = env.db.proposals(inc.id).find(p => p.action === 'quarantine_host');
-  await setState(env, 'warden', 'Awaiting approval',
-    `Quarantine of ${pend?.target ?? inc.host} needs a human. Reversible containment is in place; waiting for an operator.`,
-    env.opts.scripted ? 'scripted' : outcome.mode === 'fallback' ? 'fallback' : 'model');
+  const who = env.opts.scripted ? 'scripted' : outcome.mode === 'fallback' ? 'fallback' : 'model';
+  if (pend?.status === 'executed') {
+    await setState(env, 'warden', 'Quarantining',
+      `Policy lets quarantine_host run without a human (mode ${pend.policyMode}). Taking ${pend.target} out of the pool.`, who);
+  } else if (pend?.status === 'blocked') {
+    await setState(env, 'warden', 'Blocked',
+      `Policy blocked quarantine_host on ${pend.target} (mode ${pend.policyMode}). Reversible containment is in place; the host stays in the pool until an operator decides.`, who);
+  } else {
+    await setState(env, 'warden', 'Awaiting approval',
+      `Quarantine of ${pend?.target ?? inc.host} needs a human. Reversible containment is in place; waiting for an operator.`, who);
+  }
   return { ...outcome, orderOk };
 }
 

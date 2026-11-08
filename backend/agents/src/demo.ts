@@ -46,12 +46,30 @@ async function replayTelemetry(env: Env): Promise<void> {
   }
 }
 
-/** Wait for a human (dashboard) to approve quarantine_host; optionally auto-approve as RK. */
-async function awaitApproval(env: Env, inc: IncidentRow): Promise<boolean> {
+/**
+ * How the quarantine_host step was settled. Normally a human approves it. 'auto' and 'blocked' only
+ * happen when an operator has edited the policy table (set_policy): the gate, not the runner, decides.
+ */
+export type QuarantineOutcome = 'approved' | 'auto' | 'blocked' | 'timeout';
+
+/**
+ * Settle the quarantine_host proposal. Normally it is pending: wait for a human (dashboard) to approve
+ * it, optionally auto-approving as RK. If policy already ruled on it (auto = it ran, deny = it was
+ * blocked) there is nobody to wait for.
+ */
+async function awaitApproval(env: Env, inc: IncidentRow): Promise<QuarantineOutcome> {
   const { db, log, opts } = env;
   const quarantine = () => db.proposals(inc.id).find(p => p.action === 'quarantine_host');
   const q0 = quarantine();
   if (!q0) throw new Error('no quarantine_host proposal exists to approve');
+  if (q0.status === 'executed') {
+    log.ok('policy', `quarantine_host ran under policy mode "${q0.policyMode}" with no human (operator changed the policy); nothing to approve`);
+    return 'auto';
+  }
+  if (q0.status === 'blocked') {
+    log.error('policy', `quarantine_host was blocked (policy mode "${q0.policyMode}"); the host cannot be quarantined, so the incident stays open`);
+    return 'blocked';
+  }
   const t0 = performance.now();
   const auto = opts.autoApproveAfterS;
   log.info('runner', auto !== undefined
@@ -63,7 +81,7 @@ async function awaitApproval(env: Env, inc: IncidentRow): Promise<boolean> {
     if (q.status === 'approved') {
       log.ok('human', `${q.decidedBy || 'an operator'} approved quarantine_host -> ${q.target}`);
       env.marks.markOnce('approved');
-      return true;
+      return 'approved';
     }
     if (q.status !== 'pending_approval') throw new Error(`quarantine proposal is ${q.status}; cannot wait for approval`);
     const waited = (performance.now() - t0) / 1000;
@@ -78,7 +96,7 @@ async function awaitApproval(env: Env, inc: IncidentRow): Promise<boolean> {
     }
     if (opts.approvalTimeoutS > 0 && waited >= opts.approvalTimeoutS) {
       log.error('runner', `no approval after ${opts.approvalTimeoutS}s; giving up waiting`);
-      return false;
+      return 'timeout';
     }
     if (waited - lastBeat >= 15) {
       lastBeat = waited;
@@ -166,10 +184,15 @@ export async function runDemo(opts: RunOptions, deps: Deps = {}): Promise<RunSum
     }
 
     // ---- 5. human approval -----------------------------------------------
-    await setState(env, 'warden', 'Awaiting approval', `quarantine_host ${inc().host} is pending. Waiting for an operator to approve.`, lbl);
-    const approved = await awaitApproval(env, inc());
-    if (approved) {
-      await setState(env, 'warden', 'Quarantining', `Approved. Taking ${inc().host} out of the pool.`, lbl);
+    if (db.proposals(incidentId).find(p => p.action === 'quarantine_host')?.status === 'pending_approval') {
+      await setState(env, 'warden', 'Awaiting approval', `quarantine_host ${inc().host} is pending. Waiting for an operator to approve.`, lbl);
+    }
+    const quarantine = await awaitApproval(env, inc());
+    if (quarantine === 'approved' || quarantine === 'auto') {
+      await setState(env, 'warden', 'Quarantining',
+        quarantine === 'approved'
+          ? `Approved. Taking ${inc().host} out of the pool.`
+          : `Policy lets this run without a human. Taking ${inc().host} out of the pool.`, lbl);
       await waitFor(() => db.incidents().find(i => i.id === incidentId)?.status === 'contained', {
         timeoutMs: 15_000, label: 'incident to reach contained',
       }).catch(e => log.error('runner', errMsg(e)));

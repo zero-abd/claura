@@ -1,0 +1,6 @@
+<!-- Device frame (window chrome, 28 px corners, soft layered shadow) around a still. Footage beats write their own
+     frame (src/footage.html) because their <video> clips are timed. a.x a.y a.w a.h a.src a.id a.bare -->
+<div id="{{P}}{{a.id || 'dev'}}" class="device{{a.bare ? ' bare' : ''}}" style="left:{{a.x || 0}}px; top:{{a.y || 0}}px; width:{{a.w || 1440}}px; height:{{a.h || 938}}px;">
+  <div class="dev-bar"><div class="dev-lights"><i></i><i></i><i></i></div></div>
+  <div class="dev-screen"><img src="{{a.src}}" alt="" /></div>
+</div>

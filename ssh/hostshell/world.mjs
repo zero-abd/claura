@@ -126,7 +126,7 @@ function buildDomains(w) {
   let id = 3;
   for (const name of incoming) {
     const g = GUESTS.find(([n]) => n === name);
-    doms.push({ id: id++, name, workload: g[1], uuid: uuidOf(name), state: 'running', reason: 'booted', vcpus: 8, memKiB: 33_554_432, cpuTimeS: 12.4 + (id % 5) * 3.1, nic: { name: `vnet-${name.slice(3)}`, mac: macOf(name), attached: true }, pid: 4100 + id * 37, failoverFrom: SUSPECT_HOST, startedSec: 4.9 + (id % 6) * 0.07 });
+    doms.push({ id: id++, name, workload: g[1], uuid: uuidOf(name), state: 'running', reason: 'booted', vcpus: 8, memKiB: 33_554_432, cpuTimeS: 12.4 + (id % 5) * 3.1, nic: { name: `vnet-${name.slice(3)}`, mac: macOf(name), attached: true }, pid: 4100 + id * 37, failoverFrom: SUSPECT_HOST, startedSec: 4.9 + (id - 4) * 0.07 });
   }
   for (const [name, workload] of NATIVE_GUESTS[w.hostId] ?? []) {
     doms.push({ id: id++, name, workload, uuid: uuidOf(name), state: 'running', reason: 'booted', vcpus: 8, memKiB: 33_554_432, cpuTimeS: 90_000 + id * 311.2, nic: { name: `vnet-${name.slice(3)}`, mac: macOf(name), attached: true }, pid: 1900 + id * 41, native: true });

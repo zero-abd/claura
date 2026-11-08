@@ -21,6 +21,7 @@ export async function act(page, ctx) {
 
   // 1. register
   await page.click({ sel: '#input-email' }, { ms: 700 })
+  await page.clearFocused() // webauthn.io remembers the last username
   await page.type(username, { cps: 12 })
   await page.click({ sel: '#register-button' }, { ms: 600 })
   await page.waitUntil(() => auth.added >= 1, { timeout: 15000, label: 'the authenticator to create a credential (Register)' })

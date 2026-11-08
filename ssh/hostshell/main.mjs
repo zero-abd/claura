@@ -70,7 +70,7 @@ const session = {
   user: role, principal, mode, certId: cert.keyId, serial: cert.serial, startedMs,
   validAfterMs: cert.validAfterMs, validBeforeMs: cert.validBeforeMs,
   keyFingerprint: cert.keyFingerprint, caFingerprint: cert.caFingerprint,
-  tty: 'pts/0', pid: process.pid, sshdPid: process.ppid,
+  tty: 'pts/0', pid: process.pid, sshdPid: Math.max(2, process.pid - 2),
   clientPort: Number((process.env.SSH_CLIENT || '').split(' ')[1]) || 51234,
 };
 const world = buildWorld({ hostId, t0, now: startedMs, phase, session });

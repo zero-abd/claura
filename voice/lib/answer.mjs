@@ -46,7 +46,7 @@ function safeParse(s) {
 }
 
 /** Flatten nested JSON into "path: value" lines. Small models read these more reliably than braces. */
-export function flattenFacts(obj, maxChars = 6500) {
+export function flattenFacts(obj, maxChars = 8000) {
   const lines = [];
   const walk = (v, path) => {
     if (v === null || v === undefined || v === '') return;
@@ -63,7 +63,7 @@ export function flattenFacts(obj, maxChars = 6500) {
   return out.length > maxChars ? out.slice(0, maxChars) : out;
 }
 
-export function serializeContext(context, maxChars = 6500) {
+export function serializeContext(context, maxChars = 8000) {
   const s = typeof context === 'string' ? context : JSON.stringify(context);
   if (s.length <= maxChars) return s;
   for (const n of [8, 5, 3, 2, 1]) {
@@ -210,7 +210,7 @@ export function templateAnswer(intent, context, lang = 'en') {
     }
     case 'notifications': out = miscFor('notifications', lang); break;
     case 'detection': out = miscFor('detection', lang); break;
-    default: out = tr(b?.contained ?? context?.incident?.status);
+    default: out = ''; // "other": say so rather than guess
   }
   return withStop(out, lang) || unknown;
 }

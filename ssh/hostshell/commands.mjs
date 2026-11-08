@@ -212,12 +212,10 @@ const w_ = (c) => {
 const last = (c, args) => {
   const n = parseInt(args.find((a) => /^-\d+$/.test(a))?.slice(1) ?? args[args.indexOf('-n') + 1] ?? '20', 10) || 20;
   const rows = c.w.logins.slice(0, n).map((l) => {
-    const user = l.user.padEnd(9);
-    const tty = l.tty.padEnd(12);
-    const from = String(l.from).padEnd(16);
-    if (l.user === 'reboot') return `${user}${tty}${from}${F.lastTime(l.at)}   still running`;
-    const end = l.end ? `- ${F.clock(l.end).slice(0, 5)}  (${F.uptimeText(l.end - l.at).trim().replace(/^0:/, '00:')})` : '  still logged in';
-    return `${user}${tty}${from}${F.lastTime(l.at)} ${end}`;
+    const head = `${l.user.slice(0, 8).padEnd(8)} ${l.tty.slice(0, 12).padEnd(12)} ${String(l.from).slice(0, 16).padEnd(16)} `;
+    if (l.user === 'reboot') return `${head}${F.lastTime(l.at)}   still running`;
+    const end = l.end ? `- ${F.clock(l.end).slice(0, 5)}  (${F.uptimeText(l.end - l.at).trim().replace(/^(\d):/, '0\$1:')})` : '  still logged in';
+    return `${head}${F.lastTime(l.at)} ${end}`;
   });
   const tail = F.parts(c.w.bootMs);
   return ok(`${rows.join('\n')}\n\nwtmp begins ${F.lastTime(c.w.bootMs)}:${tail.ss} ${tail.year}\n`);
@@ -661,6 +659,7 @@ const find = (c, args) => {
 };
 
 // ---------------------------------------------------------------------------------------- system views
+const u8 = (u) => (u.length > 8 ? `${u.slice(0, 7)}+` : u).padEnd(8);
 const trunc = (line, c, full) => (c.tty && !full && line.length > c.cols ? line.slice(0, c.cols) : line);
 const cpuTime = (t) => t;
 
@@ -686,10 +685,10 @@ const ps = (c, args) => {
   if (forest) procs = treeOrder(procs);
   if (aux) {
     header = 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND';
-    fmt = (p) => `${p.user.padEnd(8).slice(0, 8)} ${String(p.pid).padStart(7)} ${p.cpu.toFixed(1).padStart(4)} ${p.mem.toFixed(1).padStart(4)} ${String(p.vsz).padStart(6)} ${String(p.rss).padStart(5)} ${p.tty.padEnd(8)} ${p.stat.padEnd(4)} ${F.psStart(p.startMs, c.now).padEnd(5)} ${p.time.padStart(6)} ${(p.indent ?? '') + p.cmd}`;
+    fmt = (p) => `${u8(p.user)} ${String(p.pid).padStart(7)} ${p.cpu.toFixed(1).padStart(4)} ${p.mem.toFixed(1).padStart(4)} ${String(p.vsz).padStart(6)} ${String(p.rss).padStart(5)} ${p.tty.padEnd(8)} ${p.stat.padEnd(4)} ${F.psStart(p.startMs, c.now).padEnd(5)} ${p.time.padStart(6)} ${(p.indent ?? '') + p.cmd}`;
   } else {
     header = 'UID          PID    PPID  C STIME TTY          TIME CMD';
-    fmt = (p) => `${p.user.padEnd(8).slice(0, 8)} ${String(p.pid).padStart(7)} ${String(p.ppid).padStart(7)}  ${p.cpu >= 1 ? Math.round(p.cpu) : 0} ${F.psStart(p.startMs, c.now).padEnd(5)} ${p.tty.padEnd(8)} ${('00:' + p.time.padStart(5, '0')).padStart(8)} ${(p.indent ?? '') + p.cmd}`;
+    fmt = (p) => `${u8(p.user)} ${String(p.pid).padStart(7)} ${String(p.ppid).padStart(7)}  ${p.cpu >= 1 ? Math.round(p.cpu) : 0} ${F.psStart(p.startMs, c.now).padEnd(5)} ${p.tty.padEnd(8)} ${('00:' + p.time.padStart(5, '0')).padStart(8)} ${(p.indent ?? '') + p.cmd}`;
   }
   const out = [header, ...procs.map(fmt)].map((l) => trunc(l, c, wide));
   return ok(unlines(out));
@@ -718,7 +717,7 @@ const top = (c) => {
     `MiB Mem : ${(m.total / 1024).toFixed(1).padStart(9)} total, ${(m.free / 1024).toFixed(1).padStart(9)} free, ${(m.used / 1024).toFixed(1).padStart(9)} used, ${(m.buffcache / 1024).toFixed(1).padStart(9)} buff/cache`,
     '',
     '    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND',
-    ...procs.map((p) => `${String(p.pid).padStart(7)} ${p.user.padEnd(8).slice(0, 8)}  20   0 ${String(p.vsz).padStart(7)} ${String(p.rss).padStart(6)} ${String(Math.round(p.rss / 8)).padStart(6)} ${p.stat[0]} ${p.cpu.toFixed(1).padStart(5)} ${p.mem.toFixed(1).padStart(5)} ${(p.time + '.00').padStart(9)} ${p.short.split('/').pop()}`),
+    ...procs.map((p) => `${String(p.pid).padStart(7)} ${u8(p.user)}  20   0 ${String(p.vsz).padStart(7)} ${String(p.rss).padStart(6)} ${String(Math.round(p.rss / 8)).padStart(6)} ${p.stat[0]} ${p.cpu.toFixed(1).padStart(5)} ${p.mem.toFixed(1).padStart(5)} ${(p.time + '.00').padStart(9)} ${p.short.split('/').pop()}`),
     '',
   ].join('\n'));
 };
@@ -917,39 +916,41 @@ const virsh = (c, args) => {
 const nvidia_smi = (c, args) => {
   if (c.w.kind === 'bmc') return fail('nvidia-smi: command not found', 127);
   if (args.includes('-L')) return ok(unlines(c.w.gpus.map((g) => `GPU ${g.idx}: ${g.name} (UUID: GPU-${uuidOf(`${c.w.hostId}/gpu${g.idx}`)})`)));
-  if (args.some((a) => ['-r', '--gpu-reset', '-pm', '-e', '-c', '-pl', '--power-limit', '-ac', '-rac', '--lock-gpu-clocks', '--persistence-mode', '-i'].includes(a) && a !== '-i') || args.some((a) => /^--(?:ecc-config|compute-mode|applications-clocks)/.test(a))) {
-    return fail(denial(c, 'nvidia-smi'));
-  }
-  const W = 91;
-  const cells = (a, b, d) => `|${a.padEnd(41)}|${b.padEnd(24)}|${d.padEnd(22)}|`;
-  const rule = (ch, mid = '+') => `${mid}${ch.repeat(41)}${mid}${ch.repeat(24)}${mid}${ch.repeat(22)}${mid}`;
+  const mutating = args.some((a) => ['-r', '--gpu-reset', '-pm', '-e', '-c', '-pl', '--power-limit', '-ac', '-rac', '-lgc', '-rgc', '--lock-gpu-clocks', '--persistence-mode', '--ecc-config', '--compute-mode'].includes(a) || /^--(?:ecc-config|compute-mode|applications-clocks|power-limit)/.test(a));
+  if (mutating) return fail(denial(c, 'nvidia-smi'));
+  const line = (a, b, d) => `|${a}|${b}|${d}|`;
+  const rule = (ch, l = '+', m = '+', r = '+') => `${l}${ch.repeat(41)}${m}${ch.repeat(24)}${m}${ch.repeat(22)}${r}`;
   const out = [];
-  out.push(F.dateFull(c.now).replace(/ [A-Z]{3} (\d{4})$/, ' $1').padEnd(30));
-  out.push(`+${'-'.repeat(W - 2)}+`);
-  out.push(`| ${'NVIDIA-SMI 570.124.06'.padEnd(33)}${'Driver Version: 570.124.06'.padEnd(26)}${'CUDA Version: 12.8'.padEnd(18)}  |`);
-  out.push(rule('-', '|').replace(/\|/g, (m, i) => (i === 0 || i === W - 1 ? '|' : '+')));
-  out.push(cells(' GPU  Name                 Persistence-M ', ' Bus-Id          Disp.A ', ' Volatile Uncorr. ECC '));
-  out.push(cells(' Fan  Temp   Perf          Pwr:Usage/Cap ', '           Memory-Usage ', ' GPU-Util  Compute M. '));
-  out.push(cells('                                         ', '                        ', '               MIG M. '));
-  out.push(rule('=', '|').replace(/\|/g, (m, i) => (i === 0 || i === W - 1 ? '|' : '+')).replace(/-/g, '='));
-  c.w.gpus.forEach((g, i) => {
-    out.push(cells(`   ${g.idx}  ${g.name.padEnd(22)}    On  `, ` ${g.bus} Off `, '                    0 '));
-    out.push(cells(` N/A   ${String(g.tempC).padStart(2)}C    P0   ${String(g.powerW).padStart(10)}W / ${String(g.capW).padStart(4)}W `, ` ${String(g.memUsed).padStart(7)}MiB / ${String(g.memTotal).padStart(6)}MiB `, ` ${String(g.util).padStart(6)}%      Default `));
-    out.push(cells('                                         ', '                        ', '                  N/A '));
+  out.push(`${F.dateFull(c.now).replace(/ [A-Z]{3} (\d{4})$/, ' $1')}       `);
+  out.push(`+${'-'.repeat(89)}+`);
+  out.push('| NVIDIA-SMI 570.124.06             Driver Version: 570.124.06     CUDA Version: 12.8     |');
+  out.push(rule('-', '|', '+', '|'));
+  out.push(line(' GPU  Name                 Persistence-M ', ' Bus-Id          Disp.A ', ' Volatile Uncorr. ECC '));
+  out.push(line(' Fan  Temp   Perf          Pwr:Usage/Cap ', '           Memory-Usage ', ' GPU-Util  Compute M. '));
+  out.push(line('                                         ', '                        ', '               MIG M. '));
+  out.push(rule('=', '|', '+', '|'));
+  for (const g of c.w.gpus) {
+    out.push(line(`   ${g.idx}  ${g.name}`.padEnd(37) + 'On  ', `   ${g.bus} Off `, `${'0'.padStart(21)} `));
+    const right = `${g.powerW}W / ${String(g.capW).padStart(4)}W `;
+    const left = ` N/A   ${String(g.tempC).padStart(2)}C    P0`;
+    out.push(line(left.padEnd(41 - right.length) + right, ` ${String(g.memUsed).padStart(7)}MiB / ${String(g.memTotal).padStart(6)}MiB `, `${`${g.util}%`.padStart(8)}      Default `));
+    out.push(line('                                         ', '                        ', `${'N/A'.padStart(21)} `));
     out.push(rule('-'));
-  });
-  out.push('');
-  out.push(`+${'-'.repeat(W - 2)}+`);
-  out.push(`| ${'Processes:'.padEnd(W - 4)} |`);
-  out.push(`| ${' GPU   GI   CI              PID   Type   Process name'.padEnd(W - 4 - 12)}${'GPU Memory '.padStart(12)} |`);
-  out.push(`| ${'       ID   ID                                                               Usage      '.slice(0, W - 4)} |`);
-  out.push(`|${'='.repeat(W - 2)}|`);
-  const procs = c.w.gpus.flatMap((g) => g.procs.map((p) => ({ g: g.idx, ...p })));
-  if (!procs.length) out.push(`| ${'  No running processes found'.padEnd(W - 4)} |`);
-  for (const p of procs) {
-    out.push(`| ${String(p.g).padStart(4)}   N/A  N/A ${String(p.pid).padStart(14)}   ${p.type.padStart(4)}   ${p.name.padEnd(36)}${(`${p.mem}MiB`).padStart(10)} |`);
   }
-  out.push(`+${'-'.repeat(W - 2)}+`);
+  out.push('');
+  out.push(`+${'-'.repeat(89)}+`);
+  out.push(`| ${'Processes:'.padEnd(87)} |`);
+  out.push(`|${'  GPU   GI   CI              PID   Type   Process name'.padEnd(89 - 11)}GPU Memory |`);
+  out.push(`|${'        ID   ID'.padEnd(89 - 11)}Usage      |`);
+  out.push(`|${'='.repeat(89)}|`);
+  const procs = c.w.gpus.flatMap((g) => g.procs.map((p) => ({ g: g.idx, ...p })));
+  if (!procs.length) out.push(`|  ${'No running processes found'.padEnd(86)} |`);
+  for (const p of procs) {
+    const left = `|${String(p.g).padStart(5)}   N/A  N/A ${String(p.pid).padStart(14)} ${p.type.padStart(6)}   ${p.name}`;
+    const mem = `${p.mem}MiB `;
+    out.push(`${left.padEnd(91 - mem.length - 1)}${mem}|`);
+  }
+  out.push(`+${'-'.repeat(89)}+`);
   return ok(unlines(out));
 };
 

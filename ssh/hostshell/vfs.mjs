@@ -12,6 +12,7 @@ const isoLocal = (ms) => {
 };
 const isoUtc = (ms) => new Date(ms).toISOString().replace('T', ' ').replace('Z', '+0000');
 
+const COLLATE = new Intl.Collator('en', { ignorePunctuation: true });
 const LEVEL = { err: 'ERROR', warning: 'WARN', notice: 'INFO', info: 'INFO' };
 
 export class Vfs {
@@ -69,7 +70,7 @@ export class Vfs {
   list(p) {
     const names = new Set(this.kids.get(p) ?? []);
     for (const k of this.overlay.keys()) if (this.#parent(k) === p) names.add(k.slice(k.lastIndexOf('/') + 1));
-    return [...names].sort();
+    return [...names].sort(COLLATE.compare);
   }
   sizeOf(node) {
     if (node.type === 'd') return node.size ?? 4096;
@@ -238,14 +239,14 @@ export class Vfs {
         '# sha256                                                            size         name',
         ...EVIDENCE.map((e) => `${e.sha256}  ${String(e.bytes).padStart(11)}  ${e.name}`),
         '',
-      ].join('\n'), { group: 'evidence', mtime: T(5.2) }));
+      ].join('\n'), { group: 'evidence', mode: 'r--r-----', mtime: T(5.2) }));
       this.#add('/var/lib/claura/evidence/CHAIN_OF_CUSTODY.txt', this.#file(() => [
         `# Chain of custody · ${INCIDENT_ID} · ${host}`,
         ...EVIDENCE.map((e) => `${F.stamp(T(e.atSec))}  claura-warden (policy: auto, reversible)  captured ${e.name}  sha256 ${e.sha256.slice(0, 8)}...${e.sha256.slice(-8)}`),
         `${F.stamp(T(5.2))}  claura-scribe  sealed evidence directory (root:evidence 0440)`,
         `${F.stamp(w.session.startedMs)}  ${w.session.principal}  opened ${w.session.mode} session via SSH certificate serial ${w.session.serial} (${w.session.certId})`,
         '',
-      ].join('\n'), { group: 'evidence', mtime: w.session.startedMs }));
+      ].join('\n'), { group: 'evidence', mode: 'r--r-----', mtime: w.session.startedMs }));
     }
     if (w.kind === 'bmc') {
       this.#add('/var/log/ipmi/auth.log', this.#file(() => joinLines(w.events.filter((e) => e.unit === 'ipmid' || e.unit === 'bmc-audit').map((e) => `${isoLocal(e.ts)} ${e.ident}[${e.pid}] ${e.msg}`))));

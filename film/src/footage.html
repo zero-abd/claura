@@ -1,0 +1,99 @@
+<template>
+  <!-- FOOTAGE beat: real UI in a device frame, camera keys on a wrapper, one headline, optional callouts.
+       Params (film.config.mjs scenes[].params), every time is a spec T() resolves (seconds local | "phrase" | "@cue"):
+         eyebrow, icon, headline ("*word*" = accent), note, layout ("stage" | "full"),
+         clips:    [{src, t?, dur?, from?, rate?}]  .mp4/.webm/.mov -> timed <video> (muted); .jpg/.png -> still
+         cam:      [{t, home} | {t, u, v, z, d?, ease?, fx?, fy?}]   (u, v) = 0..1 of the footage, z = scale
+         callouts: [{t, until?, u, v, text, side?: "right"|"left", tone?: "hot"|"safe", len?}]
+         cursor:   [{t, u, v, click?}]   only for stills: real footage carries its own cursor
+         morphTo:  the device rect the glass morph lands on (defaults to the layout's device) -->
+  <style>
+    /*COMMON*/
+    #{{P}}stage .head { position: absolute; left: 160px; top: 92px; width: 1600px; }
+    #{{P}}stage .eyebrow { display: flex; align-items: center; gap: 18px; height: 68px; }
+    #{{P}}stage .tile { position: relative; width: 68px; height: 68px; border-radius: 20px; display: grid; place-items: center; color: #fff; }
+    #{{P}}stage .eyebrow .name { font: 600 40px/1 var(--font); letter-spacing: -0.02em; color: #ff7a45; }
+    #{{P}}stage .eyebrow .verb { font: 500 40px/1 var(--font); letter-spacing: -0.02em; color: var(--ink-3); }
+    #{{P}}stage .headline { margin-top: 18px; white-space: nowrap; }
+    #{{P}}stage .note { margin-top: 10px; }
+  </style>
+  {{ (() => {
+    const lay = p.layout === 'full' ? { x: 160, y: 96, w: 1600 } : { x: 240, y: 330, w: 1440 };
+    lay.bar = 38; lay.h = lay.w / 1.6 + lay.bar;
+    globalThis.__fl = lay;
+    return '';
+  })() }}
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle">
+        <div id="{{P}}cam" class="cam">
+          <div id="{{P}}head" class="head" {{ p.layout === 'full' ? 'style="top:-150px"' : '' }}>
+            <div class="eyebrow">
+              <div id="{{P}}tile" class="tile glass clear"><!--KIT:icon name="{{p.icon || 'eye'}}" size=38 stroke=1.8--></div>
+              <span id="{{P}}eb" class="name">{{esc(p.eyebrow || '')}}</span>{{ p.verb ? `<span id="${P}verb" class="verb">${esc(p.verb)}</span>` : '' }}
+            </div>
+            <div id="{{P}}hl" class="headline t-title">{{ words(p.headline || '') }}</div>
+            {{ p.note ? `<div id="${P}note" class="note t-note">${esc(p.note)}</div>` : '' }}
+          </div>
+          <div id="{{P}}dev" class="device{{p.bare ? ' bare' : ''}}" style="left:{{__fl.x}}px; top:{{__fl.y}}px; width:{{__fl.w}}px; height:{{__fl.h}}px;">
+            <div class="dev-bar"><div class="dev-lights"><i></i><i></i><i></i></div></div>
+            <div id="{{P}}screen" class="dev-screen">
+{{ timed(p.clips || []).map((c, i) => /\.(mp4|webm|mov|m4v)$/i.test(c.src)
+  ? `              <video id="${P}v${i}" class="clip" src="${c.src}" data-start="${c.t ?? 0}" data-duration="${+(c.dur ?? (D - (c.t ?? 0))).toFixed(3)}" data-media-start="${c.from ?? 0}"${c.rate ? ` data-playback-rate="${c.rate}"` : ''} data-track-index="${3 + i}" muted playsinline style="z-index:${i + 1}"></video>`
+  : (c.t ? `              <img id="${P}v${i}" class="clip" src="${c.src}" alt="" data-start="${c.t}" data-duration="${+(c.dur ?? (D - c.t)).toFixed(3)}" data-track-index="${3 + i}" style="z-index:${i + 1}" />`
+         : `              <img id="${P}v${i}" src="${c.src}" alt="" style="z-index:${i + 1}" />`)).join('\n') }}
+            </div>
+          </div>
+{{ timed(p.callouts || []).map((c, i) => `          <div id="${P}co${i}" class="callout" data-layout-allow-overflow><i id="${P}co${i}-dot" class="co-dot"></i><i id="${P}co${i}-line" class="co-line" style="${c.side === 'left' ? 'left:auto;right:0;transform-origin:100% 50%;' : ''}width:${c.len ?? 90}px"></i><div id="${P}co${i}-pill" class="co-pill glass${c.tone ? ' ' + c.tone : ''}" style="${c.side === 'left' ? 'right:' + ((c.len ?? 90) + 4) + 'px' : 'left:' + ((c.len ?? 90) + 4) + 'px'}">${c.tone === 'hot' ? '<i style="width:14px;height:14px;border-radius:50%;background:#ff5a1f;flex:none"></i>' : c.tone === 'safe' ? '<i style="width:14px;height:14px;border-radius:50%;background:#2fbf71;flex:none"></i>' : ''}${esc(c.text)}</div></div>`).join('\n') }}
+          <!--KIT:cursor-->
+        </div>
+      </div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}}, p = {{json(timed(p))}};
+      const L = {{json(__fl)}};
+      const ctx = { screen: { x: L.x, y: L.y + L.bar, w: L.w, h: L.h - L.bar } };
+      const tl = gsap.timeline({ paused: true });
+      const morphTo = p.morphTo || [L.x, L.y, L.w, L.h, 28];
+      K.scene(tl, P, S, {
+        morph: { to: morphTo, target: P + 'dev', after: [P + 'head'] },
+      });
+      // headline: the eyebrow lands, then the line blurs in word by word; it rides the camera out when it moves
+      const hAt = p.headAt ?? (S.in.type === 'morph' ? 0.62 : 0.18);
+      if (S.in.type !== 'morph') K.glassIn(tl, P + 'tile', hAt, { from: 0.8 });
+      K.blurLine(tl, P + 'eb', hAt + 0.06);
+      if (document.querySelector(P + 'verb')) K.blurLine(tl, P + 'verb', hAt + 0.14);
+      K.blurWords(tl, P + 'hl', hAt + 0.24);
+      if (document.querySelector(P + 'note')) K.blurLine(tl, P + 'note', hAt + 0.7, { opacity: 1 });
+      if (S.in.type !== 'morph') K.land(tl, P + 'dev', Math.max(0, hAt - 0.12), { from: 0.97, blur: 8, dur: 0.7 });
+      // camera
+      const keys = (p.cam && p.cam.length ? p.cam : [{ t: 0, home: true }]).map((k) => ({ ...k }));
+      K.cam(tl, P + 'cam', keys, ctx);
+      // callouts: anchored to footage points, drawn at a constant on-screen size whatever the camera scale
+      (p.callouts || []).forEach((c, i) => {
+        const id = P + 'co' + i, el = document.querySelector(id);
+        el.style.left = ctx.screen.x + c.u * ctx.screen.w + 'px';
+        el.style.top = ctx.screen.y + c.v * ctx.screen.h + 'px';
+        const s = 1 / K.camScaleAt(keys, c.t + 0.01);
+        tl.set(id, { scale: s, opacity: 1 }, 0);
+        tl.fromTo(id + '-dot', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(2)' }, c.t);
+        tl.fromTo(id + '-line', { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: 'power3.out' }, c.t + 0.08);
+        tl.fromTo(id + '-pill', { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.22, ease: 'power2.out' }, c.t + 0.18);
+        const until = c.until ?? S.cut - 0.3;
+        tl.to([id + '-dot', id + '-line', id + '-pill'], { opacity: 0, duration: 0.18, ease: 'power2.in' }, until);
+      });
+      // cursor for stills
+      if (p.cursor && document.querySelector(P + 'cursor')) {
+        const s = 1 / K.camScaleAt(keys, p.cursor[0].t + 0.01);
+        tl.set(P + 'cursor', { scale: s }, 0);
+        K.cursor(tl, P + 'cursor', p.cursor.map((k) => ({ ...k, x: ctx.screen.x + k.u * ctx.screen.w, y: ctx.screen.y + k.v * ctx.screen.h })));
+      }
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

@@ -36,7 +36,7 @@ Pitch package. Angle: damage control. Written for HackUTD 2026 (Sun 8 Nov; submi
 ## 3. The 2-minute judge-table pitch
 
 **Before the judge arrives**
-- Tab 1: console on **Overview** ("All clear"), Hall B visible on the map. Tab 2: the incident replay URL (`?play=1`), loaded once. Reloading it starts the incident, so don't open it early.
+- Tab 1: console on **Overview** ("All clear"), Hall B visible on the map. Tab 2: the incident replay URL (`?play=1`). Loading it starts the incident, which then waits at the approval gate. Load it once beforehand, then press Cmd+R on cue to restart it from zero.
 - A teammate's phone or laptop is signed in as the **second approver** for Secure Shell. Test the mic button and turn the volume up.
 - One person talks and one person clicks. The driver clicks only on cues.
 - **Honesty switch:** if the screen shows the scripted replay, say "in this replay" once. If it shows a live agent run, say "live".
@@ -79,31 +79,31 @@ About 283 spoken words. At table pace that is about 1:45 of speech plus about 15
 
 "Sealed in nine point four seconds. That's our demo clock, not a benchmark."
 
-**1:15 · The radio room**
+**1:16 · The radio room**
 `[DEMO: War Room. Open #exec, then #legal so the notification clocks are visible. If there's time, tap Play brief for 3 seconds.]`
 
 "Assume the attacker reads your email and the phones are down. Our War Room runs off your network, on SpacetimeDB's cloud, with break-glass identities, and everyone from legal to the vendor gets Scribe's plain-English brief: what we know, what we don't."
 
-**1:33 · The boarding party**
+**1:35 · The boarding party**
 `[DEMO: click host b14-gpu-07 (in the thread or on the map), then Open secure shell, then Touch ID. The teammate approves as the second person.]`
 
 "Need to board the flooded compartment? Click the host. Short-lived certificate, Touch ID, a second approver, read-only forensics, and every keystroke hash-chained into the log."
 
-**1:46 · Ask**
+**1:44 · Ask**
 `[DEMO: hold the mic button in the toolbar. Ask, then release. Let Claura answer and don't talk over it.]`
 
 "Claura, are any customers affected?"
 
-**1:54 · Close**
+**1:52 · Close** (ends about 2:00)
 
 "After Titanic, the world rewrote the rules of the sea. AI clouds are next. Claura: ships survive breaches. Now AI clouds can."
 
 ---
 
-- **Running long?** Skip the boarding-party beat (1:33–1:46) and go straight to Ask Claura. Offer the shell as the first thing to show after their first question.
+- **Running long?** Skip the boarding-party beat (1:35–1:44) and go straight to Ask Claura. Offer the shell as the first thing to show after their first question.
 - **Judge arrives mid-run?** Start at "One door is heavy" with the approval card on screen, then go back to the cold open after Cmd+Enter.
 - **Judge has heard Titanic twice today?** Use this opener instead: "A wall keeps tenants apart on a good day. A bulkhead holds on the worst day. AI clouds have walls."
-- **If the blocked row is on screen:** "That red row is the model, or our labelled red-team probe, asking to reimage the host. Policy said no."
+- **If the blocked row is on screen:** "That red row is a denied action, proposed by the model or by our labelled red-team probe. Policy said no."
 
 ---
 
@@ -116,7 +116,7 @@ A wall keeps tenants apart on a good day. A bulkhead is built for the worst day:
 Agents now run model-written code all night, on GPUs they share with strangers. The walls under them are leaking.
 
 - **Fact 1: the vGPU wall leaks.** On 30 Sep 2026, NVIDIA published CVE-2026-47498, a flaw in the GSP plugin of its vGPU Manager. A guest VM user can send a crafted RPC message and trigger an out-of-bounds write, which may lead to code execution or privilege escalation (CVSS 7.8). Sources: [CVE record](https://www.cve.org/CVERecord?id=CVE-2026-47498), [NVIDIA bulletin, September 2026](https://github.com/NVIDIA/product-security/tree/main/2026/5861).
-- **Fact 2: the container wall leaks too.** With NVIDIAScape (CVE-2025-23266), Wiz showed that a three-line Dockerfile could break out of the NVIDIA Container Toolkit to root on the host. Wiz warned that on shared GPU clouds this lets one customer reach other customers' data and models. It estimated that about 37% of cloud environments could be vulnerable, based on an analysis of more than 100,000 environments. Sources: [Wiz](https://www.wiz.io/blog/nvidia-ai-vulnerability-cve-2025-23266-nvidiascape), [SC Media](https://www.scworld.com/news/3-line-exploit-revealed-for-critical-nvidia-container-toolkit-flaw).
+- **Fact 2: the container wall leaks too.** With NVIDIAScape (CVE-2025-23266), Wiz showed that a three-line Dockerfile could break out of the NVIDIA Container Toolkit to root on the host. Wiz warned that on shared GPU clouds this could let one customer reach other customers' data and models. It estimated that about 37% of cloud environments could be vulnerable, based on an analysis of more than 100,000 environments. Sources: [Wiz](https://www.wiz.io/blog/nvidia-ai-vulnerability-cve-2025-23266-nvidiascape), [SC Media](https://www.scworld.com/news/3-line-exploit-revealed-for-critical-nvidia-container-toolkit-flaw).
 
 ### What happens at 2 a.m.
 
@@ -228,7 +228,7 @@ AI infrastructure is next. Claura's ambition is to be the bulkhead standard ever
   - It runs on-prem by design, because telemetry from a live breach is the one dataset you can't send to someone else's cloud.
 - **Spacetime: Build on Spacetime.**
   - SpacetimeDB is the ship's log and the door locks. Every host, guest, signal, proposal, approval and report is a row. Reducers enforce the policy gate (auto / approval / deny, fail closed). Every console and the War Room subscribe to the same live log on Maincloud, and the repo is public.
-  - The only processes outside Spacetime are stateless bridges a database can't be (the SSH bridge and the voice proxy). All the state lives in Spacetime.
+  - Everything outside Spacetime is a client or a thin bridge: the agent runner, the SSH bridge and the voice proxy. The incident state, the policy and the log all live in Spacetime.
 - **MLH prizes** (categories as listed on [MLH's HackUTD prize page](https://www.mlh.com/events/hackutd-ae/prizes); confirm on Devpost):
   - **Best Use of ElevenLabs:** Claura Voice is how people who can't read a console mid-crisis still get the facts. ElevenLabs reads Scribe's brief aloud in the listener's language, and push-to-talk Ask Claura turns a spoken question into a Nemotron answer spoken back.
   - **Best Domain Name from GoDaddy Registry:** claura.tech is live. Enter only if its TLD qualifies under the prize rules.
@@ -298,13 +298,14 @@ Burn in captions. Use one calm narrator voice from ElevenLabs, and keep the musi
 ## 8. The five hardest judge questions
 
 **Q1. What's real here, and is 9.4 seconds real?**
+*(Trim this answer to what passed the check list in section 5.)*
 Real: the console; the SpacetimeDB module (tables, the policy gate in reducers, approvals, and the live log every console subscribes to); four Nemotron agents making real tool calls into those reducers; the War Room, Secure Shell and Voice. Simulated: telemetry is replayed fixture data, containment changes database state rather than real hypervisors, and the fleet sizes are scenario data. The 9.4 s is our demo clock and assumes an instant approval. Measuring real time-to-contain is the first job of a pilot.
 
 **Q2. Guest-to-host escapes are rare. Why build for them?**
-They're rare, but the blast radius is every tenant on the host, and they're real. In September NVIDIA patched a vGPU Manager flaw a guest could trigger (CVE-2026-47498). Wiz's NVIDIAScape got root on shared GPU hosts from a three-line Dockerfile, and Wiz's tenant-isolation research has found problems at Hugging Face, Replicate and SAP AI Core ([Wiz](https://www.wiz.io/blog/sapwned-sap-ai-vulnerabilities-ai-security)). The playbook also isn't specific to escapes: credential replay, a hijacked agent or a poisoned model all end in the same question. Which doors do we close, in what order, and who signs?
+They're rare, but the blast radius is every tenant on the host, and they're real. In September NVIDIA patched a vGPU Manager flaw a guest could trigger (CVE-2026-47498). Wiz's NVIDIAScape showed a three-line Dockerfile could get root on the host, with shared GPU clouds most at risk. Wiz's tenant-isolation research has found problems at Hugging Face, Replicate and SAP AI Core ([Wiz](https://www.wiz.io/blog/sapwned-sap-ai-vulnerabilities-ai-security)). The playbook also isn't specific to escapes: credential replay, a hijacked agent or a poisoned model all end in the same question. Which doors do we close, in what order, and who signs?
 
 **Q3. A 4B model will be wrong. What happens when it's wrong, or prompt-injected through the logs it reads?**
-Then it's wrong inside a box. The model can only call `propose_action` with a fixed set of actions. The reducer looks each action up in a policy table and blocks anything unknown (fail closed). It also blocks targets that don't exist, refuses to let an agent approve its own proposal, and holds the high-impact step for a human. In our run, either the model or a labelled red-team probe asks for `reimage_host`, and the gate blocks it. We chose a small local model on purpose: its job is narrow, and a bigger Nemotron is one environment variable away. What we haven't measured yet is its error rate. That's the first eval.
+Then it's wrong inside a box. The model can only call `propose_action` with a fixed set of actions. The reducer looks each action up in a policy table and blocks anything unknown (fail closed). It also blocks hosts and VMs that don't exist, refuses to let an agent approve its own proposal, and holds the high-impact step for a human. In our run, either the model proposes a denied action itself or a labelled red-team probe asks for `reimage_host`, and the gate blocks it. We chose a small local model on purpose: its job is narrow, and a bigger Nemotron is one environment variable away. What we haven't measured yet is its error rate. That's the first eval.
 
 **Q4. Failing eleven tenants over on a false alarm is expensive. How do you avoid crying wolf?**
 The cheap doors close first. Cutting one VM's network, revoking its tokens, cordoning the host and pausing the guest can all be undone. Failover is the expensive automatic step, so it's a policy row: an operator can switch it from `auto` to `approval` with one `set_policy` call, per fleet today and per tenant later. Quarantine shows its rollback on the card. We haven't measured a false-positive rate, and a blast-score threshold is the next gate we add. Nightly drills on a digital twin are how we'll put a number on it.

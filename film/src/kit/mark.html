@@ -1,0 +1,9 @@
+<svg id="{{P}}{{a.id || 'mark'}}" class="mark" viewBox="0 0 256 256" width="{{a.size || 256}}" height="{{a.size || 256}}" aria-label="Claura" style="{{a.style || ''}}">
+  <defs>
+    <mask id="{{P}}{{a.id || 'mark'}}-sweep" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <circle id="{{P}}{{a.id || 'mark'}}-sweepc" cx="156" cy="128" r="104" fill="none" stroke="#fff" stroke-width="74" stroke-linecap="round" stroke-dasharray="660 700" stroke-dashoffset="0" />
+    </mask>
+  </defs>
+  <path id="{{P}}{{a.id || 'mark'}}-ring" class="ring" fill="{{a.ring || '#FF5A1F'}}" mask="url(#{{P}}{{a.id || 'mark'}}-sweep)" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" />
+  <path id="{{P}}{{a.id || 'mark'}}-seal" class="seal" fill="{{a.seal || '#FF5A1F'}}" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" />
+</svg>
