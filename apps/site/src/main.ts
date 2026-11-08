@@ -16,7 +16,7 @@ import { initGlass } from "./glass";
    - VIDEO_SRC: the demo video. If the file is missing, the page shows a "coming soon" state.
    - The logo is one file: public/brand/logo.svg (favicon: public/brand/favicon.svg).
 ─────────────────────────────────────────────────────────────────────────────────── */
-const PROTOTYPE_URL = "http://localhost:4317/?demo=1";
+const PROTOTYPE_URL = "https://claura-app.almahmud-zero.workers.dev/?demo=1&play=1";
 const SHOTS = {
   hero: "shots/console-breach.webp", // large frame under the hero: a breach in progress
   poster: "media/claura-poster.png", // video poster: the console once the incident is contained (9.4 s)

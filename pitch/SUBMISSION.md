@@ -56,7 +56,7 @@ Devpost allows **three sponsor tracks**, plus one HackUTD track. Everyone is aut
 
 | Prize | Enter? | Note |
 |---|---|---|
-| **Best Domain Name from GoDaddy Registry** | **Only if the domain was registered through the MLH GoDaddy Registry page** | claura.tech is live and on-brand, but ICANN lists **Radix**, not GoDaddy Registry, as the .tech registry ([ICANN](https://www.icann.org/en/registry-agreements/details/tech)). Ask at the MLH table before 11:30. If the domain did not come through that page, don't enter it; or register a Claura name on a GoDaddy Registry extension through MLH's free-domain offer, point it at claura.tech, and enter that one. |
+| **Best Domain Name from GoDaddy Registry** | **Yes, if claura.us came through the MLH GoDaddy Registry page** | `.us` is a GoDaddy Registry extension (`.tech` is Radix), so **claura.us** is the domain to enter for this prize, provided it was registered with the event promo code. Keep claura.tech as the product domain everywhere else. |
 | Best Use of ElevenLabs | Optional | "Ask Claura" is built and runs live when the ElevenLabs key is present (`voice live` in `demo/start.sh`). Enter only if it works end to end on venue Wi-Fi by 11:30, with the API key kept server-side. Voice is not in the video. |
 | Best Use of Solana | **Only after funding and a real anchor** | Anchoring is built and tested, but the devnet wallet is unfunded, so the console says "Simulated anchor" and nothing reaches the chain. Do step 6 in section 0 first. Without a real signature and Explorer link, don't claim it and don't tick it. |
 | Gemini, Vultr, DigitalOcean | No | Not in the build. |
@@ -99,3 +99,9 @@ The first image is the gallery thumbnail, so it must read at small size. The fil
 - [ ] Spacetime access code entered. Team members all accepted.
 - [ ] Press **Submit**, not just Save. Re-open the public page logged out and check the video, repo and try-it links.
 - [ ] Then stop building. Rehearse `FINAL-PITCH.md` section 5 twice with a timer, using `demo/JUDGING.md` for the live clock (Enter at 0:05), and run the truth check at 12:45.
+
+
+## Try it out (live now, hosted on Cloudflare Workers)
+- Landing page: https://claura-site.almahmud-zero.workers.dev
+- Console demo: https://claura-app.almahmud-zero.workers.dev/?demo=1&play=1. The incident replays in the browser; press P to replay it again.
+- Switch to claura.us and app.claura.us once the domain's nameservers point at Cloudflare. See `deploy/cloudflare/README.md`.
