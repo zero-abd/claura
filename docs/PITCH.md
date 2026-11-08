@@ -1,82 +1,115 @@
 # Claura: pitch kit
 
-Format reminder: HackUTD's pitching workshop says **3 minutes to pitch, 2 minutes for judge questions** ([source](https://raw.githubusercontent.com/acmutd/hackutd-tech-guide/main/docs/Workshops/Pitching/index.md)). MLH-style table judging is often shorter, about 3-4 minutes per team in total ([MLH](https://guide.mlh.com/general-information/judging-and-submissions/judging-plan)). So the main script below is 2 minutes, leaving a minute of slack. Be ready to cut it to 30 seconds.
+What to say. How to run the demo while saying it is in [DEMO-FLOW.md](DEMO-FLOW.md).
 
-Anything in `[brackets]` depends on whether the Spacetime and Nemotron integrations shipped (see HACKATHON.md section 5). Say only what is true on the day.
+Format: HackUTD's pitching workshop gives **3 minutes to pitch and 2 minutes for questions**
+([source](https://raw.githubusercontent.com/acmutd/hackutd-tech-guide/main/docs/Workshops/Pitching/index.md)).
+Table judging is often shorter, so be ready to cut to the 30-second version.
 
-## 1. 30-second elevator pitch
+## 30-second pitch
 
-> AI agents now run model-written code inside sandbox VMs on shared GPU hosts. If one escapes through the vGPU path, it can reach the host and every other tenant on it. Claura is incident response for that moment. Four agents, Sentry, Triage, Warden and Scribe, correlate the signals, map the blast radius, and contain the host with reversible steps first. A person approves the one high-impact step, quarantining the host, from a single card showing evidence, scope and rollback. Today it is a front-end prototype with scripted data that tests the workflow. Seal the breach before it spreads.
+> AI agents now run model-written code inside sandbox VMs on shared GPU hosts. If one escapes through the vGPU path,
+> it can reach the host and every other tenant on it. Claura is incident response for that moment. Four agents on
+> NVIDIA Nemotron, running locally, detect it, size the blast radius and contain it with reversible steps first. They
+> can only propose: a policy gate inside SpacetimeDB decides what runs, and quarantining the host waits for a person.
+> Agents propose, policy decides.
 
-About 95 words, roughly 35 seconds. To get to 30, drop "from a single card showing evidence, scope and rollback".
+About 85 words, roughly 30 seconds.
 
-## 2. Two-minute judge-table script
+## What is true, in one breath
 
-### Setup (before the judge arrives)
-- Run the prototype locally (`npm run dev`, port 4317) and keep claura.tech open as a backup.
-- **Tab 1:** `http://localhost:4317/` shows the nominal state: status NOMINAL, "No open incidents", facility map, "Mean time to contain 11.8 s".
-- **Tab 2:** `http://localhost:4317/?play=1`. Loading this URL starts the incident immediately, so do not open it early. Open it in a second tab, load it once, and press **Cmd+R** at the moment you say "watch". The script waits at the approval gate, so you can talk over the card for as long as you need.
-- If the incident ever needs a reset, reload the page without `?play=1`.
-- There is no on-screen play button in the prototype; autoplay comes from `?play=1` only.
-- Two people: one talks, one drives (HackUTD workshop roles).
+Use these numbers and no others.
 
-### Script with demo steps
+- **Real:** the SpacetimeDB module (tables, the policy gate, human approval), the four agents calling tools on
+  Nemotron 3 Nano 4B through Ollama on this laptop, the console's Live view on real rows.
+- **Simulated:** the telemetry (six fixture signals), the hosts and guests (seeded), and the effects of containment
+  (database rows; nothing touches real infrastructure). The red-team reimage attempt is scripted by the runner and
+  labelled as such.
+- **The replay:** contained at 9.4 s. It is a scripted timeline.
+- **Live on a laptop:** 61–79 s from the first signal to contained in the two logged runs (`backend/runs/`); the
+  agents README reports a run of about 34 s. All four agents finished on the model with zero bad tool calls and no fallback in both
+  logged runs.
+- **Fleet numbers** on the Overview (2,048 hosts, 61,207 agents) are illustrative.
 
-| Time | Screen and action | Say |
-|---|---|---|
-| 0:00-0:15 | Tab 1, nominal console. | "AI agents now run code in sandbox VMs on shared GPU hosts. The VM is the wall between one tenant's code and everyone else's. This is a facility running tens of thousands of sandboxes. Now one of them tries to break out through the vGPU path." |
-| 0:15-0:25 | Stay on Tab 1. Point to the tagline in the header. (The prototype has no on-screen "scripted data" label yet; adding a small one is recommended, see HACKATHON.md checklist.) | "I'll be straight about what you're about to see: Claura is a front-end prototype with scripted data, built to test the workflow. Every number is illustrative." |
-| 0:25 | **Switch to Tab 2 and press Cmd+R.** | "Watch." |
-| 0:25-0:45 | The signal stream fills; the attack path lights up; the right panel shows Sentry, Triage, Warden, Scribe. The run holds at the approval card. | "Sentry correlated six signals in the first second: an IOMMU fault, a vGPU driver fault, a VMM audit event, the host's EDR seeing qemu spawn a shell, a flow to the IPMI port, and a token used outside its scope. Triage built the attack graph: one suspect host, eleven co-resident guests, and a reachable management plane." |
-| 0:45-1:05 | Point to the **Containment plan**, steps 1-6 completed. | "Warden did the reversible things first: detached the guest's network, revoked its credentials, cordoned the host. Then it paused the guest, captured its memory over the management path, and failed over the eleven neighbors to clean hosts. No live migration off a suspect host." |
-| 1:05-1:25 | Point to the **approval card** for step 7, "Quarantine host b14-gpu-07". Read the three fields. Point to the note "Warden cannot quarantine a host on its own." | "This is the one step that needs a person: taking the host out of the pool. The card shows the evidence, the scope, and the rollback on one screen. Warden cannot do it alone." |
-| **1:25** | **Click "Approve quarantine"** (or press Cmd+Enter). | "I approve." |
-| 1:25-1:35 | The counter freezes at **9.4 s**. The headline changes to the contained state. | "Contained in 9.4 seconds. That's demo data, not a measurement, and it assumes I approve right away. Real operators take longer, which is why the card exists." |
-| 1:35-1:50 | Click **Open report**. Scroll the timeline slightly. Press Esc to close. | "Scribe wrote the timeline: each row says who authorized it, and the evidence has hashes. Everything is one record." |
-| 1:50-2:00 | Stay on the console. | "[If shipped: The incident state is in SpacetimeDB and the triage you saw came from a real Nemotron call. The policy layer, not the model, decides what is allowed.] [If not shipped: In the design, Nemotron runs on-prem so telemetry stays in the building, a policy layer decides which actions are allowed, and SpacetimeDB is the shared incident state. Those are planned, not built.] Seal the breach before it spreads." |
+## Track lines (10 seconds each; use the one matching the judge)
 
-If the judge interrupts, answer, then say "I'll finish the run" and click Approve.
+- **NMC² (Keep the World Running):** "Your brief names missed warnings, unclear handoffs and wrong information at the
+  wrong time. Sentry catches the warning, one incident log in SpacetimeDB is the handoff, and the approval card puts
+  evidence, scope and rollback on one screen."
+- **NVIDIA (Nemotron beyond a chatbot):** "Nemotron 3 Nano runs locally and never chats. It calls tools in a loop
+  with schema checks, retries and a deterministic fallback, and every agent card records whether the model or the
+  fallback did the work. In both logged runs the model did all of it."
+- **Spacetime:** "The database is the referee. The policy gate is a reducer, agents write only through reducers, and
+  the console you just saw is subscribed to the same tables. The rule that quarantine needs a human is one row."
+- **Winstead (only if entered):** "Every action records who proposed it and who approved it, and the report is
+  written from the database's own log. What it lacks: user administration, in-app chat and an isolated deployment."
 
-### Add-on lines by judge's track (10 seconds each; use only the one that matches)
+## Judge questions
 
-- **NMC² (Keep the World Running):** "Your brief names missed warnings, unclear handoffs and wrong information at the wrong time. Sentry is the missed warning, one synced timeline is the handoff, and the approval card is the right information at the right time."
-- **NVIDIA (Nemotron beyond a chatbot):** "[If shipped: Triage calls Nemotron with tools to look up co-resident guests and token scope, then returns a structured proposal that the policy layer checks.] [If not: This is the planned Nemotron agent loop; we haven't integrated it yet.]"
-- **Spacetime:** "[If shipped: The incident is a set of tables; reducers enforce the policy gate and the approval; this window and a second console see the same rows.] [If not: Spacetime is the planned incident state machine; today the demo is scripted.]"
-- **Winstead (if entered):** "Every action has an actor and an authorizer, evidence is hashed, and the scope is stated. The report is built to be read by someone who was not in the room. What it lacks today: user administration and in-app chat."
+**Is this live?**
+The Incident view is a scripted replay; the toolbar says so. The Live view is real: SpacetimeDB rows written by
+agents running on Nemotron on this laptop, and its buttons call the real reducers.
 
-## 3. Eight likely judge questions
+**Why agents instead of SOAR playbooks?**
+The playbook order is fixed on purpose. The model does what playbooks are bad at: reading six different signal types
+as one incident, picking which guests are exposed, and writing the report. Execution stays deterministic, because the
+model's only write is a proposal and the policy decides. A wrong answer can only fail safe: a refused proposal, never
+a wrong action.
 
-Facts in the answers are from the prototype data or from linked sources. Do not invent numbers.
+**What if the model is wrong, or picks something destructive?**
+Three limits. The policy table rejects unknown actions and denies destructive ones (`reimage_host`, `power_off_hall`,
+`delete_vm`). Targets are checked, so a hallucinated host is blocked. And quarantine waits for a person. The reimage
+attempt in the demo is scripted by the runner, not chosen by the model, and the runner says so.
 
-**1. Why agents instead of SOAR playbooks?**
-Agents do the parts that playbooks are bad at: correlating six different signal types into one incident, reasoning about blast radius for this specific host, and writing the report. Execution stays deterministic. Warden is bounded by a playbook (`guest-escape v3` in the prototype) and a policy layer, so the model proposes and the policy permits. A SOAR playbook is the right tool for the steps; the agent is useful in deciding which playbook applies and with what scope. Honest caveat: in the prototype the agent text is scripted, so we have not yet shown a model doing this well. `[If Nemotron shipped: only Triage is a real model call.]`
+**How much did the model actually do?**
+Each agent records `model`, `model+fallback`, `fallback` or `scripted`. In both logged live runs all four finished on
+the model with zero bad tool calls (`backend/runs/live-run-1.log`, summary table at the end).
 
-**2. What if the model is wrong?**
-Three layers limit the damage. First, the policy layer rejects any action outside the allowlist, so a wrong model cannot invent a new action. Second, the first steps are reversible: reattaching a vNIC, reissuing credentials and uncordoning a host are all cheap to undo. Third, the one step that removes a host from service needs a human, and that person sees the evidence and the rollback. What we have not done is measure how often the model is wrong; that is the first thing to test.
+**Can't anyone call `approve` with your name?**
+Yes, today. `approve` and `set_policy` check the operator name, not the caller's identity. The gate protects against
+the model, not against a hostile client. Binding operator identities is the next step. Say this before they find it.
 
-**3. What is the cost of a false positive?**
-The honest answer is that the largest cost sits in the automated part. Failing over 11 co-resident guests restarts 11 workloads on other hosts, and we do not live-migrate. The cost is real and we have not measured it. The mitigations are design choices rather than data: reversible steps first, a score threshold before the plan runs (Triage scored this case 0.87 in the demo data), a per-tenant policy that can require approval for fail-over, and a one-screen card so a human can reject quickly. The quarantine itself is cheap to undo: un-quarantine returns the host to the pool.
+**Could an attacker steer the agents through log text?**
+Signals reach the model only as tool results. The worst injected text can do is make the model propose something,
+and the policy still decides. The model has no approve tool, so it cannot forge an approval. We have not tested
+injection systematically; that is on the list.
 
-**4. How is this different from Wiz or CrowdStrike?**
-They are detection and posture products: Wiz for cloud configuration and workload risk, CrowdStrike for endpoint detection and response. Claura is the response layer for one specific incident class, a suspected guest-to-host escape on a multi-tenant GPU host, and it consumes signals like host EDR rather than replacing them. The differentiator is the ordering: reversible containment, memory capture over a trusted management path, fail-over of neighbors, and a single human gate. We have not built integrations with either; this is idea validation, not a competitive product.
+**What does a false positive cost?**
+Most of the cost is in the automatic steps: failing over 11 guests restarts 11 workloads elsewhere (no live migration
+off a suspect host, because that copies memory through the hypervisor we no longer trust). Those steps are reversible,
+Triage scores the blast radius first (0.87 here), and the policy can require approval for fail-over too. Un-quarantine
+returns the host to the pool. We have not measured the rate.
 
-**5. Is VM escape real?**
-Yes. Public examples: CVE-2021-3546, an out-of-bounds write in QEMU's vhost-user-gpu that [NVD](https://nvd.nist.gov/vuln/detail/CVE-2021-3546) says can let a malicious guest crash the host QEMU process or potentially run code on the host; a Black Hat Asia 2020 talk demonstrated a guest-to-host escape through a QEMU/KVM virtio device ([slides](https://i.blackhat.com/asia-20/Thursday/asia-20-Shao-3D-Red-Pill-A-Guest-To-Host-Escape-On-QEMUKVM-Virtio-Device.pdf)); and two VM escapes were demonstrated at Pwn2Own 2017 ([Computerworld](https://www.computerworld.com/article/1667668/pwn2own-ends-with-two-virtual-machine-escapes.html)). NVIDIA vGPU Manager has also had guest-reachable host vulnerabilities, for example CVE-2024-0099 per a [third-party tracker](https://www.sentinelone.com/vulnerability-database/cve-2024-0099/); check NVIDIA's bulletin before quoting versions. They are rare and expensive to exploit, but the host holds many tenants, so the impact is large. Claura assumes the escape is rare and the response time matters.
+**9.4 seconds? Really?**
+That is the scripted replay. Live on a laptop with a 4B model it takes about a minute, most of it Warden's seven
+proposals, one per turn. Both are faster than paging a person at 3 am.
 
-**6. What is real in the demo and what is scripted?**
-The front-end is real: console, map, attack path, plan, approval flow, report. The telemetry, the agent text and every number are scripted, including the 9.4 s and the fleet sizes. The 9.4 s also assumes the approval comes at a fixed moment, so a real number would be longer. `[If shipped: The incident state is real rows in SpacetimeDB and Triage is a real Nemotron call; the telemetry feeding them is simulated.]` The point of the prototype is to test the workflow and the approval card, not to claim performance.
+**How is this different from Wiz or CrowdStrike?**
+They are detection and posture products: Wiz for cloud configuration and workload risk, CrowdStrike for endpoint
+detection. Claura is the response layer for one incident class, a suspected guest-to-host escape on a multi-tenant
+GPU host, and it would consume signals like host EDR rather than replace them. We have not built integrations with
+either.
 
-**7. Could an attacker manipulate the agents? Logs contain attacker-controlled text.**
-Yes, that is the right concern, and it is why the model is not the authority. The design treats guest-influenced strings (process names, command lines) as data in structured fields, not as instructions; the model can only propose from a fixed action set; the policy layer checks every proposal; and the host-level step needs a human. It is a planned design, not a tested one. Testing prompt injection through telemetry is on the list of next steps.
+**Is VM escape real?**
+Yes, and rare. CVE-2021-3546, an out-of-bounds write in QEMU's vhost-user-gpu that
+[NVD](https://nvd.nist.gov/vuln/detail/CVE-2021-3546) says can let a malicious guest crash host QEMU or potentially
+run code on the host; a Black Hat Asia 2020 guest-to-host escape through a QEMU/KVM virtio device
+([slides](https://i.blackhat.com/asia-20/Thursday/asia-20-Shao-3D-Red-Pill-A-Guest-To-Host-Escape-On-QEMUKVM-Virtio-Device.pdf));
+two VM escapes at Pwn2Own 2017
+([Computerworld](https://www.computerworld.com/article/1667668/pwn2own-ends-with-two-virtual-machine-escapes.html)).
+NVIDIA vGPU Manager has had guest-reachable host bugs too; check NVIDIA's security bulletin before naming a CVE.
 
-**8. Why Nemotron on-prem and why SpacetimeDB?**
-On-prem Nemotron is about data: incident telemetry can contain customer workloads and credentials, and many operators will not send it to an outside API during an incident. `[If shipped: In this demo we call NVIDIA's hosted API; the same OpenAI-compatible client works against a self-hosted NIM.]` SpacetimeDB fits because an incident is a sequence of state changes that every operator must see in the same order: reducers commit signals, proposals and approvals atomically, and subscriptions push them to all consoles. A conventional database plus a websocket layer could do it too; Spacetime removes the sync layer. `[If not shipped: Both are planned architecture, not part of the prototype.]`
+**What would it take to run this for real?**
+Real telemetry (IOMMU faults, VMM audit, EDR, BMC flows) in place of fixtures, effects that call the hypervisor and
+network instead of updating rows, and identity on the reducers. The gate and the data model stay.
 
-## 4. Table logistics
-- Keep your project number visible (MLH advice).
-- Open with the problem, not your names. Say the tagline once, at the end.
-- State "prototype, scripted data" within the first 30 seconds. Judges who find out later discount everything else.
-- Do not read the screen aloud. Point at one thing at a time.
-- HackUTD's own advice: the pitch is a story (problem, solution, demo, impact, next), not a feature list, delivered as if persuading an investor ([HackUTD workshop](https://raw.githubusercontent.com/acmutd/hackutd-tech-guide/main/docs/Workshops/Pitching/index.md)).
-- Rehearse twice with a timer. Rehearse the failure case: wifi down, tab closed, judge arrives late.
-- Fallback if the demo breaks: play the video from your phone and keep talking.
+**How is the War Room kept away from the attacker?**
+It is designed as an out-of-band channel on separate infrastructure. In this build it is scripted.
+
+## At the table
+
+- Open with the problem, not your names. Say "Agents propose, policy decides" once, at the end.
+- Say "replay" before showing the replay. Judges who find out later discount everything else.
+- Point at one thing at a time. Don't read the screen aloud.
+- Two people: one talks, one drives.
+- Rehearse the failure case too: Ollama down, console disconnected, judge arriving mid-run.
