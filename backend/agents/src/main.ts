@@ -1,6 +1,8 @@
 import { HELP, HelpRequested, parseArgs } from './config.ts';
 import { runDemo } from './demo.ts';
 
+process.on('SIGINT', () => process.exit(130));
+
 async function main() {
   let opts;
   try {

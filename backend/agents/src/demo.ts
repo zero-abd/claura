@@ -198,7 +198,7 @@ export async function runDemo(opts: RunOptions, deps: Deps = {}): Promise<RunSum
 
   const summary: RunSummary = { incidentId, contained, reportFiled, outcomes, redTeam, marks, log, exitCode };
   try {
-    printSummary(summary, db);
+    if (!log.isQuiet) printSummary(summary, db);
   } finally {
     db.close();
   }
@@ -212,7 +212,7 @@ export function printSummary(s: RunSummary, db: ClauraDb): void {
   const t = (n: Parameters<Marks['get']>[0]) => marks.get(n);
   const t0 = marks.get('first_signal') ?? 0;
   const row = (at: number | undefined, text: string) =>
-    at === undefined ? null : `  T+${((at - t0) / 1000).toFixed(2).padStart(6)}s  ${text}`;
+    at === undefined ? null : `  ${('T+' + ((at - t0) / 1000).toFixed(2) + 's').padEnd(9)} ${text}`;
 
   console.log('\n' + '='.repeat(78));
   console.log('CLAURA RUN SUMMARY');

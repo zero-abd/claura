@@ -55,6 +55,12 @@ export interface LoopConfig {
    * is finished, and gives it a fair chance to propose anything else on its own.
    */
   allowFinalTurn?: boolean;
+  /**
+   * Called when the model answers with prose instead of a tool call and the
+   * task is not done. Return true if the prose was consumed (for example filed
+   * as the report), which saves a second generation of the same text.
+   */
+  salvageProse?: (content: string, calls: CallRecord[]) => Promise<boolean>;
   deadlineMs?: number;
   llmTimeoutMs?: number;
   hooks?: LoopHooks;
@@ -85,6 +91,8 @@ export interface LoopResult {
   promptTokens: number;
   evalTokens: number;
   malformed: number;
+  /** times model prose was accepted in place of a tool call */
+  salvaged: number;
 }
 
 const MAX_CALLS_PER_TURN = 8;
@@ -108,7 +116,7 @@ export async function runToolLoop(cfg: LoopConfig): Promise<LoopResult> {
   const started = Date.now();
   const res: LoopResult = {
     completed: false, reason: 'max_steps', detail: '', steps: 0, calls: [], finalText: '',
-    llmMs: 0, promptTokens: 0, evalTokens: 0, malformed: 0,
+    llmMs: 0, promptTokens: 0, evalTokens: 0, malformed: 0, salvaged: 0,
   };
   const seen = new Map<string, unknown>();
   let malformedStreak = 0;
@@ -161,6 +169,17 @@ export async function runToolLoop(cfg: LoopConfig): Promise<LoopResult> {
     // ---- no tool calls: either finished or needs a nudge -------------------
     if (calls.length === 0) {
       if (cfg.isDone()) return finish('done', 'model finished and backend state is complete');
+      if (cfg.salvageProse && content) {
+        try {
+          if (await cfg.salvageProse(content, res.calls)) {
+            res.salvaged++;
+            log.warn('model answered in prose instead of a tool call; accepted it (salvage)');
+            if (cfg.isDone()) return finish('done', 'prose salvaged into the expected tool call');
+          }
+        } catch (e) {
+          log.warn(`salvage failed: ${errMsg(e)}`);
+        }
+      }
       if (nudges < 2) {
         nudges++;
         messages.push({ role: 'user', content: cfg.nudge });

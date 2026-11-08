@@ -39,7 +39,7 @@ export class SpacetimeClauraDb implements ClauraDb {
         .withUri(this.uri)
         .withDatabaseName(this.dbName)
         .onConnect(c => { clearTimeout(timer); resolve(c); })
-        .onConnectError((_c, e) => { clearTimeout(timer); reject(new Error(`connect failed: ${errMsg(e)}`)); })
+        .onConnectError((_c, e) => { clearTimeout(timer); reject(new Error(`could not connect to ${this.uri} (db "${this.dbName}"): ${errMsg(e)}. Is "spacetime start" running and is the module published under that name?`)); })
         .onDisconnect(() => { this.connected = false; })
         .build();
     });

@@ -53,7 +53,16 @@ export async function runScribe(env: Env, inc: IncidentRow): Promise<AgentOutcom
     maxToolCalls: 6,
     deadlineMs: 90_000,
     isDone,
-    nudge: 'You have not filed the report yet. Call file_report now with a 5 to 8 sentence plain-prose summary.',
+    nudge: 'You have not filed the report yet. Call the file_report tool now and pass the report text as its summary argument.',
+    // Nemotron sometimes writes the finished report as chat text instead of calling file_report.
+    // If it has read the log and the prose is report-sized, file that text rather than regenerating it.
+    async salvageProse(content, calls) {
+      const readLog = calls.some(c => c.tool === 'list_events' && c.ok);
+      const text = content.replace(/[*_#`]+/g, '').trim();
+      if (!readLog || text.length < 120) return false;
+      await callTool(tools, 'file_report', { summary: text });
+      return true;
+    },
     startStatus: 'Writing',
     startThought: `Writing the report for incident #${inc.id} from the event log.`,
     async deterministic(pace) {

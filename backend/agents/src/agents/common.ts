@@ -2,7 +2,7 @@ import { FALLBACK_LABEL, MODEL_LABEL, SCRIPTED_LABEL, type RunOptions } from '..
 import type { Logger } from '../log.ts';
 import type { LlmClient } from '../ollama.ts';
 import type { Marks } from '../timeline.ts';
-import { runToolLoop, type Tool, type LoopResult } from '../toolLoop.ts';
+import { runToolLoop, type CallRecord, type Tool, type LoopResult } from '../toolLoop.ts';
 import type { AgentName, ClauraDb } from '../types.ts';
 import { clip, errMsg, sleep } from '../util.ts';
 
@@ -44,6 +44,8 @@ export interface AgentSpec {
   nudge: string;
   /** See LoopConfig.allowFinalTurn. */
   allowFinalTurn?: boolean;
+  /** See LoopConfig.salvageProse. */
+  salvageProse?: (content: string, calls: CallRecord[]) => Promise<boolean>;
   startStatus: string;
   startThought: string;
   /**
@@ -114,6 +116,7 @@ export async function runAgent(env: Env, spec: AgentSpec): Promise<AgentOutcome>
       isDone: spec.isDone,
       nudge: spec.nudge,
       allowFinalTurn: spec.allowFinalTurn,
+      salvageProse: spec.salvageProse,
       deadlineMs: spec.deadlineMs,
       llmTimeoutMs: env.opts.llmTimeoutMs,
       log: { debug: t => log.debug(name, t), warn: t => log.warn(name, t) },
@@ -131,7 +134,7 @@ export async function runAgent(env: Env, spec: AgentSpec): Promise<AgentOutcome>
     // The loop itself should never throw; treat it as a failed run if it does.
     loop = {
       completed: false, reason: 'llm_error', detail: errMsg(e), steps: 0, calls: [],
-      finalText: '', llmMs: 0, promptTokens: 0, evalTokens: 0, malformed: 0,
+      finalText: '', llmMs: 0, promptTokens: 0, evalTokens: 0, malformed: 0, salvaged: 0,
     };
   }
 
@@ -142,7 +145,11 @@ export async function runAgent(env: Env, spec: AgentSpec): Promise<AgentOutcome>
   };
   if (loop.completed && spec.isDone()) {
     log.ok(name, `model completed in ${loop.steps} turn(s), ${loop.calls.length} tool call(s), ${Math.round(loop.llmMs)} ms model time`);
-    return { ...stats, mode: 'model', note: `${loop.steps} turns, ${loop.evalTokens} tokens generated` };
+    return {
+      ...stats,
+      mode: 'model',
+      note: `${loop.steps} turns, ${loop.evalTokens} tokens generated${loop.salvaged ? `, ${loop.salvaged} prose answer(s) accepted` : ''}`,
+    };
   }
 
   log.warn(name, `FALLBACK: model loop ended with "${loop.reason}" (${loop.detail}); deterministic routine completes the rest`);

@@ -19,7 +19,11 @@ export interface TimelineEntry {
 export class Logger {
   readonly t0 = performance.now();
   readonly entries: TimelineEntry[] = [];
-  constructor(public verbose = false) {}
+  constructor(public verbose = false, private readonly quiet = false) {}
+
+  get isQuiet(): boolean {
+    return this.quiet;
+  }
 
   now(): number {
     return performance.now() - this.t0;
@@ -28,6 +32,7 @@ export class Logger {
   private emit(level: TimelineEntry['level'], who: string, text: string, record = true) {
     const t = this.now();
     if (record) this.entries.push({ tMs: t, who, text, level });
+    if (this.quiet) return;
     const stamp = c('90', `+${(t / 1000).toFixed(2).padStart(6)}s`);
     const name = c(AGENT_COLOR[who] ?? '37', who.toUpperCase().padEnd(9));
     const body = level === 'warn' ? c('33', text) : level === 'error' ? c('31', text) : level === 'ok' ? c('32', text) : text;
