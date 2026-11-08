@@ -9,13 +9,13 @@
 # The SpacetimeDB SQL endpoint has no ORDER BY, GROUP BY or IN (...), so rows come back in storage order;
 # this script sorts them by their first column (the id) for reading.
 
-S=${SPACETIME:-/Users/abd/.local/bin/spacetime}
+S=${SPACETIME:-$(command -v spacetime || echo "$HOME/.local/bin/spacetime")}
 ENVF=${CLAURA_ENV_FILE:-$HOME/.config/claura/.env}
 [ "${1:-}" = "--local" ] && ENVF=${CLAURA_ENV_FILE:-$HOME/.config/claura/local.env}
 getvar() { grep -E "^$1=" "$ENVF" 2>/dev/null | head -1 | cut -d= -f2- | tr -d "\"'"; }
 URI=$(getvar CLAURA_STDB_URI); URI=${URI:-ws://127.0.0.1:3000}
 DB=${STDB_DB:-$(getvar CLAURA_STDB_DB)}; DB=${DB:-claura}
-case "$URI" in *maincloud*) SERVER=maincloud ;; *) SERVER=local ;; esac
+case "$URI" in *maincloud*) SERVER=maincloud ;; *) SERVER=http://${URI#ws://} ;; esac
 
 q() { # title, sql
   echo "-- $1"
