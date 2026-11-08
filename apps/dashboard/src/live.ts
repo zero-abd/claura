@@ -106,7 +106,12 @@ async function run(fn: (c: DbConnection) => Promise<string>): Promise<void> {
   try {
     live.notice = { tone: "safe", text: await fn(conn) };
   } catch (e) {
-    live.notice = { tone: "hot", text: `Refused by SpacetimeDB: ${msg(e)}` };
+    // SenderError is the module refusing; anything else is a local check (nothing waiting, no incident).
+    const text = msg(e);
+    live.notice = {
+      tone: "hot",
+      text: e instanceof Error && e.name === "SenderError" ? `Refused by SpacetimeDB: ${text}` : text[0].toUpperCase() + text.slice(1) + ".",
+    };
   } finally {
     live.busy = false;
     bump();
