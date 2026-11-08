@@ -1,0 +1,69 @@
+<template>
+  <!-- 26. "And every screen updates live, through SpacetimeDB subscriptions." Two consoles (two people) on one
+       incident; SpacetimeDB below, one subscription line to each. On "updates live" one change arrives on both lines at
+       once and both screens flip from breach to contained on the same frame (two real states of the product, honest:
+       no invented UI). Params: a, b (still per state), who: [[initials, role, colour], ...] -->
+  <style>
+    /*COMMON*/
+    #{{P}}stage .dev2 { position: absolute; top: 150px; width: 860px; height: 578px; border-radius: 24px; }
+    #{{P}}stage .dev2 .dev-screen { top: 40px; }
+    #{{P}}stage .dev2 .dev-screen img { position: absolute; left: -276px; top: -46px; width: 1290px; height: 806px; object-fit: fill; }
+    #{{P}}stage .who { position: absolute; top: 76px; height: 56px; display: flex; align-items: center; gap: 16px; font: 600 30px/1 var(--font); letter-spacing: -0.016em; white-space: nowrap; }
+    #{{P}}stage .who b { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font: 600 24px/1 var(--font); color: #fff; }
+    #{{P}}db { left: 730px; top: 790px; width: 460px; height: 86px; display: flex; align-items: center; justify-content: center; gap: 16px; font: 600 33px/1 var(--font); letter-spacing: -0.02em; white-space: nowrap; }
+    #{{P}}db .sub { font-weight: 500; color: var(--ink-3); }
+    #{{P}}lines { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    #{{P}}stage .pk { position: absolute; left: 0; top: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18); opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle"><div id="{{P}}cam" class="cam">
+        <svg id="{{P}}lines" viewBox="0 0 1920 1080" aria-hidden="true" data-layout-ignore>
+          <path id="{{P}}l0" d="M900 790 C 900 760, 520 770, 520 730" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-dasharray="8 10" />
+          <path id="{{P}}l1" d="M1020 790 C 1020 760, 1400 770, 1400 730" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-dasharray="8 10" />
+        </svg>
+{{ [0, 1].map((i) => `        <div id="${P}d${i}" class="device dev2" style="left:${i ? 970 : 90}px">
+          <div class="dev-bar"><div class="dev-lights"><i></i><i></i><i></i></div></div>
+          <div class="dev-screen"><img id="${P}d${i}a" src="${p.a}" alt="" style="z-index:1" /><img id="${P}d${i}b" src="${p.b}" alt="" style="z-index:2; opacity:0" /></div>
+        </div>
+        <div id="${P}who${i}" class="who" style="left:${i ? 970 : 90}px"><b style="background:${p.who[i][2]}" data-layout-ignore>${p.who[i][0]}</b>${esc(p.who[i][1])}</div>`).join('\n') }}
+        <div id="{{P}}db" class="glass pill"><!--KIT:icon name="database" size=38 stroke=1.8-->SpacetimeDB <span class="sub">subscriptions</span></div>
+        <i id="{{P}}pk0" class="pk"></i><i id="{{P}}pk1" class="pk"></i>
+      </div></div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S, { morph: { to: [90, 150, 860, 578, 24], flip: P + 'd0', blur: false, after: [P + 'who0'] } });
+      // the second console and its person, then the database they both subscribe to
+      K.land(tl, P + 'd1', 0.3, { from: 0.95, blur: 10, dur: 0.6 });
+      K.blurLine(tl, P + 'who1', 0.5);
+      if (S.in.type !== 'morph') { K.land(tl, P + 'd0', 0.1, { from: 0.95, blur: 10, dur: 0.6 }); K.blurLine(tl, P + 'who0', 0.3); }
+      K.land(tl, P + 'db', 0.55, { from: 0.92, blur: 10, dur: 0.55 });
+      tl.fromTo([P + 'l0', P + 'l1'], { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, 0.7);
+      // one change, both lines, both screens, same frame
+      const live = {{at('updates live')}};
+      const PATHS = [[[900, 790], [700, 762], [520, 730]], [[1020, 790], [1220, 762], [1400, 730]]];
+      // a packet runs a line: two straight legs (fromTo, so any frame renders on its own)
+      const trip = (pk, pts, t0, op) => {
+        tl.fromTo(pk, { x: pts[0][0], y: pts[0][1] }, { x: pts[1][0], y: pts[1][1], duration: 0.29, ease: 'none', immediateRender: false }, t0);
+        tl.fromTo(pk, { x: pts[1][0], y: pts[1][1] }, { x: pts[2][0], y: pts[2][1], duration: 0.29, ease: 'none', immediateRender: false }, t0 + 0.29);
+        tl.fromTo(pk, { opacity: 0 }, { opacity: op, duration: 0.06, ease: 'none', immediateRender: false }, t0);
+        tl.fromTo(pk, { opacity: op }, { opacity: 0, duration: 0.08, ease: 'none', immediateRender: false }, t0 + 0.58);
+      };
+      const arrive = live + 0.28;
+      PATHS.forEach((pts, i) => { tl.set(P + 'pk' + i, { x: pts[0][0], y: pts[0][1], opacity: 0 }, 0); trip(P + 'pk' + i, pts, live - 0.3, 1); });
+      [0, 1].forEach((i) => tl.fromTo(P + 'd' + i + 'b', { opacity: 0 }, { opacity: 1, duration: 0.18, ease: 'power1.out' }, arrive));
+      K.tone(tl, P, 'breach', 'contained', arrive, 0.6);
+      // and again on "subscriptions", quieter: it is a live channel, not a one-off
+      const subs = {{at('subscriptions')}};
+      PATHS.forEach((pts, i) => trip(P + 'pk' + i, pts, subs - 0.3, 0.8));
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

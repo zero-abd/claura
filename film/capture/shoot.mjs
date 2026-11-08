@@ -68,6 +68,9 @@ function parseArgs(argv) {
     else if (a === '--keep-frames') o.keepFrames = true
     else if (a === '--no-encode') o.noEncode = true
     else if (a === '--dry') o.dry = true
+    else if (a === '--attempts') { o.attempts = Math.max(1, +need(i, a)); i++ }
+    else if (a === '--no-gate') o.noGate = true
+    else if (a === '--strict') o.strict = true // a take that is still stalled on the last attempt FAILS (no encode) instead of being kept
     else if (a === '--keep-chrome') o.keepChrome = true
     else if (a === '--attach') o.attach = true
     else if (a === '--headful') o.headful = true
@@ -85,6 +88,34 @@ function saveManifest(file, entries) {
   const tmp = `${file}.tmp`
   fs.writeFileSync(tmp, JSON.stringify(entries, null, 1))
   fs.renameSync(tmp, file)
+}
+
+class RetryTake extends Error {}
+
+/** Stalls = screencast gaps of >= 100 ms that overlap motion. Returns { stalls, worst, worstAt, fps, bad }. */
+function takeGate(rec, page, meta) {
+  const fr = rec.frames.map((f) => f.t)
+  if (fr.length < 2) return { stalls: [{ at: 0, ms: 9999 }], worst: 9999, worstAt: 0, fps: 0, bad: true }
+  const motion = page.cursorPath.map(([t]) => [t, t])
+  for (const e of page.eventLog) if (e.type === 'scroll') motion.push([e.t, e.t + (e.ms || 0) / 1000])
+  if (meta.continuous) motion.push([fr[0], fr[fr.length - 1]])
+  // a stall = the picture did not follow the motion for 100 ms or more: from the first motion inside a long gap to the frame
+  // that finally showed it (so the 0.2 s a cursor needs to appear after a static lead-in is a short hiccup, not a long stall)
+  const stalls = []
+  for (let i = 1; i < fr.length; i++) {
+    const p = fr[i - 1], q = fr[i]
+    if ((q - p) * 1000 < 100) continue
+    let m0 = Infinity
+    for (const [s, e] of motion) if (e >= p + 0.02 && s <= q - 0.02) m0 = Math.min(m0, Math.max(s, p))
+    if (m0 === Infinity) continue
+    const delay = (q - m0) * 1000
+    if (delay >= 100) stalls.push({ at: +(m0 - fr[0]).toFixed(2), ms: Math.round(delay) })
+  }
+  const worst = Math.max(0, ...stalls.map((x) => x.ms))
+  const w = stalls.find((x) => x.ms === worst)
+  const fps = +((fr.length - 1) / (fr[fr.length - 1] - fr[0])).toFixed(1)
+  // tolerated: a few short hiccups; a stall longer than 250 ms or more than 3 stalls rejects the take
+  return { stalls, worst, worstAt: w?.at ?? 0, fps, bad: worst > 250 || stalls.length > 3 }
 }
 
 async function runShot(file, env) {
@@ -150,11 +181,25 @@ async function runShot(file, env) {
     run.phase = 'stop'
     rec = await stop()
     stop = null
+    // capture-stall gate: gaps of 100 ms or more between screencast frames WHILE something was moving (cursor path, a scroll
+    // glide, or the whole take for pages that animate by themselves) are stalls: the machine was busy and the footage will
+    // stutter. A take with too many is thrown away and shot again (the page is reloaded, so it starts clean).
+    const gate = takeGate(rec, page, meta)
+    if (gate.stalls.length) log(`[${name}] take ${env.attempt}/${env.attempts}: ${gate.stalls.length} stall(s) during motion, worst ${gate.worst} ms at ${gate.worstAt}s (${gate.fps} fps)`)
+    if (!env.noGate && meta.retry !== false && gate.bad && env.attempt < env.attempts) {
+      fs.rmSync(path.join(env.framesRoot, name), { recursive: true, force: true })
+      throw new RetryTake(`${gate.stalls.length} capture stalls (worst ${gate.worst} ms)`)
+    }
+    if (env.strict && !env.noGate && gate.bad && (meta.retry === false || env.attempt >= env.attempts)) {
+      fs.rmSync(path.join(env.framesRoot, name), { recursive: true, force: true })
+      throw new Error(`take rejected: ${gate.stalls.length} capture stalls during motion (worst ${gate.worst} ms), ${gate.fps} fps`)
+    }
     if (mod.after) { run.phase = 'after'; await mod.after(page, ctx) }
     const events = await page.events()
     const ignore = (meta.ignoreProblems ?? []).map((x) => new RegExp(x))
     const problems = page.problems.filter((p) => !ignore.some((re) => re.test(p.text)))
     const cursor = [...page.cursorPath]
+    await page.send('Page.navigate', { url: 'about:blank' }, { timeout: 4000 }).catch(() => {}) // idle the tab (a 3D page left running starves the next take)
     await page.close()
 
     if (env.noEncode) return { name, frames: rec.frames.length, framesDir: dir, recorded_seconds: +(rec.endT - T0).toFixed(2) }
@@ -177,6 +222,20 @@ async function runShot(file, env) {
     fs.mkdirSync(path.dirname(evFile), { recursive: true })
     fs.writeFileSync(evFile, JSON.stringify(sidecar))
 
+    // key events for the edit, in CLIP seconds: every mark() the shot made (first time each label fires), plus the console's own
+    // phase/view changes, the app calls that start a script (app:play = incident T+0) and every click (with what it hit).
+    const keyEvents = {}
+    const firstOf = (k, t) => { if (!(k in keyEvents)) keyEvents[k] = t }
+    const phases = [], views = [], clicks = []
+    for (const e of sidecar.events) {
+      if (e.type === 'mark' && e.label && !/^act:/.test(e.label)) firstOf(e.label, e.t)
+      else if (/^(bulkhead|claura):phase$/.test(e.type)) { phases.push({ t: e.t, phase: e.detail }); firstOf(`phase:${e.detail}`, e.t) }
+      else if (/^(bulkhead|claura):view$/.test(e.type)) { views.push({ t: e.t, view: e.detail }); firstOf(`view:${e.detail}`, e.t) }
+      else if (e.type === 'app' && ['play', 'approve', 'seek', 'reset'].includes(e.method)) firstOf(`app:${e.method}`, e.t)
+      else if (e.type === 'click') clicks.push({ t: e.t, target: e.target || e.hit || '', hit: e.hit || '' })
+      else if (/^webauthn:/.test(e.type)) firstOf(e.type, e.t)
+    }
+
     const relOut = (p) => path.relative(env.out, p)
     const outBase = path.relative(path.resolve(HERE, '..'), env.out)
     const entry = {
@@ -184,6 +243,7 @@ async function runShot(file, env) {
       seconds: res.seconds, fps: res.fps, size: res.size, logical: res.logical, scale: meta.scale,
       shows: meta.shows ?? '', url: ctx.url ?? null, theme: meta.scheme, shot: path.relative(path.resolve(HERE, '..'), file),
       capturedAt: new Date().toISOString(), capture: res.stats, bytes: res.bytes,
+      keyEvents, phases, views, clicks, stalls: { count: gate.stalls.length, worst: gate.worst, worstAt: gate.worstAt, attempt: env.attempt },
       problems: problems.length, ...(actResult && typeof actResult === 'object' ? { result: actResult } : {}), notes: `${meta.notes ?? ''}${meta.notes ? ' ' : ''}Screencast ${res.stats.frames_used} unique frames over ${res.seconds}s (${res.stats.unique_fps}/s, median gap ${res.stats.median_gap_ms} ms) laid on a constant ${res.fps} fps timeline.`,
     }
     const manifestFile = path.join(env.out, 'manifest.json')
@@ -193,7 +253,11 @@ async function runShot(file, env) {
     return { name, ...entry, problemList: problems.slice(0, 5).map((p) => `${p.kind}: ${p.text}`) }
   } finally {
     if (stop) { try { await stop() } catch { /* ignore */ } }
-    if (!page.closed) await page.close()
+    if (!page.closed) {
+      // idle the tab: a left-over 3D page keeps the GPU busy (and starves the next take) after the run
+      await page.send('Page.navigate', { url: 'about:blank' }, { timeout: 4000 }).catch(() => {})
+      await page.close()
+    }
   }
 }
 
@@ -214,7 +278,7 @@ async function main() {
   }
   fs.writeFileSync(LOCK, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }))
 
-  const env = { port: o.port, out, fps: o.fps, crf: o.crf, preset: o.preset, quality: o.quality, keepFrames: o.keepFrames, noEncode: o.noEncode, dry: o.dry, base: o.url }
+  const env = { port: o.port, out, fps: o.fps, crf: o.crf, preset: o.preset, quality: o.quality, keepFrames: o.keepFrames, noEncode: o.noEncode, dry: o.dry, base: o.url, attempts: o.attempts ?? 3, noGate: o.noGate, strict: o.strict, attempt: 1 }
   env.framesRoot = o.framesDir ?? path.join(tmpRoot(), 'claura-cap-frames')
   fs.mkdirSync(env.framesRoot, { recursive: true })
 
@@ -250,11 +314,16 @@ async function main() {
   const clips = []
   const failures = []
   for (const file of o.shots) {
-    try {
-      clips.push(await runShot(file, env))
-    } catch (e) {
-      failures.push({ shot: path.basename(file), phase: run.phase, error: e.message.split('\n')[0] })
-      console.error(`[shoot] FAILED ${path.basename(file)} in phase "${run.phase}":\n${describe(e)}`)
+    for (env.attempt = 1; env.attempt <= env.attempts; env.attempt++) {
+      try {
+        clips.push(await runShot(file, env))
+        break
+      } catch (e) {
+        if (e instanceof RetryTake) { log(`[${path.basename(file)}] ${e.message}: shooting it again (${env.attempt}/${env.attempts})`); await sleep(1500); continue }
+        failures.push({ shot: path.basename(file), phase: run.phase, error: e.message.split('\n')[0] })
+        console.error(`[shoot] FAILED ${path.basename(file)} in phase "${run.phase}":\n${describe(e)}`)
+        break
+      }
     }
   }
   const ok = failures.length === 0

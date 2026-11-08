@@ -134,14 +134,12 @@ const K = (() => {
   function enter(tl, P, T, o = {}) {
     if (!T || T.type === 'cut') return;
     const whip = P + 'whip';
-    if (T.type === 'blur') {
-      tl.fromTo(whip, { opacity: 0, filter: 'blur(14px)' }, { opacity: 1, filter: 'blur(0px)', duration: T.dur, ease: 'power2.out' }, 0);
+    if (T.type === 'blur' || T.type === 'whip') {
+      // blur swap: the frame sharpens in place; whip: it lands blurred from the side and sharpens (0.3 s power3.out)
+      const isWhip = T.type === 'whip', dx = isWhip ? 760 * (T.dir ?? 1) : 0;
+      tl.fromTo(whip, { opacity: isWhip ? 1 : 0, x: dx, filter: `blur(${isWhip ? 20 : 14}px)` }, { opacity: 1, x: 0, filter: 'blur(0px)', duration: T.dur, ease: isWhip ? 'power3.out' : 'power2.out' }, 0);
       tl.set(whip, { filter: 'none' }, T.dur + 0.01);
-    } else if (T.type === 'whip') {
-      // the arriving frame lands blurred and sharpens: 0.3 s power3.out, horizontal travel
-      tl.fromTo(whip, { x: 760 * (T.dir ?? 1), filter: 'blur(20px)' }, { x: 0, filter: 'blur(0px)', duration: T.dur, ease: 'power3.out' }, 0);
-      tl.set(whip, { filter: 'none' }, T.dur + 0.01);
-      tl.fromTo(P + 'wall', { x: 90 * (T.dir ?? 1) }, { x: 0, duration: T.dur + 0.1, ease: 'power3.out' }, 0);
+      if (isWhip) tl.fromTo(P + 'wall', { x: 90 * (T.dir ?? 1) }, { x: 0, duration: T.dur + 0.1, ease: 'power3.out' }, 0);
     } else if (T.type === 'zoom') {
       // the previous scene zoomed through a button; its fill is this frame's first frame, then the scene settles
       tl.fromTo(P + 'fx-fill', { opacity: 1, background: T.color }, { opacity: 0, duration: T.fadeDur ?? 0.34, ease: 'power1.out' }, 0.04);
@@ -158,11 +156,10 @@ const K = (() => {
     const T = S.out, cut = S.cut;
     if (!T || ['cut', 'end', 'iris'].includes(T.type)) return;
     const whip = P + 'whip';
-    if (T.type === 'blur') {
-      tl.to(whip, { opacity: 0, filter: 'blur(12px)', duration: 0.18, ease: 'power2.in' }, cut - 0.18);
-    } else if (T.type === 'whip') {
-      tl.to(whip, { x: -760 * (T.dir ?? 1), filter: 'blur(20px)', duration: 0.24, ease: 'power3.in' }, cut - 0.24);
-      tl.to(P + 'wall', { x: -90 * (T.dir ?? 1), duration: 0.24, ease: 'power3.in' }, cut - 0.24);
+    if (T.type === 'blur' || T.type === 'whip') {
+      const isWhip = T.type === 'whip', d = isWhip ? 0.24 : 0.18;
+      tl.to(whip, { opacity: isWhip ? 1 : 0, x: isWhip ? -760 * (T.dir ?? 1) : 0, filter: `blur(${isWhip ? 20 : 12}px)`, duration: d, ease: isWhip ? 'power3.in' : 'power2.in' }, cut - d);
+      if (isWhip) tl.to(P + 'wall', { x: -90 * (T.dir ?? 1), duration: 0.24, ease: 'power3.in' }, cut - 0.24);
     } else if (T.type === 'zoom') {
       zoomOut(tl, P, T, cut);
     } else if (T.type === 'morph') {
@@ -173,25 +170,73 @@ const K = (() => {
   function zoomOut(tl, P, T, cut) {
     const [x, y, w, h, r] = T.rect || [W / 2 - 60, H / 2 - 60, 120, 120, 60], d = T.dur ?? 0.36;
     const z = P + 'fx-zoom', from = cut - d;
-    tl.set(z, { background: T.color, opacity: 1 }, from);
+    tl.set(z, { background: T.color }, from);
+    tl.fromTo(z, { opacity: 0 }, { opacity: 1, duration: d * 0.75, ease: 'power2.in', immediateRender: false }, from);
     tl.fromTo(z, { clipPath: `inset(${y}px ${W - x - w}px ${H - y - h}px ${x}px round ${r}px)` },
       { clipPath: 'inset(-4px -4px -4px -4px round 0px)', duration: d, ease: 'power3.in', immediateRender: false }, from);
     tl.set(P + 'settle', { transformOrigin: `${x + w / 2}px ${y + h / 2}px` }, from);
     tl.fromTo(P + 'settle', { scale: 1 }, { scale: 2.6, duration: d, ease: 'power3.in', immediateRender: false }, from);
   }
-  // glass pane morph, outgoing half: everything but the pane blurs out; the pane's own content leaves; the pane stays
+  // glass pane morph, outgoing half: everything but the pane blurs out; the pane keeps its content until the last
+  // 0.1 s (the next scene's content grows out of the same rect on the cut, so the pane is never empty for long)
   function morphOut(tl, P, T, cut, m) {
     const d = 0.28;
     (m.out || []).forEach((s) => tl.to(s, { opacity: 0, filter: 'blur(10px)', duration: d, ease: 'power2.in' }, cut - d - 0.04));
-    (m.inner || []).forEach((s) => tl.to(s, { opacity: 0, filter: 'blur(6px)', duration: 0.18, ease: 'power2.in' }, cut - 0.2));
+    (m.inner || []).forEach((s) => tl.to(s, { opacity: 0, filter: 'blur(6px)', duration: 0.1, ease: 'power2.in' }, cut - 0.11));
   }
   // incoming half: a glass ghost at the old pane's rect grows into this scene's target; the target sharpens inside it
   function morphIn(tl, P, T, m) {
     const g = P + 'fx-ghost', d = T.dur ?? 0.55;
     const [x0, y0, w0, h0, r0] = T.from || [W / 2 - 160, H / 2 - 40, 320, 80, 40];
     const [x1, y1, w1, h1, r1] = m.to || [160, 120, 1600, 900, 28];
-    tl.fromTo(g, { opacity: 1, left: x0, top: y0, width: w0, height: h0, borderRadius: r0 },
-      { left: x1, top: y1, width: w1, height: h1, borderRadius: r1, duration: d, ease: 'power3.inOut' }, 0);
+    if (m.flip) {
+      // the target itself flies from the outgoing pane's rect to its own (laid out at m.to), content and all
+      const fb = m.blur === false ? 0 : (m.blur ?? 6);
+      tl.fromTo(m.flip, { x: x0 - x1, y: y0 - y1, scaleX: w0 / w1, scaleY: h0 / h1, transformOrigin: '0 0', filter: `blur(${fb}px)` },
+        { x: 0, y: 0, scaleX: 1, scaleY: 1, filter: 'blur(0px)', duration: d, ease: 'power3.inOut' }, 0);
+      tl.set(m.flip, { filter: 'none' }, d + 0.01);
+      (m.after || []).forEach((s, i) => tl.fromTo(s, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.22, ease: 'power2.out' }, d + 0.05 + i * 0.07));
+      return;
+    }
+    if (!m.ghost) {
+      // REVEAL (default): this scene's own content grows out of the outgoing pane's rect with a uniform scale (nothing
+      // squashed), seen through a rounded clip that opens from that rect to the frame, while a glass rim flies from the
+      // old rect to the target's. The content is visible from the first frame: no plain-glass pane, no bare wallpaper.
+      // fit 'contain' puts the whole target inside the old rect; 'cover' fills it (a screen growing out of a row).
+      const s0 = m.fit === 'cover' ? Math.max(w0 / w1, h0 / h1) : Math.min(w0 / w1, h0 / h1);
+      const tx = x0 + w0 / 2 - s0 * (x1 + w1 / 2), ty = y0 + h0 / 2 - s0 * (y1 + h1 / 2);
+      const ins = (x, y, w, h, r) => `inset(${y.toFixed(1)}px ${(W - x - w).toFixed(1)}px ${(H - y - h).toFixed(1)}px ${x.toFixed(1)}px round ${r.toFixed(1)}px)`;
+      tl.fromTo(P + 'settle', { x: tx, y: ty, scale: s0, transformOrigin: '0px 0px' }, { x: 0, y: 0, scale: 1, duration: d, ease: 'power3.inOut' }, 0);
+      // the clip follows the rim (old rect -> target rect) on the same ease; GSAP does not interpolate these inset()
+      // strings reliably, so the clip is written from a tweened progress (a pure function of timeline time)
+      const wEl = $(P + 'whip'), st = { p: 0 };
+      const clipAt = (p) => { const L = (a, b) => a + (b - a) * p; wEl.style.clipPath = ins(L(x0, x1), L(y0, y1), L(w0, w1), L(h0, h1), L(r0, r1)); };
+      tl.set(P + 'whip', { clipPath: ins(x0, y0, w0, h0, r0) }, 0);
+      tl.fromTo(st, { p: 0 }, { p: 1, duration: d, ease: 'power3.inOut', onUpdate: () => clipAt(st.p), immediateRender: false }, 0.001);
+      tl.set(P + 'whip', { clipPath: 'none' }, d + 0.01);
+      const rim = $(P + 'fx-rim');
+      if (rim) {
+        // FLIP with transforms only: laid out once at the target rect, flown from the old rect (radius pre-divided)
+        Object.assign(rim.style, { left: x1 + 'px', top: y1 + 'px', width: w1 + 'px', height: h1 + 'px' });
+        const sx = w0 / w1, sy = h0 / h1;
+        tl.fromTo(rim, { opacity: 1, x: x0 - x1, y: y0 - y1, scaleX: sx, scaleY: sy, transformOrigin: '0 0', borderRadius: `${(r0 / sx).toFixed(2)}px / ${(r0 / sy).toFixed(2)}px` },
+          { x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: `${r1}px / ${r1}px`, duration: d, ease: 'power3.inOut' }, 0);
+        tl.to(rim, { opacity: 0, duration: 0.2, ease: 'power1.out' }, d - 0.1);
+      }
+      if (m.target && m.blur !== false) {
+        tl.fromTo(m.target, { filter: 'blur(5px)' }, { filter: 'blur(0px)', duration: d * 0.7, ease: 'power2.out' }, 0);
+        tl.set(m.target, { filter: 'none' }, d * 0.7 + 0.01);
+      }
+      (m.after || []).forEach((s, i) => tl.fromTo(s, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.22, ease: 'power2.out' }, d + 0.05 + i * 0.07));
+      return;
+    }
+    // GHOST (m.ghost): the ghost is laid out at the target rect once (plain style, not a tween), then flies there with transforms;
+    // its corner radius is pre-divided by the scale so the corners stay round on the way
+    const el = $(g);
+    if (el) Object.assign(el.style, { left: x1 + 'px', top: y1 + 'px', width: w1 + 'px', height: h1 + 'px' });
+    const sx = w0 / w1, sy = h0 / h1;
+    tl.fromTo(g, { opacity: 1, x: x0 - x1, y: y0 - y1, scaleX: sx, scaleY: sy, transformOrigin: '0 0', borderRadius: `${(r0 / sx).toFixed(2)}px / ${(r0 / sy).toFixed(2)}px` },
+      { x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: `${r1}px / ${r1}px`, duration: d, ease: 'power3.inOut' }, 0);
     tl.to(g, { opacity: 0, duration: 0.22, ease: 'power1.out' }, d - 0.06);
     if (m.target) tl.fromTo(m.target, { opacity: 0, filter: 'blur(12px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.3, ease: 'power2.out' }, d * 0.62);
     if (m.target) tl.set(m.target, { filter: 'none' }, d * 0.62 + 0.31);

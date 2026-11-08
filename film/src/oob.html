@@ -1,0 +1,73 @@
+<template>
+  <!-- 8. "Its command center runs outside your network, with its own identities." The mark (carried from the reveal)
+       becomes the command-centre pane; the compromised network lands beside it, a clear gap between them; identities
+       verified out-of-band. We leave by zooming through "Claura agents · on-prem" inside the data center. -->
+  <style>
+    /*COMMON*/
+    #{{P}}net { left: 110px; top: 170px; width: 960px; height: 620px; }
+    #{{P}}net .hd { position: absolute; left: 40px; top: 36px; right: 40px; height: 60px; display: flex; align-items: center; gap: 22px; }
+    #{{P}}net .hd .t { font: 600 42px/1 var(--font); letter-spacing: -0.026em; }
+    #{{P}}comp { position: relative; height: 56px; }
+    #{{P}}stage .tile { position: absolute; width: 420px; height: 214px; border-radius: 26px; padding: 26px 28px 0; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.08); }
+    #{{P}}stage .tile .row { display: flex; align-items: center; gap: 18px; }
+    #{{P}}stage .tile .ib { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+    #{{P}}stage .tile .n { font: 600 32px/1 var(--font); letter-spacing: -0.02em; }
+    #{{P}}stage .tile .s { margin-top: 10px; font: 500 28px/1 var(--font); color: #ff7a45; }
+    #{{P}}agents { position: absolute; left: 26px; top: 132px; height: 58px; padding: 0 24px 0 16px; border-radius: 29px; display: inline-flex; align-items: center; gap: 12px; font: 600 28px/1 var(--font); color: var(--ink); white-space: nowrap; }
+    #{{P}}cmd { left: 1220px; top: 170px; width: 590px; height: 620px; }
+    #{{P}}cmd .hd { position: absolute; left: 150px; top: 46px; }
+    #{{P}}cmd .hd .t { font: 600 42px/1 var(--font); letter-spacing: -0.026em; white-space: nowrap; }
+    #{{P}}cmd .hd .s { margin-top: 12px; font: 500 28px/1 var(--font); color: var(--ink-2); white-space: nowrap; }
+    #{{P}}cmd .id { position: absolute; left: 44px; right: 40px; height: 104px; display: flex; align-items: center; gap: 22px; border-top: 1.5px solid rgba(255, 255, 255, 0.08); }
+    #{{P}}cmd .av { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 600 28px/1 var(--font); color: #fff; flex: none; }
+    #{{P}}cmd .who { font: 600 30px/1 var(--font); letter-spacing: -0.016em; white-space: nowrap; }
+    #{{P}}cmd .ver { margin-top: 10px; display: flex; align-items: center; gap: 8px; font: 500 28px/1 var(--font); color: var(--ink-3); white-space: nowrap; }
+    #{{P}}mk { position: absolute; left: 1270px; top: 214px; width: 71.6px; height: 76px; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle"><div id="{{P}}cam" class="cam">
+        <div id="{{P}}net" class="glass">
+          <div class="hd"><span class="t">Your network</span><span id="{{P}}comp" class="chip hot" style="position:relative">Compromised</span></div>
+          <div id="{{P}}t0" class="tile" style="left:40px; top:126px"><div class="row"><div class="ib"><!--KIT:icon name="mail" size=34 stroke=1.8--></div><div><div class="n">Email</div><div class="s">Read by the attacker</div></div></div></div>
+          <div id="{{P}}t1" class="tile" style="left:500px; top:126px"><div class="row"><div class="ib"><!--KIT:icon name="phone" size=34 stroke=1.8--></div><div><div class="n">Phones</div><div class="s">Down</div></div></div></div>
+          <div id="{{P}}t2" class="tile" style="left:40px; top:366px"><div class="row"><div class="ib"><!--KIT:icon name="share" size=34 stroke=1.8--></div><div><div class="n">File share</div><div class="s">Encrypted</div></div></div></div>
+          <div id="{{P}}t3" class="tile" style="left:500px; top:366px"><div class="row"><div class="ib"><!--KIT:icon name="server" size=34 stroke=1.8--></div><div><div class="n">Data center</div><div class="s">Breach in Hall B</div></div></div>
+            <div id="{{P}}agents" class="glass clear pill"><svg viewBox="24 17 209 222" width="30" height="32" aria-hidden="true"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>Claura agents · on-prem</div>
+          </div>
+        </div>
+        <div id="{{P}}cmd" class="glass thick">
+          <div class="hd"><div id="{{P}}ct" class="t">{{ words('Command center') }}</div><div id="{{P}}cs" class="s">Outside your network</div></div>
+          <div id="{{P}}oobl" class="chip glass clear pill" style="left:44px; top:168px"><!--KIT:icon name="signal" size=30 stroke=1.8-->Out-of-band · not on your network</div>
+{{ [['RK', 'Incident Commander', '#4f5dff'], ['JT', 'Legal counsel', '#14a9a4'], ['AL', 'CISO', '#8e4ff0']].map(([a, n, c], i) => `          <div id="${P}id${i}" class="id" style="top:${262 + i * 112}px"><div class="av" style="background:${c}">${a}</div><div><div class="who">${n}</div><div class="ver"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="3.6"/><path d="M11.4 12H20.4M17.4 12v3M20.4 12v2"/></svg>verified out-of-band</div></div></div>`).join('\n') }}
+        </div>
+        <svg id="{{P}}mk" viewBox="24 17 209 222" aria-label="Claura"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>
+      </div></div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S);
+      // the pane builds around the mark that just arrived
+      tl.fromTo(P + 'cmd', { opacity: 0, scale: 0.94, transformOrigin: '86px 82px' }, { opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out' }, 0.04);
+      K.blurWords(tl, P + 'ct', 0, { times: {{json(times('command center'))}} });
+      K.blurLine(tl, P + 'cs', {{at('runs outside')}});
+      K.land(tl, P + 'oobl', {{at('outside')}} + 0.05, { from: 0.9, blur: 8, dur: 0.45 });
+      // the compromised network, beside it, not around it
+      const outside = {{at('outside')}};
+      K.land(tl, P + 'net', outside - 0.18, { from: 0.95, blur: 12, dur: 0.6 });
+      for (let i = 0; i < 4; i++) K.land(tl, P + 't' + i, outside + 0.02 + i * 0.07, { from: 0.94, blur: 8, dur: 0.45 });
+      K.pop(tl, P + 'comp', {{at('your network')}});
+      K.land(tl, P + 'agents', outside + 0.5, { from: 0.9, blur: 8, dur: 0.45 });
+      // its own identities
+      const ids = {{at('with its own identities')}};
+      for (let i = 0; i < 3; i++) K.land(tl, P + 'id' + i, ids - 0.42 + i * 0.07, { from: 0.96, blur: 8, dur: 0.4 });
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

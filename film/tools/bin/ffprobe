@@ -1,0 +1,5 @@
+#!/bin/sh
+# ffprobe for hyperframes check/render: Remotion's bundled build (bulkhead-studio/node_modules), which loads its
+# ffmpeg dylibs by bare name, so point dyld at its folder. (bulkhead-studio/bin only ships ffmpeg.)
+R=/Users/abd/repos/bulkhead-studio/node_modules/@remotion/compositor-darwin-arm64
+DYLD_LIBRARY_PATH="$R${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}" exec "$R/ffprobe" "$@"

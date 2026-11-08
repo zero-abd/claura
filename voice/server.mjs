@@ -328,9 +328,12 @@ export function mount(app, ctx = {}) {
   }
 
   function sendClip(res, clip, extra = {}) {
+    // Send relative to a root: with a bare absolute path, `dotfiles: 'deny'` also rejects any dot-directory in the path, and the
+    // default cache folder is ~/.cache/claura/voice (every clip answered 403/500 before this).
     res.sendFile(
-      clip.file,
+      path.basename(clip.file),
       {
+        root: path.dirname(clip.file),
         acceptRanges: true,
         maxAge: '1h',
         immutable: true,
@@ -506,7 +509,7 @@ export function mount(app, ctx = {}) {
   });
 
   app.get(`${base}/ui.js`, (_req, res) => {
-    res.type('text/javascript').sendFile(path.join(HERE, 'ui.js'), { maxAge: 0, dotfiles: 'deny' });
+    res.type('text/javascript').sendFile('ui.js', { root: HERE, maxAge: 0, dotfiles: 'deny' });
   });
 
   // ---------------------------------------------------------------- warm-up (opt-in) and handle
@@ -517,7 +520,8 @@ export function mount(app, ctx = {}) {
       answerQuestion({ question: 'Is the host contained?', context: buildIncidentContext(defaultStage), lang: 'en', nemotron, log }).catch(() => {});
     });
   }
-  log.info(`voice ready: ${mode()} mode, base ${base}, characters used ${store.usage().charsUsed}/${store.budget}${eleven ? '' : ` (no ELEVENLABS_API_KEY in ${envFilePath()}; mock audio)`}`);
+  const whyMock = forceMock ? ' (CLAURA_VOICE_MOCK is set; mock audio)' : ` (no ELEVENLABS_API_KEY in ${envFilePath()}; mock audio)`;
+  log.info(`voice ready: ${mode()} mode, base ${base}, characters used ${store.usage().charsUsed}/${store.budget}${eleven ? '' : whyMock}`);
 
   return {
     name: 'voice',

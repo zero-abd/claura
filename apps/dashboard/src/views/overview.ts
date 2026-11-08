@@ -1,8 +1,8 @@
-import { FLEET, INCIDENT, LAST_INCIDENT, RESOLUTION, FACILITY } from "../script";
+import { FLEET, LAST_INCIDENT, FACILITY } from "../script";
 import { icon, chev } from "../icons";
 import { $, setAttr, setHTML, setText } from "../dom";
 import { hostLink } from "../hosts";
-import { S, ttc, type Phase } from "../engine";
+import { S, info, isLive, ttc, type Phase } from "../engine";
 import { data, roster, summarize } from "../data";
 import { scopeSummaryText } from "./scope";
 
@@ -61,6 +61,9 @@ export const overview = {
   },
   render(ph: Phase) {
     const badge = $("#oBadge");
+    const live = isLive();
+    const I = info();
+    const k = (x: string) => (live ? `${x}:${I.host}:${I.resolution.overview}` : x);
     const inc = ph === "breach" || ph === "approval" || ph === "isolating";
     const title =
       ph === "nominal" ? "All clear" : ph === "breach" ? "Breach in progress" : ph === "approval" ? "Waiting on you" : ph === "isolating" ? "Quarantining" : "Contained";
@@ -70,13 +73,13 @@ export const overview = {
     if (ph === "nominal") {
       setHTML(line, "fleet", () => `<b>${FLEET.hosts}</b> hosts<span class="sep">·</span><b>${FLEET.vms}</b> VMs<span class="sep">·</span><b>${FLEET.agents}</b> sandboxed agents`);
     } else if (ph === "breach") {
-      setHTML(line, "b", () => `Suspected escape on <b>${hostLink(INCIDENT.host)}</b>. Agents are containing it.`);
+      setHTML(line, k("b"), () => `Suspected escape on <b>${hostLink(I.host)}</b>. Agents are containing it.`);
     } else if (ph === "approval") {
-      setHTML(line, "a", () => `Warden needs your approval to quarantine <b>${hostLink(INCIDENT.host)}</b>.`);
+      setHTML(line, k("a"), () => `Warden needs your approval to quarantine <b>${hostLink(I.host)}</b>.`);
     } else if (ph === "isolating") {
-      setHTML(line, "i", () => `Taking <b>${hostLink(INCIDENT.host)}</b> off the fabric.`);
+      setHTML(line, k("i"), () => `Taking <b>${hostLink(I.host)}</b> off the fabric.`);
     } else {
-      setHTML(line, "c", () => RESOLUTION.replace(" · memory captured", ""));
+      setHTML(line, k("c"), () => I.resolution.overview);
     }
     const act = $("#oActions");
     setHTML(act, inc ? "open" : "none", () =>
@@ -85,6 +88,7 @@ export const overview = {
 
     // last incident row: live incident replaces the history line
     const row = $("#lastRow");
+    if (live) row.hidden = !S.started; // the scripted history (INC-0418 ...) is fiction: live shows only the real incident
     if (!S.started) {
       setAttr(row, "data-go", "reports");
       setText($("#lastTitle"), LAST_INCIDENT.id);
@@ -94,8 +98,8 @@ export const overview = {
       const v = ttc() ?? 0;
       const done = ph === "contained" || ph === "report";
       setAttr(row, "data-go", done ? "reports" : "incident");
-      setText($("#lastTitle"), INCIDENT.id);
-      setText($("#lastSub"), done ? `${INCIDENT.title}. Contained in ${v.toFixed(1)} s` : INCIDENT.title);
+      setText($("#lastTitle"), I.id);
+      setText($("#lastSub"), done ? `${I.title}. Contained in ${v.toFixed(1)} s` : I.title);
       setText($("#lastWhen"), done ? "just now" : "live");
     }
     setAttr($("#lastRow"), "data-tone", inc ? "live" : "ok");

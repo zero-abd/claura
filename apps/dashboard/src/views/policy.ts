@@ -1,10 +1,25 @@
 import { POLICY_AUTO, POLICY_HUMAN, POLICY_PRESETS, type PolicyAction } from "../script";
 import { icon } from "../icons";
 import { $, $$, setAttr, setVar } from "../dom";
+import { isLive } from "../engine";
+import { liveSource } from "../live-engine";
 
 // Policy: what Warden may do alone, and what needs a human. Interactive in-memory toggles.
 export const policyState = {
   on: new Set<string>(POLICY_PRESETS.Standard),
+};
+// live: the switches mirror the module's policy table (auto = on). They are read-only here: changing policy is the
+// set_policy reducer (admin or commander), and a half-wired toggle that did nothing to the database would be a lie.
+const ACTION_OF: Record<string, string> = {
+  isolate: "isolate_network",
+  revoke: "revoke_credentials",
+  cordon: "cordon_host",
+  pause: "pause_guest",
+  capture: "capture_memory",
+  failover: "failover_guests",
+  quarantine: "quarantine_host",
+  reimage: "reimage_host",
+  terminate: "delete_vm",
 };
 
 const prow = (a: PolicyAction, locked: boolean) => `<div class="prow">
@@ -54,9 +69,11 @@ export const policy = {
   },
 
   setPreset(name: string) {
+    if (isLive()) return;
     policyState.on = new Set(POLICY_PRESETS[name] ?? []);
   },
   toggle(id: string) {
+    if (isLive()) return;
     if (policyState.on.has(id)) policyState.on.delete(id);
     else policyState.on.add(id);
   },
@@ -67,7 +84,25 @@ export const policy = {
   },
 
   render() {
+    const live = isLive();
+    if (live) {
+      const pols = liveSource()?.policies() ?? [];
+      policyState.on = new Set(POLICY_AUTO.filter((a) => pols.find((p) => p.action === ACTION_OF[a.id])?.mode === "auto").map((a) => a.id));
+      let note = document.getElementById("polLiveNote");
+      if (!note) {
+        note = document.createElement("p");
+        note.id = "polLiveNote";
+        note.className = "pol-live-note";
+        note.textContent = "Live: this page mirrors the module's policy table, so it is read-only here. An admin or commander changes it with set_policy.";
+        $("#v-policy .p-bar").after(note);
+      }
+    }
     for (const sw of $$(".switch", $("#v-policy"))) {
+      if (live) {
+        setAttr(sw, "data-locked", "1");
+        setAttr(sw, "aria-disabled", "true");
+        setAttr(sw, "tabindex", "-1");
+      }
       const locked = sw.dataset.locked === "1";
       setAttr(sw, "aria-checked", String(!locked && policyState.on.has(sw.dataset.pol!)));
     }

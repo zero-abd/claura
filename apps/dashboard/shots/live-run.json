@@ -1,0 +1,39 @@
+{
+  "at": "2026-11-08T12:14:16.283Z",
+  "server": "maincloud",
+  "scripted": false,
+  "rows": "31 events, 8 proposals, 19 messages, 4 tasks, 3 decisions, 7 assets",
+  "identical": true,
+  "shared": 90,
+  "onlyOne": 0,
+  "skewMs": {
+    "median": 0,
+    "p95": 2,
+    "max": 800
+  },
+  "skewExcludingStallsMs": {
+    "rows": 58,
+    "median": 0,
+    "p95": 2,
+    "max": 2
+  },
+  "commitToScreenMs": [
+    {
+      "console": "A",
+      "n": 25,
+      "median": 22,
+      "p95": 104
+    },
+    {
+      "console": "B",
+      "n": 25,
+      "median": 22,
+      "p95": 104
+    }
+  ],
+  "approvalMs": {
+    "A": 332,
+    "B": 333
+  },
+  "warRoomMs": 335
+}

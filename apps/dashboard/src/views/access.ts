@@ -16,20 +16,20 @@ import {
   type Person,
 } from "../data";
 import { CODE_TTL_HOURS } from "../data/scripted-content";
-import { codeFromSeed, enrollLink, generateCode, maskCode } from "../data/codes";
+import { codeFromSeed, enrollLink, fmtCode, generateCode, maskCode } from "../data/codes";
 import { qrMatrix, qrSVG } from "../data/qr";
 import { scriptedSource } from "../data";
 import { AGENT_ICON, icon } from "../icons";
 import { $, disc, setAttr, setHTML, setText } from "../dom";
 import { esc } from "../hosts";
-import { S } from "../engine";
+import { S, isLive } from "../engine";
 import { hash } from "../util";
 
 // People & Access (admin): who can sign in, what each role may do, and the break-glass codes that add people
 // without email or phones. The Add person sheet issues a single-use code and shows it as text and as a QR.
 
 export const ac = {
-  sheet: null as null | { stage: "form" | "code"; name: string; role: OperatorRole; code: string; issued: boolean },
+  sheet: null as null | { stage: "form" | "code"; name: string; role: OperatorRole; code: string; issued: boolean; busy?: boolean },
   confirm: null as null | { key: string; at: number },
   err: "",
   copied: 0,
@@ -121,7 +121,15 @@ export const access = {
       return `<div class="ac-lh"><span class="c-main">Person</span><span class="c-role">Access</span><span class="c-ver">Identity</span><span class="c-seen">Presence</span></div>${rows.join("")}`;
     });
 
+    if (isLive()) {
+      const first = document.querySelector<HTMLElement>(".ac-steps li:first-child");
+      if (first && !first.dataset.live) {
+        first.dataset.live = "1";
+        first.innerHTML = "<b>An admin issues a code.</b> Single use, 18 characters, made in the admin's browser. It is never emailed or texted.";
+      }
+    }
     const ag = agentIdentities(d);
+    if (isLive()) setText(document.querySelector('.disc[data-key="identities"] .r-val'), `${ag.length} service ${ag.length === 1 ? "identity" : "identities"}, least privilege`);
     setHTML($("#acAgents"), `g:${ag.length}`, () =>
       ag
         .map((a) => {
@@ -147,7 +155,7 @@ function personRow(p: Person, now: number): string {
         : `<span class="v-badge warn">${icon("info")}Not verified</span>`;
   const seen =
     p.kind === "pending"
-      ? `<span class="seen">code expires in ${until(now, (p.createdAt ?? now) + CODE_TTL_HOURS * 3600_000)}</span>`
+      ? `<span class="seen">${isLive() ? "valid until used or voided" : `code expires in ${until(now, (p.createdAt ?? now) + CODE_TTL_HOURS * 3600_000)}`}</span>`
       : !p.active
         ? `<span class="seen">access removed</span>`
         : p.online
@@ -261,8 +269,26 @@ export function issueCode(): boolean {
     input?.focus();
     return false;
   }
-  const code = S.demo ? codeFromSeed(scriptedSource.nextDemoSeed()) : generateCode();
-  const r = data().issueEnrollment(code, s.role, s.name);
+  const src = data();
+  const code = S.demo ? codeFromSeed(scriptedSource.nextDemoSeed()) : (src.newCode?.() ?? generateCode());
+  if (src.issueEnrollmentAsync) {
+    // live: the module can still refuse (a name already in use, say), so the code is only shown once it accepted it
+    if (s.busy) return false;
+    s.busy = true;
+    ac.err = "";
+    void src.issueEnrollmentAsync(code, s.role, s.name).then((res) => {
+      s.busy = false;
+      if (!res.ok) {
+        ac.err = res.error;
+        return;
+      }
+      s.code = code;
+      s.stage = "code";
+      s.issued = true;
+    });
+    return true;
+  }
+  const r = src.issueEnrollment(code, s.role, s.name);
   if (!r.ok) {
     ac.err = r.error;
     return false;
@@ -288,7 +314,7 @@ export async function copyCode(): Promise<boolean> {
   const code = ac.sheet?.code;
   if (!code) return false;
   try {
-    await navigator.clipboard.writeText(code);
+    await navigator.clipboard.writeText(fmtCode(code));
   } catch {
     /* the clipboard can be blocked on an isolated laptop: the code is on screen anyway */
   }
@@ -326,16 +352,27 @@ export function renderPersonSheet() {
   );
   setText($("#pCan"), `Can: ${ROLE_CAN[s.role]}.`);
   setText($("#pErr"), ac.err);
+  setText($("#issueBtn span"), s.busy ? "Issuing…" : "Issue break-glass code");
   if (s.stage === "code") {
     setText($("#pcTitle"), `Code ready for ${s.name}`);
-    setText($("#pcSub"), `${roleLabel(s.role)} · expires in ${CODE_TTL_HOURS} h`);
+    setText($("#pcSub"), isLive() ? `${roleLabel(s.role)} · single use` : `${roleLabel(s.role)} · expires in ${CODE_TTL_HOURS} h`);
+    if (isLive()) {
+      // the module has no code expiry: a code works once and stays valid until it is used or an admin voids it
+      const note = document.querySelector<HTMLElement>("#personSheet .pc-notes li:nth-child(2) span");
+      if (note && !note.dataset.live) {
+        note.dataset.live = "1";
+        note.innerHTML = "<b>Single use.</b> Valid until it is used, or until an admin voids it.";
+      }
+      const card = document.querySelector("#printCard .pcard-grid p:nth-of-type(2)");
+      if (card) setText(card, "Single use. Valid until used, or until an admin voids it.");
+    }
     if (lastCodeShown !== s.code) {
       lastCodeShown = s.code;
-      $("#pcCode").textContent = s.code;
-      const qr = qrSVG(qrMatrix(enrollLink(s.code)), { quiet: 2, label: `QR code for the break-glass code ${s.code}` });
+      $("#pcCode").textContent = fmtCode(s.code);
+      const qr = qrSVG(qrMatrix(enrollLink(s.code)), { quiet: 2, label: `QR code for the break-glass code ${fmtCode(s.code)}` });
       $("#pcQr").innerHTML = qr;
       $("#pcardQr").innerHTML = qr;
-      $("#pcardCode").textContent = s.code;
+      $("#pcardCode").textContent = fmtCode(s.code);
       $("#pcardWho").textContent = `For ${s.name} · ${roleLabel(s.role)}`;
     }
     setText($("#copyBtn span"), Date.now() - ac.copied < 1800 ? "Copied" : "Copy");

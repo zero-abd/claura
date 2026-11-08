@@ -1,0 +1,23 @@
+{
+  "name": "@claura/gateway",
+  "version": "0.1.0",
+  "description": "Claura gateway: one loopback server that mounts the feature packages (Secure Shell, Voice, integrations), serves their browser modules and hands the console a single loader.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node smoke.mjs",
+    "check:browser": "node browser-check.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "ws": "^8.18.0"
+  }
+}

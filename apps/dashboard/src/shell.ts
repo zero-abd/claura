@@ -2,11 +2,13 @@ import { APPROVER, CANON_APPROVE, EVIDENCE, FACILITY, FINAL_STEP, INCIDENT, ISOL
 import { icon } from "./icons";
 import { faviconURL, logoSVG } from "./logo";
 import { $, $$, disc, setAttr, setHTML, setText } from "./dom";
-import { S, U, VIEWS, tone, type Phase, type View } from "./engine";
+import { S, U, VIEWS, info, isLive, tone, type Phase, type View } from "./engine";
 import { esc, hostInfo } from "./hosts";
 import { fmtT } from "./util";
 import { approverOf, avatarStyle, canApprove, data, roleLabel, roster, summarize } from "./data";
 import { closePerson, personSheetHTML, personSheetOpen, renderPersonSheet } from "./views/access";
+import { joinOpen, joinSheetHTML, renderJoin } from "./views/join";
+import { liveSource, sheetInfo } from "./live-engine";
 import { scopeBadge } from "./views/scope";
 
 const NAV: Record<View, { label: string; icon: string }> = {
@@ -18,6 +20,7 @@ const NAV: Record<View, { label: string; icon: string }> = {
   agents: { label: "Agents", icon: "agents" },
   policy: { label: "Policy", icon: "policy" },
   reports: { label: "Reports", icon: "reports" },
+  integrations: { label: "Integrations", icon: "link" },
   access: { label: "People & Access", icon: "users" },
 };
 
@@ -48,6 +51,7 @@ function isolationHTML(): string {
     <div class="iso-no"><span class="iso-l">Does not depend on</span><div>${no.map((t) => `<span class="no-chip">${icon("x")}${t}</span>`).join("")}</div></div>
     <div class="iso-row">${icon("key")}<div><b>Passkey or hardware-key sign-in</b><p>No passwords to steal. New people join with a single-use break-glass code, issued in person.</p></div></div>
     <div class="iso-row">${icon("seal")}<div><b>Every action is on the record</b><p>Messages, approvals and status changes are appended and attributed. Nobody edits the past.</p></div></div>
+    <div class="src-row" id="srcRow" data-src="replay"><i></i><b id="srcLabel">Replay</b><span id="srcSub">Scripted data. Nothing is read from or written to a server.</span></div>
     <footer><i></i>SpacetimeDB · live sync<span id="isoWho"></span></footer>
   </section>`;
 }
@@ -151,6 +155,7 @@ export function shellHTML(views: string): string {
   </section>
 
   ${personSheetHTML()}
+  ${joinSheetHTML()}
 
   <div class="devdock" id="devdock">
     <button type="button" class="btn-chip" data-act="sim">${icon("bolt")}Simulate breach</button>
@@ -162,13 +167,14 @@ export function shellHTML(views: string): string {
 // ------------------------------------------------------------------ render
 const SUB: Record<View, (ph: Phase) => string> = {
   overview: (ph) => (ph === "nominal" ? "All clear" : ph === "contained" || ph === "report" ? "Contained" : "Breach in progress"),
-  incident: (ph) => (ph === "nominal" ? "No open incident" : INCIDENT.id),
+  incident: (ph) => (ph === "nominal" ? "No open incident" : info().id),
   warroom: () => "Out-of-band · SpacetimeDB cloud",
   scope: (ph) => (ph === "nominal" ? "No open incident" : "What was reachable, and its state"),
   shells: () => "Secure shells",
   agents: () => "Sentry, Triage, Warden, Scribe",
   policy: () => "Playbook guest-escape v3",
   reports: () => "NIST SP 800-61 · filed by Scribe",
+  integrations: () => "Optional modules · local gateway",
   access: () => "Admin · break-glass enrollment",
 };
 
@@ -225,6 +231,7 @@ export function renderShell(ph: Phase) {
     setAttr($("#isoBtn"), "aria-expanded", String(popOpen));
   }
   setText($("#isoWho"), ` · you are ${me.name}, ${roleLabel(me.role).toLowerCase()} · ${summarize(roster(d)).online} online`);
+  renderSource();
 
   // nav lens follows the selected item
   const nav = $("#nav");
@@ -282,7 +289,8 @@ export function renderSheet(ph: Phase) {
   renderHostSheet(host);
   if (open && personSheetOpen()) closePersonQuiet(); // the approval always comes first
   renderPersonSheet();
-  const any = open || host || personSheetOpen() ? "1" : "0";
+  if (isLive()) renderJoin();
+  const any = open || host || personSheetOpen() || joinOpen() ? "1" : "0";
   if (scrim.dataset.open !== any) {
     scrim.dataset.open = any;
     document.body.dataset.sheet = any;
@@ -292,7 +300,10 @@ export function renderSheet(ph: Phase) {
   const me = data().me();
   const may = canApprove(me.role);
   const btn = $("#approveBtn") as HTMLButtonElement;
-  if (btn.disabled !== !may) btn.disabled = !may;
+  const si = isLive() ? sheetInfo() : null;
+  if (si) renderLiveApproval(si);
+  const off = !may || !!si?.busy;
+  if (btn.disabled !== off) btn.disabled = off;
   setText($("#approveNote"), may ? "Warden cannot quarantine a host on its own." : `${me.name} (${me.title}) cannot approve. Only the Incident Commander or an admin can.`);
   const approved = S.A !== null;
   setAttr(sheet, "data-s", approved ? "approved" : "request");
@@ -300,11 +311,52 @@ export function renderSheet(ph: Phase) {
     const ap = approverOf(data());
     setText($("#doneTitle"), `Approved by ${ap ? `${ap.name} · ${ap.title}` : `${APPROVER.initials} · ${APPROVER.role}`}`);
     const u = U();
-    setText($("#doneSum"), u >= ISOLATE_DUR ? "Host quarantined. The escape stopped at the hypervisor boundary." : `Taking ${INCIDENT.host} off the fabric and pruning its BMC VLAN.`);
-    setText($("#doneNote"), `${fmtT(S.A ?? CANON_APPROVE)} · ⌘↵`);
+    setText($("#doneSum"), u >= ISOLATE_DUR ? "Host quarantined. The escape stopped at the hypervisor boundary." : `Taking ${info().host} off the fabric and pruning its BMC VLAN.`);
+    setText($("#doneNote"), isLive() ? "Recorded in the incident log" : `${fmtT(S.A ?? CANON_APPROVE)} · ⌘↵`);
     $("#doneBar").style.transform = `scaleX(${Math.min(1, Math.max(0, u / ISOLATE_DUR)).toFixed(4)})`;
   }
 }
 
 
 const closePersonQuiet = () => void closePerson();
+
+// ------------------------------------------------------------------ live: the source indicator and the approval content
+/** The "Live · SpacetimeDB Maincloud" / "Replay" line in the isolation popover, and the link dot on the Isolated button. */
+function renderSource() {
+  const row = document.getElementById("srcRow");
+  if (!row) return;
+  const live = liveSource();
+  if (!live) {
+    delete document.body.dataset.source;
+    return; // scripted: the row keeps the markup it was built with ("Replay")
+  }
+  document.body.dataset.source = "live";
+  const link = live.linkState();
+  const name = live.server.label;
+  setAttr(row, "data-src", link === "ready" ? "live" : link === "offline" ? "off" : "wait");
+  setText($("#srcLabel"), link === "ready" ? `Live · ${name}` : link === "offline" ? `Offline · ${name}` : link === "reconnecting" ? `Reconnecting · ${name}` : `Connecting · ${name}`);
+  setText($("#srcSub"), link === "ready" ? `Rows arrive the moment they change. Database ${live.server.db}.` : live.linkError() || "Waiting for the server.");
+  setAttr($("#isoBtn"), "data-link", link === "ready" ? "live" : link === "offline" ? "off" : "wait");
+}
+
+/** Fill the approval sheet from the quarantine proposal instead of the scripted copy. */
+function renderLiveApproval(si: NonNullable<ReturnType<typeof sheetInfo>>) {
+  const sheet = $("#sheet");
+  setText($("#sheetTitle"), `Quarantine ${si.host}?`);
+  setText(sheet.querySelector(".sheet-req .sheet-sum"), si.reason);
+  const dd = sheet.querySelectorAll(".sheet-facts dd");
+  setText(dd[0] ?? null, si.scope);
+  setText(dd[1] ?? null, si.rollback);
+  setText(sheet.querySelector(".ev-note"), si.evidence);
+  let box = document.getElementById("sheetFiles");
+  if (!box) {
+    sheet.querySelectorAll(".file").forEach((f) => f.remove()); // the scripted file list
+    box = document.createElement("div");
+    box.id = "sheetFiles";
+    sheet.querySelector(".ev-note")?.after(box);
+  }
+  setHTML(box, si.files.map((f) => f.name + f.meta).join("|"), () =>
+    si.files.map((f) => `<div class="file">${icon("file")}<b>${esc(f.name)}</b><em>${esc(f.meta)}</em></div>`).join(""),
+  );
+  setText($("#approveBtn span"), si.busy ? "Approving…" : FINAL_STEP.button);
+}

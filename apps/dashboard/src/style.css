@@ -6226,3 +6226,436 @@ button.chip {
     display: none !important;
   }
 }
+
+/* ============================================================ live mode (SpacetimeDB) */
+/* The source line in the isolation popover: "Live · SpacetimeDB Maincloud" or "Replay". Quiet on purpose. */
+.src-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: var(--fill-1);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.src-row i {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ink-4);
+}
+.src-row b {
+  font: 600 13.5px/1.2 var(--font);
+  letter-spacing: -0.006em;
+  color: var(--ink-2);
+}
+.src-row span {
+  flex: 1 1 100%;
+  padding-left: 17px;
+}
+.src-row[data-src="live"] i {
+  background: var(--safe);
+  box-shadow: 0 0 8px rgba(var(--safe-rgb), 0.9);
+  animation: pulse 2.6s ease-in-out infinite;
+}
+.src-row[data-src="live"] b {
+  color: var(--safe);
+}
+.src-row[data-src="wait"] i {
+  background: #f5b83d;
+  box-shadow: 0 0 8px rgba(245, 184, 61, 0.85);
+  animation: pulse 1.1s ease-in-out infinite;
+}
+.src-row[data-src="wait"] b {
+  color: #f5b83d;
+}
+.src-row[data-src="off"] i {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.9);
+}
+.src-row[data-src="off"] b {
+  color: var(--accent);
+}
+/* the dot on the Isolated button doubles as the link light in live mode */
+.iso[data-link="wait"] .iso-dot {
+  background: #f5b83d;
+  box-shadow: 0 0 8px rgba(245, 184, 61, 0.85);
+  animation-duration: 1.1s;
+}
+.iso[data-link="off"] .iso-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.9);
+  animation: none;
+}
+/* the dev dock drives the scripted replay: nothing to drive in live mode */
+body[data-source="live"] .devdock {
+  display: none;
+}
+
+/* ---- toasts */
+#toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 140;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.toast {
+  max-width: min(580px, calc(100vw - 48px));
+  padding: 13px 22px;
+  border-radius: 24px;
+  font: 500 15px/1.4 var(--font);
+  letter-spacing: -0.008em;
+  color: var(--ink);
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05)),
+    rgba(18, 24, 50, 0.7);
+  -webkit-backdrop-filter: blur(30px) saturate(1.8);
+  backdrop-filter: blur(30px) saturate(1.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 20px 50px -14px rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition:
+    opacity 0.35s ease,
+    transform var(--spring-dur) var(--spring);
+}
+.toast[data-in="1"] {
+  opacity: 1;
+  transform: none;
+}
+.toast[data-kind="error"] {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(var(--accent-rgb), 0.55),
+    0 20px 50px -14px rgba(var(--accent-rgb), 0.4);
+}
+.toast[data-kind="ok"] {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(var(--safe-rgb), 0.5),
+    0 20px 50px -14px rgba(var(--safe-rgb), 0.35);
+}
+
+/* ---- the break-glass sheet */
+.join-sheet {
+  width: 600px;
+  display: block;
+  overflow-y: auto;
+}
+.join-sheet .sheet-pane {
+  grid-area: auto;
+  padding: 36px 40px 26px;
+}
+.join-sheet[data-s="code"] .js-offline,
+.join-sheet[data-s="offline"] .js-code {
+  display: none;
+}
+.join-sheet .sheet-sum {
+  max-width: 500px;
+}
+.join-sheet .sheet-sum b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.join-sheet .field input.code-in {
+  font-family: var(--mono);
+  font-size: 17px;
+  letter-spacing: 0.04em;
+}
+.join-sheet .field em {
+  font-style: normal;
+  color: var(--ink-4);
+}
+.join-sheet .sheet-actions {
+  margin-top: 22px;
+}
+.join-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 9px 10px 9px 18px;
+  border-radius: 20px;
+  background: var(--fill-1);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+.join-id code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 13px/1 var(--mono);
+  color: var(--ink-2);
+}
+.join-id .btn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 13px;
+  font-size: 13.5px;
+}
+.join-id .btn-chip .ico {
+  width: 15px;
+  height: 15px;
+}
+.join-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+.join-foot .btn-text {
+  height: 36px;
+  font-size: 14px;
+}
+.js-offline {
+  text-align: left;
+}
+.js-offline .sheet-actions {
+  margin-top: 22px;
+}
+
+/* ---- containment: rows the policy gate blocked (live) */
+.steps-blocked {
+  margin-top: 6px;
+}
+.step-blocked .s-mark {
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.14);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.4);
+}
+.step-blocked .s-label {
+  color: var(--ink);
+}
+.step-blocked .s-right {
+  color: var(--accent);
+  font-weight: 560;
+}
+.step-blocked .probe {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---- reports: the Solana anchor and Scribe's summary */
+.doc-head {
+  flex-wrap: wrap;
+}
+.doc-head > div:first-child {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+.doc-tools {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.anchor-out {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 12px 0 4px;
+  padding: 12px 18px;
+  border-radius: 20px;
+  background: var(--fill-1);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink-3);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.anchor-out[hidden] {
+  display: none;
+}
+.anchor-out b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.anchor-out code {
+  font: 500 13px/1 var(--mono);
+  color: var(--ink-2);
+}
+.anchor-out .a-sig {
+  flex: 1 1 100%;
+  padding-left: 19px;
+}
+.anchor-out a {
+  margin-left: 6px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+  text-underline-offset: 3px;
+}
+.anchor-out .a-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-4);
+}
+.anchor-out[data-s="busy"] .a-dot {
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  animation: pulse 1.1s ease-in-out infinite;
+}
+.anchor-out[data-s="ok"] {
+  box-shadow: inset 0 0 0 1px rgba(var(--safe-rgb), 0.35);
+}
+.anchor-out[data-s="ok"] .a-dot {
+  background: var(--safe);
+  box-shadow: 0 0 8px rgba(var(--safe-rgb), 0.9);
+}
+.anchor-out[data-s="err"] {
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.4);
+}
+.anchor-out[data-s="err"] .a-dot {
+  background: var(--accent);
+}
+.auth.blocked {
+  color: var(--accent);
+}
+.doc-summary .sum-text {
+  white-space: pre-wrap;
+  color: var(--ink-2);
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+.doc-summary .sum-by {
+  margin-top: 8px;
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+
+/* ============================================================ integrations */
+.int-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.int-card {
+  border-radius: 36px;
+  padding: 26px 28px 24px;
+}
+.int-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.int-top .a-ico {
+  width: 56px;
+  height: 56px;
+  border-radius: 19px;
+}
+.int-top .a-ico .ico {
+  width: 28px;
+  height: 28px;
+}
+.int-id h3 {
+  font: 600 24px/1.1 var(--font);
+  letter-spacing: -0.03em;
+}
+.int-track {
+  color: var(--ink-3);
+  font-size: 15px;
+}
+.int-badge {
+  margin-left: auto;
+}
+.int-meta {
+  margin: 18px 0 4px;
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+.int-meta code {
+  font: 500 13px/1.3 var(--mono);
+  word-break: break-all;
+}
+.int-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.int-actions .btn-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.int-mount {
+  margin-top: 18px;
+  padding-top: 18px;
+  box-shadow: inset 0 1px 0 var(--hair);
+  min-height: 40px;
+}
+.int-mount[hidden] {
+  display: none;
+}
+.int-err {
+  color: var(--accent);
+  font-size: 14.5px;
+}
+.int-empty {
+  margin-top: 26px;
+  border-radius: 40px;
+  padding: 56px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+.int-empty h2 {
+  font: 600 30px/1.1 var(--font);
+  letter-spacing: -0.034em;
+  margin-top: 6px;
+}
+.int-empty p {
+  max-width: 520px;
+  color: var(--ink-2);
+  font-size: 16.5px;
+  line-height: 1.45;
+}
+.int-empty code {
+  font: 500 14.5px/1 var(--mono);
+  color: var(--ink);
+}
+.int-empty .btn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  height: 38px;
+}
+.int-empty .btn-chip .ico {
+  width: 16px;
+  height: 16px;
+}
+@media (max-width: 900px) {
+  .int-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- policy page in live mode: a read-only mirror of the policy table */
+.pol-live-note {
+  margin: -6px 0 18px;
+  color: var(--ink-3);
+  font-size: 14.5px;
+}

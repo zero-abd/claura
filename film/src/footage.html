@@ -34,20 +34,35 @@
       <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle">
         <div id="{{P}}cam" class="cam">
           <div id="{{P}}dev" class="device" style="left:{{__fl.x}}px; top:{{__fl.y}}px; width:{{__fl.w}}px; height:{{__fl.h}}px;">
-            <div class="dev-bar"><div class="dev-lights"><i></i><i></i><i></i></div>{{ p.title ? `<div class="dev-title">${esc(p.title)}</div>` : '' }}</div>
+            <div class="dev-bar"><div class="dev-lights"><i></i><i></i><i></i></div>{{ p.title ? `<div class="dev-title" data-layout-ignore>${esc(p.title)}</div>` : '' }}</div>
             <div id="{{P}}screen" class="dev-screen">
 {{ (() => {
   const out = [];
   if (p.clip) {
-    const c = timed(p.clip), src = c.src;
-    const map = (c.map && c.map.length ? c.map : [[0, c.from ?? 0]]).map(([a, b]) => [T(a), +b]);
+    // map pairs [sceneT, clipT, src?]: piecewise-linear clip time; a pair at the same scene time as the one before it is a
+    // jump cut (a third element switches the source from there on). FILM_CLIPS=proxy builds against assets/clips/proxy/.
+    const c = timed(p.clip);
+    const prox = (s) => (process.env.FILM_CLIPS === 'proxy' ? s.replace('assets/clips/', 'assets/clips/proxy/') : s);
+    const map = (c.map && c.map.length ? c.map : [[0, c.from ?? 0]]).map((m) => [m[0] === 'end' ? D : m[0] === 'cut' ? CUT : T(m[0]), +m[1], m[2] || null]);
+    let src = c.src, last = c.rate ?? 1, n = 0;
     for (let i = 0; i < map.length; i++) {
-      const [t0, c0] = map[i];
+      const [t0, c0, s] = map[i];
+      if (s) src = s;
       const next = map[i + 1];
       const t1 = next ? next[0] : D;
-      let rate = next ? (next[1] - c0) / Math.max(0.001, t1 - t0) : (c.rate ?? (i ? (c0 - map[i - 1][1]) / Math.max(0.001, t0 - map[i - 1][0]) : 1));
+      if (t1 - t0 < 0.001) continue;
+      let rate = next ? (next[1] - c0) / (t1 - t0) : (c.rate ?? last);
+      if (next && Math.abs(next[1] - c0) < 1e-4) {
+        // a hold: the frame at c0, frozen (a still extracted from the same source)
+        out.push(`              <img id="${P}v${n}" class="clip" src="${still(prox(src), c0)}" alt="" data-start="${+t0.toFixed(3)}" data-duration="${+(t1 - t0).toFixed(3)}" data-track-index="${3 + (n % 2)}" style="z-index:${n + 1}" />`);
+        n++;
+        continue;
+      }
+      if (next && (rate < 0.0999 || rate > 10.001)) throw new Error(`clip map ${c.src}: segment ${t0}-${t1} s needs rate ${rate.toFixed(3)} (0.1-10)`);
       rate = Math.min(10, Math.max(0.1, +rate.toFixed(4)));
-      out.push(`              <video id="${P}v${i}" class="clip" src="${src}" data-start="${+t0.toFixed(3)}" data-duration="${+(t1 - t0).toFixed(3)}" data-media-start="${+c0.toFixed(3)}"${rate !== 1 ? ` data-playback-rate="${rate}"` : ''} data-track-index="${3 + (i % 2)}" muted playsinline style="z-index:${i + 1}"></video>`);
+      last = rate;
+      out.push(`              <video id="${P}v${n}" class="clip" src="${prox(src)}" data-start="${+t0.toFixed(3)}" data-duration="${+(t1 - t0).toFixed(3)}" data-media-start="${+c0.toFixed(3)}"${rate !== 1 ? ` data-playback-rate="${rate}"` : ''} data-track-index="${3 + (n % 2)}" muted playsinline style="z-index:${n + 1}"></video>`);
+      n++;
     }
   } else {
     const shots = timed(p.shots || []);
@@ -72,7 +87,7 @@
     return `          <div id="${P}fo${i}" class="focus" style="left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; width:${w.toFixed(1)}px; height:${h.toFixed(1)}px; border-radius:${(14 / z).toFixed(1)}px; box-shadow: 0 0 0 ${(3 / z).toFixed(2)}px rgba(${col},0.95), 0 0 0 ${(10 / z).toFixed(2)}px rgba(${col},0.16), 0 ${(10 / z).toFixed(1)}px ${(40 / z).toFixed(1)}px rgba(0,0,0,0.4);" data-layout-ignore></div>`;
   }).join('\n') + '\n' + timed(p.flash || []).map((f, i) => {
     const x = sx(f.u0), y = sy(f.v0), w = (f.u1 - f.u0) * L.w, h = (f.v1 - f.v0) * L.sh;
-    return `          <div id="${P}fl${i}" style="position:absolute; left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; width:${w.toFixed(1)}px; height:${h.toFixed(1)}px; border-radius:${(h / 2).toFixed(1)}px; background:#fff; opacity:0" data-layout-ignore></div>`;
+    return `          <div id="${P}fl${i}" style="position:absolute; left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; width:${w.toFixed(1)}px; height:${h.toFixed(1)}px; border-radius:${(h / 2).toFixed(1)}px; background:#fff; opacity:0; z-index:28" data-layout-ignore></div>`;
   }).join('\n');
 })() }}
 {{ timed(p.callouts || []).map((c, i) => `          <div id="${P}co${i}" class="callout" data-layout-allow-overflow><i id="${P}co${i}-dot" class="co-dot"></i><i id="${P}co${i}-line" class="co-line" style="${c.side === 'left' ? 'left:auto;right:0;transform-origin:100% 50%;' : ''}width:${c.len ?? 90}px"></i><div id="${P}co${i}-pill" class="co-pill glass${c.tone ? ' ' + c.tone : ''}" style="${c.side === 'left' ? 'right:' + ((c.len ?? 90) + 4) + 'px' : 'left:' + ((c.len ?? 90) + 4) + 'px'}">${c.tone === 'hot' ? '<i style="width:14px;height:14px;border-radius:50%;background:#ff5a1f;flex:none"></i>' : c.tone === 'safe' ? '<i style="width:14px;height:14px;border-radius:50%;background:#2fbf71;flex:none"></i>' : ''}${esc(c.text)}</div></div>`).join('\n') }}
@@ -105,7 +120,7 @@
       if (S.out && S.out.type === 'zoom' && S.out.target) S.out = { ...S.out, rect: frameRect(S.out.target, S.cut - (S.out.dur ?? 0.36)) };
       const c0 = camAt(0);
       const devRect = [c0.x + c0.scale * L.x, c0.y + c0.scale * L.y, c0.scale * L.w, c0.scale * L.h, 28 * c0.scale];
-      K.scene(tl, P, S, { morph: { to: p.morphTo || devRect, target: P + 'dev', out: [P + 'dev', P + 'over'] } });
+      K.scene(tl, P, S, { morph: { to: p.morphTo || devRect, target: P + 'dev', fit: 'cover', blur: false, out: [P + 'dev', P + 'over'] } });
       if (S.in.type !== 'morph' && S.in.type !== 'zoom' && S.in.type !== 'whip' && S.in.type !== 'iris' && S.in.type !== 'cut') K.land(tl, P + 'dev', 0, { from: 0.97, blur: 8, dur: 0.7 });
       K.cam(tl, P + 'cam', keys, ctx);
       // focus rings
@@ -131,6 +146,8 @@
         const s = 1 / K.camScaleAt(keys, p.cursor[Math.min(1, p.cursor.length - 1)].t + 0.01);
         tl.set(P + 'cursor', { scale: s }, 0);
         K.cursor(tl, P + 'cursor', p.cursor.map((k) => ({ ...k, x: ctx.screen.x + k.u * ctx.screen.w, y: ctx.screen.y + k.v * ctx.screen.h })));
+        tl.set(P + 'cursor', { opacity: 0 }, 0);
+        p.cursor.forEach((k) => { if (k.hide) tl.fromTo(P + 'cursor', { opacity: 1 }, { opacity: 0, duration: 0.18, ease: 'power2.in', immediateRender: false }, k.t - 0.18); });
         tl.fromTo(P + 'cursor', { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power1.out', immediateRender: false }, Math.max(0, p.cursor[0].t));
       }
       // keycaps: land (glass drops in from depth), press on the beat

@@ -262,3 +262,181 @@ If you intend to use the URL of that asset, use /logo.svg?url&raw.
 Assets in public directory cannot be imported from JavaScript.
 If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
 If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:28:58 AM [vite] (client) page reload src/engine.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:31:03 AM [vite] (client) page reload src/views/incident.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:31:37 AM [vite] (client) page reload src/data/roster.ts
+5:31:37 AM [vite] (client) page reload src/data/index.ts
+5:31:37 AM [vite] (client) page reload src/hosts.ts
+5:31:37 AM [vite] (client) page reload src/views/agents.ts
+5:31:37 AM [vite] (client) page reload src/views/overview.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:33:33 AM [vite] (client) page reload src/shell.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:26 AM [vite] (client) page reload src/views/reports.ts
+5:34:26 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:26 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:26 AM [vite] Internal server error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+      at failureErrorWithLog (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:1467:15)
+      at /Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:736:50
+      at responseCallbacks.<computed> (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:603:9)
+      at handleIncomingPacket (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:658:12)
+      at Socket.readFromStdout (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:581:7)
+      at Socket.emit (node:events:509:28)
+      at addChunk (node:internal/streams/readable:563:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+      at Readable.push (node:internal/streams/readable:394:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:41 AM [vite] (client) page reload src/views/reports.ts
+5:34:41 AM [vite] (client) page reload src/data/codes.ts
+5:34:41 AM [vite] (client) page reload src/views/access.ts
+5:34:41 AM [vite] (client) page reload src/data/source.ts
+5:34:41 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:41 AM [vite] (client) Pre-transform error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+5:34:41 AM [vite] Internal server error: Transform failed with 1 error:
+/Users/abd/repos/bulkhead/src/views/reports.ts:163:10: ERROR: The symbol "live" has already been declared
+  Plugin: vite:esbuild
+  File: /Users/abd/repos/bulkhead/src/views/reports.ts:163:10
+  
+  The symbol "live" has already been declared
+  161|      setText($("#docMeta"), `Opened ${fmtDayTime(inc.openedAt)} CST · Incident Commander ${commander?.name ?? "RK"} · Phase: ${PHASE[inc.nistPhase].label}`);
+  162|      setText($("#docPrintStamp"), `Generated ${fmtDayTime(newest)} CST by ${me.name}`);
+  163|      const live = $("#docLive");
+     |            ^
+  164|      setAttr(live, "data-s", filed ? "filed" : "live");
+  165|      setText(live.querySelector("span"), filed ? `Filed · updated ${fmtClock(newest)}` : `Live · updated ${fmtClock(newest)}`);
+  
+      at failureErrorWithLog (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:1467:15)
+      at /Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:736:50
+      at responseCallbacks.<computed> (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:603:9)
+      at handleIncomingPacket (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:658:12)
+      at Socket.readFromStdout (/Users/abd/repos/bulkhead/node_modules/esbuild/lib/main.js:581:7)
+      at Socket.emit (node:events:509:28)
+      at addChunk (node:internal/streams/readable:563:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+      at Readable.push (node:internal/streams/readable:394:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:49 AM [vite] (client) page reload src/views/reports.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:34:49 AM [vite] (client) ✨ new dependencies optimized: spacetimedb
+5:34:49 AM [vite] (client) ✨ optimized dependencies changed. reloading
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:35:25 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:35:29 AM [vite] (client) page reload src/main.ts
+5:35:29 AM [vite] (client) page reload src/data/live.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:35:41 AM [vite] (client) page reload src/main.ts
+Assets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use /src/logo.svg?raw instead of /public/logo.svg?raw.
+If you intend to use the URL of that asset, use /logo.svg?url&raw.
+5:36:35 AM [vite] (client) hmr update /src/style.css
+5:45:53 AM [vite] (client) page reload src/live-engine.ts
+5:45:53 AM [vite] (client) hmr update /src/style.css
+5:45:53 AM [vite] (client) page reload src/main.ts
+5:47:52 AM [vite] (client) page reload src/live-engine.ts
+5:47:52 AM [vite] (client) page reload src/views/incident.ts
+5:47:52 AM [vite] (client) page reload src/main.ts
+5:47:52 AM [vite] (client) page reload src/data/live.ts
+5:47:52 AM [vite] (client) page reload src/views/join.ts
+5:49:36 AM [vite] (client) page reload src/views/access.ts
+5:49:39 AM [vite] (client) page reload src/views/access.ts
+5:53:57 AM [vite] (client) page reload src/data/live.ts
+5:53:57 AM [vite] (client) page reload src/main.ts
+5:55:28 AM [vite] (client) page reload src/views/reports.ts
+5:55:28 AM [vite] (client) page reload src/features.ts
+5:55:28 AM [vite] (client) page reload src/live-engine.ts
+5:55:28 AM [vite] (client) page reload src/data/live.ts
+5:55:28 AM [vite] (client) page reload src/main.ts
+5:56:07 AM [vite] (client) page reload src/data/live.ts
+5:56:07 AM [vite] (client) page reload src/views/join.ts
+5:56:07 AM [vite] (client) page reload src/views/reports.ts
+5:58:45 AM [vite] (client) page reload src/views/scope.ts
+5:58:45 AM [vite] (client) page reload src/views/policy.ts
+5:58:45 AM [vite] (client) hmr update /src/style.css
+5:58:51 AM [vite] (client) page reload src/views/policy.ts
+5:59:00 AM [vite] (client) page reload src/views/policy.ts
+6:10:06 AM [vite] (client) page reload src/views/incident.ts

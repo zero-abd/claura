@@ -25,7 +25,18 @@ export const LANGUAGES = [
 const SPEECH_LANG = { en: 'en-US', es: 'es-ES', hi: 'hi-IN', zh: 'zh-CN', fr: 'fr-FR' };
 const isLang = (c) => LANGUAGES.some((l) => l.code === c);
 
-const cfg = { base: '/api/voice', hotkey: 'Alt+V', hud: true, theme: 'dark', maxRecordMs: 25000, minRecordMs: 450, holdMs: 450, autoHideMs: 5200 };
+// The API lives at <origin>/api/voice. When this module is loaded from another origin (the console at :4317 importing it from
+// the gateway at :8787) the origin of the module URL is part of the base; same-origin pages keep the path-only base.
+const SELF_ORIGIN = (() => {
+  try {
+    const u = new URL(import.meta.url);
+    return u.origin !== location.origin ? u.origin : '';
+  } catch {
+    return '';
+  }
+})();
+
+const cfg = { base: `${SELF_ORIGIN}/api/voice`, hotkey: 'Alt+V', hud: true, theme: 'dark', maxRecordMs: 25000, minRecordMs: 450, holdMs: 450, autoHideMs: 5200 };
 
 const keep = {
   get(k) { try { return localStorage.getItem(`claura.voice.${k}`); } catch { return null; } },
@@ -216,7 +227,11 @@ const jsonInit = (body, signal) => ({ method: 'POST', headers: { 'content-type':
 
 // ------------------------------------------------------------------ speaking a clip (shared by say / brief / ask)
 async function playClip(url, text, run, { lang = S.lang } = {}) {
-  const res = await api(url.startsWith('/api/') || url.startsWith('http') ? url.replace(cfg.base, '') : url, { signal: run.signal });
+  // The server returns path-only clip URLs (/api/voice/audio/x.mp3); cfg.base may carry an origin. Strip whichever prefix matches.
+  const u = String(url);
+  const pathBase = cfg.base.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, '');
+  const rel = u.startsWith(cfg.base) ? u.slice(cfg.base.length) : u.startsWith(`${pathBase}/`) ? u.slice(pathBase.length) : u;
+  const res = await api(rel, { signal: run.signal });
   const ab = await res.arrayBuffer();
   if (!run.live()) return;
   setState('speaking', { label: 'Speaking' });

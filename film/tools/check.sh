@@ -1,7 +1,7 @@
 #!/bin/sh
 # Runs `hyperframes check --json` quietly and prints the findings that matter.
 unset NODE_USE_SYSTEM_CA
-export PATH="$HOME/repos/bulkhead-studio/bin:$PATH" DO_NOT_TRACK=1
+export PATH="$PWD/tools/bin:$HOME/repos/bulkhead-studio/bin:$PATH" DO_NOT_TRACK=1
 npx --yes hyperframes@0.9.23 check --json > .hyperframes-check.json 2> .hyperframes-check.log
 "$HOME/repos/bulkhead-studio/.venv/bin/python" - <<'PY'
 import json

@@ -1,0 +1,80 @@
+<template>
+  <!-- 1. "The attacker is reading your email." A mail window; a ghost cursor reads the open message (its selection
+       follows); "Opened on an unknown device" lands on "reading". Frame 0 already shows the window. -->
+  <style>
+    /*COMMON*/
+    #{{P}}win { left: 250px; top: 120px; width: 1420px; height: 780px; }
+    #{{P}}list { position: absolute; left: 0; top: 0; bottom: 0; width: 500px; padding: 14px 14px; box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08); }
+    #{{P}}list .row { position: relative; height: 118px; padding: 20px 22px 0 24px; border-radius: 18px; }
+    #{{P}}list .row.sel { background: rgba(255, 255, 255, 0.11); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14); }
+    #{{P}}list .who { font: 600 28px/1.1 var(--font); letter-spacing: -0.014em; color: var(--ink); }
+    #{{P}}list .sub { margin-top: 10px; font: 500 24px/1.2 var(--font); letter-spacing: -0.008em; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #{{P}}list .tm { position: absolute; right: 22px; top: 24px; font: 500 22px/1 var(--font); color: var(--ink-3); }
+    #{{P}}msg { position: absolute; left: 500px; right: 0; top: 0; bottom: 0; padding: 40px 56px; }
+    #{{P}}msg .from { display: flex; align-items: center; gap: 20px; }
+    #{{P}}msg .av { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; font: 600 26px/1 var(--font); color: #fff; background: linear-gradient(180deg, #5b6dff, #3b4bd8); }
+    #{{P}}msg .fn { font: 600 30px/1.1 var(--font); letter-spacing: -0.014em; }
+    #{{P}}msg .to { margin-top: 6px; font: 500 23px/1 var(--font); color: var(--ink-3); }
+    #{{P}}msg .subj { margin-top: 34px; font: 600 50px/1.1 var(--font); letter-spacing: -0.03em; white-space: nowrap; }
+    #{{P}}msg .body { position: relative; margin-top: 34px; }
+    #{{P}}msg .ln { position: relative; height: 54px; font: 500 31px/54px var(--font); letter-spacing: -0.01em; color: var(--ink-2); white-space: nowrap; }
+    #{{P}}msg .bar { height: 18px; margin: 18px 0 0; border-radius: 9px; background: rgba(255, 255, 255, 0.1); }
+    #{{P}}selbg { position: absolute; left: -8px; top: 6px; height: 44px; width: 640px; border-radius: 8px; background: rgba(255, 90, 31, 0.32); transform-origin: 0 50%; }
+    #{{P}}chip { left: 1250px; top: 166px; height: 64px; font-size: 32px; }
+    #{{P}}gcur { left: 0; top: 0; }
+  </style>
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle"><div id="{{P}}cam" class="cam">
+        <div id="{{P}}win" class="win glass thick">
+          <div id="{{P}}wbar" class="wbar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="wt" data-layout-ignore>Inbox</span></div>
+          <div id="{{P}}wbody" class="wbody">
+            <div id="{{P}}list" data-layout-ignore>
+              <div class="row"><div class="who">IT Service Desk</div><div class="sub">Password reset required</div><span class="tm">1:58 AM</span></div>
+              <div class="row"><div class="who">Finance</div><div class="sub">Q4 wire approvals</div><span class="tm">2:03 AM</span></div>
+              <div class="row sel"><div class="who">Incident bridge</div><div class="sub">INC bridge: dial-in details</div><span class="tm">2:11 AM</span></div>
+              <div class="row"><div class="who">Legal</div><div class="sub">Privileged: draft customer notice</div><span class="tm">2:12 AM</span></div>
+              <div class="row"><div class="who">Payroll</div><div class="sub">Direct deposit changes</div><span class="tm">Yesterday</span></div>
+            </div>
+            <div id="{{P}}msg">
+              <div class="from"><div class="av">IB</div><div><div class="fn">Incident bridge</div><div class="to" data-layout-ignore>to Response team</div></div></div>
+              <div class="subj">INC bridge: dial-in details</div>
+              <div class="body" data-layout-ignore>
+                <div class="ln"><i id="{{P}}selbg"></i><span style="position:relative">Bridge +1 214 555 0148, PIN 7731 4410</span></div>
+                <div class="ln">Do not forward. Hypervisor issue in Hall B.</div>
+                <div class="bar" style="width: 88%"></div>
+                <div class="bar" style="width: 72%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="{{P}}chip" class="chip hot glass pill"><!--KIT:icon name="eye" size=34 stroke=1.9-->Unknown reader</div>
+        <svg id="{{P}}gcur" class="cursor" viewBox="0 0 28 28" width="58" height="58" aria-hidden="true"><path d="M6.2 3.6 21.4 15.2l-6.6.9 3.8 7.6-3 1.5-3.8-7.6-4.7 4.7z" fill="rgba(255,90,31,0.62)" stroke="rgba(255,255,255,0.75)" stroke-width="1.4" stroke-linejoin="round" /></svg>
+      </div></div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S, { morph: { out: [P + 'chip', P + 'gcur'], inner: [P + 'wbody', P + 'wbar'] } });
+      // frame 0 is the window, already there: it sharpens and settles
+      tl.fromTo(P + 'win', { scale: 1.025, filter: 'blur(6px)' }, { scale: 1, filter: 'blur(0px)', duration: 0.6, ease: 'expo.out' }, 0);
+      tl.set(P + 'win', { filter: 'none' }, 0.61);
+      // the ghost cursor glides in and reads the first line; its selection follows it
+      const lineX = 250 + 500 + 56, lineY = 120 + 52 + 40 + 68 + 34 + 55 + 34 + 30;
+      tl.set(P + 'gcur', { x: 1520, y: 760, opacity: 0 }, 0);
+      tl.to(P + 'gcur', { opacity: 1, duration: 0.15, ease: 'none' }, 0.12);
+      tl.to(P + 'gcur', { x: lineX - 6, y: lineY - 4, duration: 0.42, ease: 'power2.inOut' }, 0.12);
+      tl.fromTo(P + 'selbg', { scaleX: 0 }, { scaleX: 1, duration: 0.72, ease: 'power1.inOut' }, {{at('reading')}} - 0.25);
+      tl.fromTo(P + 'gcur', { x: lineX - 6 }, { x: lineX + 620, duration: 0.72, ease: 'power1.inOut', immediateRender: false }, {{at('reading')}} - 0.25);
+      // the tell: someone else opened it
+      K.land(tl, P + 'chip', {{at('attacker')}} + 0.2, { from: 0.9, blur: 10, dur: 0.5 });
+      K.tone(tl, P, 'nominal', 'breach', {{at('reading')}}, 0.9);
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

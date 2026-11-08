@@ -86,6 +86,10 @@ export interface DataSource {
   revokeOperator(identityHex: string): Result;
   /** Scripted only: forget everything a viewer changed, so a recording can start clean. */
   reset?(): void;
+  /** Live only: the module can refuse a code (a name in use), so the Add person sheet waits for its answer. */
+  issueEnrollmentAsync?(code: string, role: OperatorRole, nameHint: string): Promise<Result>;
+  /** Live only: a fresh code in the format this backend wants (the scripted source uses the console's own generator). */
+  newCode?(): string;
 }
 
 let current: DataSource | null = null;

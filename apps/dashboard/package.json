@@ -2,7 +2,7 @@
   "name": "bulkhead",
   "private": true,
   "version": "0.1.0",
-  "description": "Claura: agentic incident-response console prototype (scripted demo data).",
+  "description": "Claura: agentic incident-response console. Scripted replay by default; live SpacetimeDB data with ?live=1 (see LIVE.md).",
   "type": "module",
   "scripts": {
     "dev": "vite --port 4317",
@@ -12,5 +12,8 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "vite": "^6.4.5"
+  },
+  "dependencies": {
+    "spacetimedb": "2.14.1"
   }
 }

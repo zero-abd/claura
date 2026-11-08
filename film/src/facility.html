@@ -1,0 +1,86 @@
+<template>
+  <!-- 3D beat: the DFW-2 facility (bulkhead-3d, three.js bundled) drawn from hf-seek on a transparent canvas over the
+       wallpaper, with glass overlays. Params:
+         track:   [{t, state?, cam?, progress?, blend?, fly?}]  scene-local keys for f.film.renderAt (t specs resolved)
+         tag:     honest label (top left), tagAt, tagUntil
+         sigs:    [{at, k, v, x, y}]   signal chips that land on the shot (the breach)
+         counter: {at, from, to, note, noteAt, stateAt}   the time-to-contain count-up (contained)
+         pick:    {host, from: [x, y], at (move starts), t (click)}   a cursor picks a host (hover, then select)
+         tone:    [{t, from, to}]  ground colour floods -->
+  <style>
+    /*COMMON*/
+    #{{P}}gl { position: absolute; inset: 0; }
+    #{{P}}gl canvas { display: block; }
+    #{{P}}ov { position: absolute; inset: 0; pointer-events: none; }
+    #{{P}}tag { left: 48px; top: 30px; }
+    #{{P}}cnt { left: 110px; top: 470px; width: 640px; height: 380px; padding: 40px 48px 0; }
+    #{{P}}cnt .cst { display: flex; align-items: center; gap: 16px; font: 600 38px/1 var(--font); letter-spacing: -0.02em; color: #4fd68c; }
+    #{{P}}cnt .cst i { width: 20px; height: 20px; border-radius: 50%; background: var(--safe); }
+    #{{P}}cnt .cnum { margin-top: 18px; display: flex; align-items: baseline; gap: 8px; font: 600 168px/0.9 var(--font); letter-spacing: -0.05em; color: var(--ink); }
+    #{{P}}cnt .cnum .cs { font-size: 84px; color: var(--ink-2); letter-spacing: -0.02em; }
+    #{{P}}cnt .clab { margin-top: 16px; font: 600 34px/1.2 var(--font); letter-spacing: -0.014em; color: var(--ink-2); }
+    #{{P}}cnt .cnote { position: absolute; left: 48px; bottom: 34px; font: 500 30px/1 var(--font); letter-spacing: -0.008em; color: var(--ink-3); }
+    #{{P}}pointer { position: absolute; left: 0; top: 0; }
+  </style>
+  <div id="root" data-composition-id="{{ID}}" data-width="1920" data-height="1080">
+    <div id="{{P}}stage" class="stage">
+      <!--KIT:wallpaper-->
+      <div id="{{P}}whip" class="whip"><div id="{{P}}settle" class="settle">
+        <div id="{{P}}gl" data-layout-allow-overflow></div>
+        <div id="{{P}}ov">
+{{ (p.sigs || []).map((s, i) => `          <div id="${P}sig${i}" class="sig glass" style="left:${s.x}px; top:${s.y}px"><i></i><span class="k">${esc(s.k)}</span><span class="v">${esc(s.v)}</span></div>`).join('\n') }}
+{{ p.counter ? `          <div id="${P}cnt" class="glass safe">
+            <div id="${P}cst" class="cst"><i></i><span>Contained</span></div>
+            <div class="cnum"><span id="${P}num" class="t-num">0.0</span><span class="cs">s</span></div>
+            <div id="${P}clab" class="clab">Time to contain</div>
+            <div id="${P}cnote" class="cnote">${esc(p.counter.note || 'in our simulation')}</div>
+          </div>` : '' }}
+{{ p.tag ? `          <div id="${P}tag" class="tag glass pill${p.tagHot ? ' hot' : ''}"><i></i>${esc(p.tag)}</div>` : '' }}
+{{ p.pick ? `          <div id="${P}pointer"><svg id="${P}cur" class="cursor" viewBox="0 0 28 28" width="56" height="56" aria-hidden="true" style="opacity:1"><path d="M6.2 3.6 21.4 15.2l-6.6.9 3.8 7.6-3 1.5-3.8-7.6-4.7 4.7z" fill="#0B0C0E" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg></div>` : '' }}
+        </div>
+      </div></div>
+      <!--KIT:fx-->
+    </div>
+  </div>
+  <script src="assets/vendor/facility.global.min.js"></script>
+  <script>
+    (function () {
+      /*KIT*/
+      const P = '#{{P}}', S = {{json(S)}}, p = {{json(timed(p))}};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S);
+      (p.tone || []).forEach((x) => K.tone(tl, P, x.from, x.to, x.t, x.dur ?? 1.0));
+      // the pointer follows the projected host point (seek-driven, pure in t); GSAP only squashes the cursor on the click
+      let pointer = null;
+      if (p.pick) {
+        const el = document.querySelector(P + 'pointer');
+        const tgt = K.PTS[p.pick.pt || 'host'];
+        const [sx, sy] = p.pick.from || [1640, 1000];
+        pointer = (t, pose) => {
+          const q = K.project(pose, tgt);
+          const k = K.easeInOut(K.clamp01((t - p.pick.at) / Math.max(0.1, p.pick.t - 0.08 - p.pick.at)));
+          const x = K.lerp(sx, q.x - 8, k), y = K.lerp(sy, q.y - 6, k);
+          el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
+        };
+        tl.fromTo(P + 'cur', { scale: 1 }, { scale: 0.84, duration: 0.07, ease: 'power2.out', immediateRender: false }, p.pick.t);
+        tl.to(P + 'cur', { scale: 1, duration: 0.14, ease: 'power2.out' }, p.pick.t + 0.08);
+        tl.to(P + 'cur', { opacity: 0, duration: 0.2, ease: 'power2.in' }, S.cut - 0.05);
+      }
+      const hl = p.pick ? [{ t: p.pick.t - 0.4, kind: 'hover', host: p.pick.host }, { t: p.pick.t, kind: 'select', host: p.pick.host }, { t: p.pick.t, kind: 'hover', host: null }] : [];
+      K.facility({ el: P + 'gl', key: '{{ID}}', from: S.from, dur: S.dur, track: p.track, hl, onFrame: pointer });
+      // overlays
+      (p.sigs || []).forEach((s, i) => K.land(tl, P + 'sig' + i, s.at, { from: 0.9, blur: 12, dur: 0.6 }));
+      if (p.worldOut) tl.to(P + 'gl', { opacity: 0, filter: 'blur(10px)', duration: p.worldOut, ease: 'power2.in' }, S.cut - p.worldOut);
+      if (p.tag) { K.blurLine(tl, P + 'tag', p.tagAt ?? 0.4); if (p.tagUntil !== undefined) K.out(tl, P + 'tag', p.tagUntil); }
+      if (p.counter) {
+        const c = p.counter;
+        K.glassIn(tl, P + 'cnt', c.at - 0.1, { from: 0.94, dur: 0.6 });
+        K.blurLine(tl, P + 'cst', c.stateAt ?? c.at);
+        K.blurLine(tl, P + 'clab', c.at + 0.1);
+        K.count(tl, P + 'num', c.from ?? 0, c.to, c.at + 0.05, { dur: c.dur ?? 1.4 });
+        K.blurLine(tl, P + 'cnote', c.noteAt);
+      }
+      window.__timelines['{{ID}}'] = tl;
+    })();
+  </script>
+</template>

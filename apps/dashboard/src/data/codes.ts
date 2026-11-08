@@ -25,6 +25,8 @@ export function codeFromSeed(seed: number): string {
   for (let i = 0; i < 12; i++) out += ALPHABET[Math.floor(hash(seed, i, 41) * 31)];
   return group(out);
 }
+/** How a code is shown: the live source's 18-symbol codes in three groups of six; scripted codes already carry their dashes. */
+export const fmtCode = (code: string) => (/^[A-Z0-9]{18}$/.test(code) ? code.replace(/(.{6})(?=.)/g, "$1-") : code);
 export const normalizeCode = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, "");
 export const looksLikeCode = (s: string) => /^[2-9A-HJKMNP-Z]{12}$/.test(normalizeCode(s));
 /** What the QR carries: a deep link the enrolling device opens (or types in by hand). 28 bytes: fits QR version 2-L. */

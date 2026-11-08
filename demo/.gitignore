@@ -1,0 +1,2 @@
+# runtime state of the launcher: pid files, logs, the private console build
+.run/

@@ -153,6 +153,11 @@ export function agentIdentities(d: DataSource) {
   return d.operators().filter((o) => o.role === "agent");
 }
 
+/** The Incident Commander for display: an active commander if there is one, else the first admin (in the scripted data RK is the admin). */
+export function incidentCommander(people: Person[]): Person | undefined {
+  return people.find((p) => p.kind === "operator" && p.active && p.role === "commander") ?? people.find((p) => p.role === "admin" && p.kind === "operator");
+}
+
 /** Who approved the quarantine (proposal.decided_by), with their display title from the roster. Null until approved. */
 export function approverOf(d: DataSource): { name: string; title: string } | null {
   const p = d.proposals().find((x) => x.policyMode === "approval" && x.decidedBy && x.decidedBy !== "policy");

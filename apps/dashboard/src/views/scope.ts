@@ -14,7 +14,7 @@ import {
 import { icon } from "../icons";
 import { $, disc, setAttr, setHTML, setText } from "../dom";
 import { esc, linkHosts } from "../hosts";
-import { type Phase } from "../engine";
+import { info, isLive, type Phase } from "../engine";
 
 // Data scope: every data asset the incident could have touched, with its system, classification, the range of
 // records at risk and a status pill (locked for ransomware, exfiltrated, ...). Responders update the status live.
@@ -56,7 +56,9 @@ const DOMAIN: Record<string, { title: string; sub: string }> = {
   "DFW-2": { title: "DFW-2 data center", sub: "The vGPU escape, INC-0419" },
   "Corp IT": { title: "Corporate IT", sub: "Parallel ransomware event on a separate network" },
 };
-const domainOf = (a: DataAsset) => a.system.split(" · ")[0];
+// scripted systems are written "DFW-2 · ..." / "Corp IT · ..."; the live module writes plain systems, so anything on corporate IT
+// is the parallel event and everything else belongs to the data center
+const domainOf = (a: DataAsset) => (isLive() ? (/^corporate IT/i.test(a.system) ? "Corp IT" : "DFW-2") : a.system.split(" · ")[0]);
 
 export const sc = {
   filter: "all" as AssetStatus | "all",
@@ -165,9 +167,10 @@ export const scope = {
       box.innerHTML = order.length
         ? order
             .map(([dom, rows]) => {
-              const info = DOMAIN[dom] ?? { title: dom, sub: "" };
+              const dm = DOMAIN[dom] ?? { title: dom, sub: "" };
+              const sub = dom === "DFW-2" ? `The vGPU escape, ${info().id}` : dm.sub;
               return `<section class="sc-group">
-                <header class="sc-gh"><div><h2>${esc(info.title)}</h2><span>${esc(info.sub)}</span></div><div class="sc-gsum">${scopeSummaryHTML(rows)}</div></header>
+                <header class="sc-gh"><div><h2>${esc(dm.title)}</h2><span>${esc(sub)}</span></div><div class="sc-gsum">${scopeSummaryHTML(rows)}</div></header>
                 <div class="glass group">${rows.map((a) => assetRow(a, flashIds.has(a.id))).join("")}</div>
               </section>`;
             })

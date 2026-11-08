@@ -19,9 +19,9 @@ import { initGlass } from "./glass";
 const PROTOTYPE_URL = "http://localhost:4317/?demo=1";
 const SHOTS = {
   hero: "shots/approval.png", // large frame under the hero
-  poster: "shots/contained.png", // video poster
+  poster: "media/claura-poster.png", // video poster
 } as const;
-const VIDEO_SRC = "media/bulkhead-demo.mp4";
+const VIDEO_SRC = "media/claura-demo.mp4";
 /* ─────────────────────────────────────────────────────────────────────────────── */
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

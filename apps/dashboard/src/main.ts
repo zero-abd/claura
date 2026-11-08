@@ -16,6 +16,7 @@ import {
   S,
   U,
   VIEWS,
+  isLive,
   phase,
   setOpen,
   isOpen,
@@ -36,10 +37,16 @@ import { cycleTask, selectChannel, warroom } from "./views/warroom";
 import { shells } from "./views/shells";
 import { scope, applyAssetStatus, setScopeFilter } from "./views/scope";
 import { access, cancelCode, closePerson, copyCode, issueCode, openPerson, pickRole, personSheetOpen, revoke, showCode } from "./views/access";
-import { exportReport } from "./views/reports";
+import { anchorEvidence, exportReport } from "./views/reports";
+import { integrations, retryIntegrations, toggleFeature } from "./views/integrations";
+import { copyIdentity, leaveToReplay, submitJoin } from "./views/join";
 import { canApprove, data, scriptedSource, selectSource, setDataSource, type AssetStatus, type DataSource, type OperatorRole } from "./data";
+import { LiveSource, resolveServer } from "./data/live";
+import { debugState, enterLive, leaveLive, liveFrame, liveSource } from "./live-engine";
+import { bootFeatures, features, resolveGateway } from "./features";
+import { toast } from "./toast";
 
-const VIEW_MODULES = { overview, incident, warroom, scope, shells, agents, policy, reports, access } as const;
+const VIEW_MODULES = { overview, incident, warroom, scope, shells, agents, policy, reports, integrations, access } as const;
 
 // ------------------------------------------------------------------ boot DOM
 let map!: FacilityMap;
@@ -146,7 +153,8 @@ function frame(now: number) {
   const dt = Math.min(0.25, Math.max(0, (now - last) / 1000));
   last = now;
   S.amb += dt;
-  if (S.running) {
+  if (isLive()) liveFrame(dt); // live: the script clock follows the SpacetimeDB rows (live-engine.ts)
+  else if (S.running) {
     S.r += dt;
     if (S.A === null && S.autoApprove !== null) {
       const when = Math.max(S.autoApprove, APPROVAL_AT);
@@ -204,6 +212,7 @@ function knownKey(key: string) {
 
 const api = {
   reset() {
+    if (isLive()) return; // live: the incident is whatever the database says
     settle(() => {
       S.started = false;
       S.running = false;
@@ -221,6 +230,7 @@ const api = {
   },
   /** Run the incident from T+0. Optional { approveAt } auto-approves at that script time (canonical 7.4). */
   play(opts: { approveAt?: number } = {}) {
+    if (isLive()) return;
     if (S.started) api.reset();
     S.ambFrozen = AMB_PREFILL + Math.floor(S.amb / AMB_DT);
     S.started = true;
@@ -234,6 +244,7 @@ const api = {
   },
   /** Approve the quarantine step (same as the button or ⌘↵). */
   approve() {
+    if (isLive()) return liveApprove();
     if (!S.started || S.A !== null) return false;
     if (!canApprove(data().me().role)) return false; // backend: approve() needs admin or commander
     if (S.r < APPROVAL_AT) {
@@ -258,6 +269,7 @@ const api = {
   },
   /** Jump to script time t (seconds) and hold. approveAt defaults to 7.4. */
   seek(t: number, opts: { approveAt?: number | null; run?: boolean; report?: boolean } = {}) {
+    if (isLive()) return;
     settle(() => {
       const ap = opts.approveAt === undefined ? CANON_APPROVE : opts.approveAt;
       if (!S.started) S.ambFrozen = AMB_PREFILL;
@@ -383,12 +395,14 @@ const api = {
   },
   /** Sign in as someone else in the scripted data to see the console with their role: 'JT', 'legal', 'AL'... */
   as(who: string) {
+    if (isLive()) return false; // live: you are whoever your enrollment says
     const ok = scriptedSource.setIdentity(who);
     render();
     return ok;
   },
   /** Scripted only: the person behind the newest unused break-glass code enrolls on their own device. */
   simulateEnroll(code?: string) {
+    if (isLive()) return false;
     const r = scriptedSource.simulateEnroll(code);
     render();
     return r.ok;
@@ -400,9 +414,35 @@ const api = {
   },
   /** Pick a registered source by name ('scripted', or 'live' once a LiveSource registers itself). */
   async useSource(name: string) {
+    if (name === "live") return startLive(new URLSearchParams(location.search));
+    if (name === "scripted" && isLive()) stopLive();
     const ok = await selectSource(name);
     if (ok) render();
     return ok;
+  },
+  /** Live mode, for tests and recorders: the connection, who you are, and what the adapter derived from the rows. */
+  get live() {
+    const s = liveSource();
+    if (!s) return null;
+    return {
+      server: { ...s.server },
+      link: s.linkState(),
+      access: s.access(),
+      identity: s.identityHex(),
+      applied: s.isApplied(),
+      state: () => debugState(),
+      enroll: (code: string, name = "") => s.enroll(code, name),
+      approve: () => s.approvePending(),
+      forgetIdentity: () => s.forgetIdentity(),
+      /** call fn right when rows change (as the SDK delivers them); returns the unsubscribe */
+      watch: (fn: () => void) => s.watch(fn),
+      /** test aid: drop the socket; the console reconnects by itself and keeps its rows meanwhile */
+      dropConnection: () => s.dropConnection(),
+    };
+  },
+  /** The feature gateway: what it listed and whether its client module loaded. */
+  get features() {
+    return { gateway: features.gateway, base: features.base, list: features.list.map((f) => ({ ...f })), moduleLoaded: features.moduleLoaded, error: features.error };
   },
   /** Fly the 3D camera by hand: fly3d('hallB') or fly3d({ preset: 'rack14', w: 8, h: 6.3 }). Holds until the phase changes. */
   fly3d(cam: Parameters<typeof flyFacility>[0]) {
@@ -548,6 +588,37 @@ function printCard() {
   window.requestAnimationFrame(() => window.print());
 }
 
+// ------------------------------------------------------------------ live mode
+/** Approve the pending quarantine through the module's approve reducer (it records the approver from the caller's identity). */
+function liveApprove(): boolean {
+  const s = liveSource();
+  if (!s || !s.pendingApproval()) return false;
+  const me = s.me();
+  if (!canApprove(me.role)) return false;
+  void s.approvePending();
+  return true;
+}
+/** Select the SpacetimeDB source: connect, route the engine to the rows, and say so in the isolation popover. */
+async function startLive(params: URLSearchParams): Promise<boolean> {
+  if (isLive()) return true;
+  const src = new LiveSource(resolveServer(params));
+  setDataSource(src);
+  enterLive(src);
+  src.onNotice((n) => toast(n.text, n.kind));
+  src.start();
+  S.started = false;
+  S.running = false;
+  render();
+  return true;
+}
+function stopLive() {
+  liveSource()?.stop();
+  leaveLive();
+  setDataSource(scriptedSource);
+  delete document.body.dataset.source;
+  api.reset();
+}
+
 // ------------------------------------------------------------------ input
 document.addEventListener("click", (e) => {
   const t = e.target as HTMLElement;
@@ -572,6 +643,16 @@ document.addEventListener("click", (e) => {
   if (t.closest("#personCancel") || t.closest("#codeDone")) return void closePerson();
   if (t.closest("#copyBtn")) return void copyCode();
   if (t.closest("#printBtn")) return void printCard();
+
+  // live: the break-glass sheet
+  if (t.closest("#joinBtn")) return void submitJoin();
+  if (t.closest("#joinCopy")) return void copyIdentity();
+  if (t.closest("#joinReplay") || t.closest("#offReplay")) return void leaveToReplay();
+  if (t.closest("#offRetry")) return void liveSource()?.retryNow();
+  if (t.closest("#offForget")) {
+    if (window.confirm("Forget this device's identity? You will need a new break-glass code to join again.")) liveSource()?.forgetIdentity();
+    return;
+  }
 
   const hostEl = t.closest("[data-host]") as HTMLElement | null;
   if (hostEl) return void api.openHost(hostEl.dataset.host!);
@@ -598,6 +679,9 @@ document.addEventListener("click", (e) => {
     else if (a === "revoke") void revoke(act.dataset.key!);
     else if (a === "sim-enroll") api.simulateEnroll();
     else if (a === "export") void exportReport();
+    else if (a === "anchor") void anchorEvidence();
+    else if (a === "int-open") void toggleFeature(act.dataset.target!.replace(/^int-open:/, ""));
+    else if (a === "int-retry") retryIntegrations();
     return;
   }
 
@@ -636,7 +720,12 @@ document.addEventListener("submit", (e) => {
   if (f.id !== "wrForm") return;
   e.preventDefault();
   const input = $("#wrInput") as HTMLInputElement;
-  if (warroom.send(input.value)) input.value = "";
+  if (isLive()) {
+    // live: warroom.send() answers with the refusal text, or null once the message is on its way
+    const err = warroom.send(input.value);
+    if (err && err !== "Nothing to send") toast(err, "error");
+    else if (!err) input.value = "";
+  } else if (warroom.send(input.value)) input.value = "";
   render();
 });
 document.addEventListener("keydown", (e) => {
@@ -647,6 +736,9 @@ document.addEventListener("keydown", (e) => {
     if (S.popover) S.popover = null;
     else if (personSheetOpen()) closePerson();
     else if (!api.closeHost()) api.closeApproval();
+  } else if (e.key === "Enter" && ((e.target as HTMLElement).id === "joinCode" || (e.target as HTMLElement).id === "joinName")) {
+    e.preventDefault();
+    submitJoin();
   } else if (e.key === "Enter" && (e.target as HTMLElement).id === "pName") {
     e.preventDefault();
     issueCode();
@@ -668,10 +760,15 @@ void mountFacility3D(stageEl);
 
 const params = new URLSearchParams(location.search);
 S.demo = params.get("demo") === "1";
-const asParam = params.get("as"); // ?as=JT (or legal, AL, ...): see the console with that person's role
-if (asParam) scriptedSource.setIdentity(asParam);
-const sourceParam = params.get("source"); // ?source=live once a LiveSource has registered itself
-if (sourceParam && sourceParam !== "scripted") void selectSource(sourceParam);
+// ?live=1 (or ?source=live) reads the SpacetimeDB rows. The scripted replay stays the default, and ?demo=1 always means replay
+// (the film is recorded from it). ?stdb=local points live mode at the local appliance instead of Maincloud.
+const wantLive = !S.demo && (params.get("live") === "1" || params.get("source") === "live");
+void bootFeatures(resolveGateway(params)); // optional modules from the local gateway; never awaited, never fatal
+if (wantLive) void startLive(params);
+const asParam = params.get("as"); // ?as=JT (or legal, AL, ...): see the console with that person's role (replay only)
+if (asParam && !wantLive) scriptedSource.setIdentity(asParam);
+const sourceParam = params.get("source");
+if (sourceParam && sourceParam !== "scripted" && sourceParam !== "live") void selectSource(sourceParam);
 S.amb = 6.0; // fixed ambient start so first frames are identical every load
 
 const want = params.get("phase");
@@ -682,7 +779,9 @@ settle(() => {
     viewParam && VIEWS.includes(viewParam) ? viewParam : want === "report" ? "reports" : want || tParam !== null ? "incident" : "overview";
   setView(v, false);
 });
-if (tParam !== null) api.seek(parseFloat(tParam));
+if (wantLive) {
+  /* live: the clock follows the rows, nothing to seek */
+} else if (tParam !== null) api.seek(parseFloat(tParam));
 else if (want === "breach") api.seek(4.4, { approveAt: null });
 else if (want === "approval") api.seek(6.8, { approveAt: null });
 else if (want === "contained") api.seek(CANON_APPROVE + SCRIPT_END_U);
@@ -704,7 +803,7 @@ if (sheetParam === "person" || sheetParam === "person-code")
   settle(() => void api.addPerson({ name: "Forensics lead", role: "responder", issue: sheetParam === "person-code" }));
 const hostParam = params.get("host"); // ?host=b14-gpu-07 opens its Host sheet
 if (hostParam) settle(() => void api.openHost(hostParam));
-if (params.get("play") === "1") api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });
+if (params.get("play") === "1" && !wantLive) api.play({ approveAt: params.get("approveAt") ? parseFloat(params.get("approveAt")!) : undefined });
 
 document.fonts.ready.then(() => {
   map.resize();

@@ -1,0 +1,638 @@
+<template>
+  <!-- 8. "Its command center runs outside your network, with its own identities." The mark (carried from the reveal)
+       becomes the command-centre pane; the compromised network lands beside it, a clear gap between them; identities
+       verified out-of-band. We leave by zooming through "Claura agents · on-prem" inside the data center. -->
+  <style>
+    /* Claura film kit: Liquid Glass, matched to the product (bulkhead/src/style.css: tokens -> wallpaper -> glass).
+   Inlined into every scene by tools/build.mjs at the COMMON marker. Scene-only rules go under #<id>-stage. */
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-500.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: block; }
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: block; }
+@font-face { font-family: 'Inter Film'; src: url('assets/fonts/Inter-700.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: block; }
+
+:root {
+  --font: 'Inter Film', 'Inter', sans-serif;
+  --ink: rgba(247, 249, 255, 0.97);
+  --ink-2: rgba(226, 232, 250, 0.74);
+  --ink-3: rgba(214, 222, 246, 0.54);
+  --ink-4: rgba(214, 222, 246, 0.26);
+  --hair: rgba(255, 255, 255, 0.1);
+  --fill-1: rgba(255, 255, 255, 0.06);
+  --fill-2: rgba(255, 255, 255, 0.1);
+  --accent: var(--color-accent, #ff5a1f);
+  --accent-rgb: 255, 90, 31;
+  --safe: var(--color-sealed, #2fbf71);
+  --safe-rgb: 47, 191, 113;
+  --bg: #05070d;
+}
+#root { position: absolute; inset: 0; overflow: hidden; background: transparent; font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
+#root * { box-sizing: border-box; }
+
+/* ------------------------------------------------------------ stage layers: stage > wall, whip > cam > content, fx */
+.stage { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+.whip, .settle { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+.fx { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+.fx-fill, .fx-zoom { position: absolute; inset: 0; opacity: 0; }
+.fx-ghost { position: absolute; inset: 0; opacity: 0; border-radius: 0; }
+.fx-rim { position: absolute; left: 0; top: 0; width: 10px; height: 10px; opacity: 0; pointer-events: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.42), 0 24px 70px rgba(0, 0, 0, 0.32); }
+
+/* ------------------------------------------------------------ wallpaper (deep, never a flat void) */
+.wall { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(120% 100% at 50% -10%, #0e1531 0%, #080b19 55%, #04060b 100%); }
+.wp { position: absolute; border-radius: 50%; }
+.wp.b1 { width: 1320px; height: 1100px; left: -420px; top: -430px; background: radial-gradient(closest-side, rgba(38, 66, 214, 0.74), rgba(38, 66, 214, 0.28) 55%, transparent); }
+.wp.b2 { width: 1220px; height: 1220px; right: -360px; top: -90px; background: radial-gradient(closest-side, rgba(116, 52, 222, 0.6), rgba(116, 52, 222, 0.2) 58%, transparent); }
+.wp.b3 { width: 1540px; height: 980px; left: 16%; bottom: -580px; background: radial-gradient(closest-side, rgba(16, 156, 186, 0.48), rgba(16, 156, 186, 0.16) 60%, transparent); }
+.wp.b4 { width: 900px; height: 900px; left: -230px; bottom: -300px; background: radial-gradient(closest-side, rgba(200, 56, 132, 0.34), transparent); }
+.wp.ember, .wp.green { width: 1240px; height: 920px; right: 0; top: -300px; opacity: 0; }
+.wp.ember { background: radial-gradient(closest-side, rgba(255, 90, 31, 0.56), rgba(255, 90, 31, 0.17) 55%, transparent); }
+.wp.green { background: radial-gradient(closest-side, rgba(47, 191, 113, 0.44), rgba(47, 191, 113, 0.14) 55%, transparent); }
+.wp.spot { width: 900px; height: 900px; left: 510px; top: 90px; opacity: 0; background: radial-gradient(closest-side, rgba(255, 90, 31, 0.5), rgba(255, 90, 31, 0.12) 60%, transparent); }
+.grain { position: absolute; inset: 0; opacity: 0.08; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.vig { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 75% at 50% 42%, transparent 45%, rgba(0, 0, 0, 0.5) 100%); }
+
+/* ------------------------------------------------------------ glass: blur + saturate, specular top edge, inner border, layered shadow */
+.glass {
+  position: absolute;
+  border-radius: 36px;
+  color: var(--ink);
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 36%, rgba(255, 255, 255, 0.025) 100%),
+    rgba(16, 22, 46, 0.38);
+  -webkit-backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+  backdrop-filter: blur(34px) saturate(1.9) brightness(1.08);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 24px 36px -24px rgba(255, 255, 255, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 22px 48px -16px rgba(0, 0, 0, 0.55),
+    0 48px 96px -36px rgba(0, 0, 0, 0.5);
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.12) 22%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.26) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass.thick { background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)), rgba(9, 13, 30, 0.56); -webkit-backdrop-filter: blur(46px) saturate(1.8); backdrop-filter: blur(46px) saturate(1.8); }
+.glass.clear { background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.09)); -webkit-backdrop-filter: blur(20px) saturate(1.7); backdrop-filter: blur(20px) saturate(1.7); }
+.glass.pill { border-radius: 999px; }
+.glass.hot {
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.42),
+    inset 0 0 90px -20px rgba(var(--accent-rgb), 0.3),
+    0 22px 48px -16px rgba(0, 0, 0, 0.55),
+    0 48px 96px -36px rgba(var(--accent-rgb), 0.38);
+}
+.glass.safe {
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.4),
+    inset 0 0 90px -20px rgba(var(--safe-rgb), 0.26),
+    0 22px 48px -16px rgba(0, 0, 0, 0.55),
+    0 48px 96px -36px rgba(var(--safe-rgb), 0.32);
+}
+/* a lit control: the product's primary button */
+.btn-primary {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  height: 88px; padding: 0 48px; border-radius: 44px;
+  font: 600 34px/1 var(--font); letter-spacing: -0.016em; color: #fff; white-space: nowrap;
+  background: linear-gradient(180deg, #ff7f4d 0%, #ff5a1f 52%, #f24a0d 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.3), 0 22px 44px -12px rgba(var(--accent-rgb), 0.7);
+  text-shadow: 0 1px 1px rgba(120, 30, 0, 0.35);
+}
+
+/* ------------------------------------------------------------ type: Inter as the SF stand-in, Apple hierarchy */
+.t-hero    { font: 600 156px/1.0 var(--font); letter-spacing: -0.048em; color: var(--ink); white-space: nowrap; }
+.t-display { font: 600 120px/1.02 var(--font); letter-spacing: -0.044em; color: var(--ink); white-space: nowrap; }
+.t-title   { font: 600 84px/1.06 var(--font); letter-spacing: -0.036em; color: var(--ink); }
+.t-head    { font: 600 64px/1.1 var(--font); letter-spacing: -0.03em; color: var(--ink); }
+.t-lead    { font: 500 44px/1.28 var(--font); letter-spacing: -0.018em; color: var(--ink-2); }
+.t-body    { font: 500 34px/1.32 var(--font); letter-spacing: -0.012em; color: var(--ink-2); }
+.t-label   { font: 600 32px/1.15 var(--font); letter-spacing: -0.01em; color: var(--ink-2); }
+.t-note    { font: 500 28px/1.25 var(--font); letter-spacing: -0.004em; color: var(--ink-3); }
+.t-num     { font-variant-numeric: tabular-nums; }
+.w { display: inline-block; }
+.acc { color: var(--accent); }
+.safe-c { color: var(--safe); }
+.ico { display: block; flex: none; }
+
+/* ------------------------------------------------------------ chips (the product's pill / chip) */
+.chip {
+  position: absolute;
+  display: inline-flex; align-items: center; gap: 14px;
+  height: 60px; padding: 0 26px 0 20px; border-radius: 30px;
+  font: 600 30px/1 var(--font); letter-spacing: -0.01em; white-space: nowrap; color: var(--ink-2);
+  background: var(--fill-1);
+  box-shadow: inset 0 0 0 1.5px var(--hair), inset 0 1.5px 0 rgba(255, 255, 255, 0.14);
+}
+.chip i { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-4); flex: none; }
+.chip.hot { color: #ff7a45; background: rgba(var(--accent-rgb), 0.15); box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.36), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
+.chip.hot i { background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.9); }
+.chip.safe { color: #4fd68c; background: rgba(var(--safe-rgb), 0.14); box-shadow: inset 0 0 0 1.5px rgba(var(--safe-rgb), 0.34), inset 0 1.5px 0 rgba(255, 255, 255, 0.16); }
+.chip.safe i { background: var(--safe); }
+
+/* ------------------------------------------------------------ device frame for real UI footage */
+.device {
+  position: absolute;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #05070d;
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    0 36px 72px -24px rgba(0, 0, 0, 0.72),
+    0 80px 150px -50px rgba(0, 0, 0, 0.62);
+}
+.device::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 6; box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.dev-bar { position: absolute; left: 0; right: 0; top: 0; height: 38px; z-index: 4; background: linear-gradient(180deg, rgba(36, 42, 68, 0.98), rgba(20, 24, 42, 0.98)); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.55); }
+.dev-lights { position: absolute; left: 20px; top: 13px; display: flex; gap: 9px; }
+.dev-lights i { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 0.75px rgba(0, 0, 0, 0.25); }
+.dev-lights i:nth-child(1) { background: #ff5f57; }
+.dev-lights i:nth-child(2) { background: #febc2e; }
+.dev-lights i:nth-child(3) { background: #28c840; }
+.dev-screen { position: absolute; left: 0; right: 0; bottom: 0; top: 38px; overflow: hidden; background: #05070d; }
+.device.bare .dev-bar { display: none; }
+.device.bare .dev-screen { top: 0; }
+.dev-screen > img, .dev-screen > video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* ------------------------------------------------------------ the cursor (only where the footage has none) */
+.cursor { position: absolute; left: 0; top: 0; width: 52px; height: 52px; z-index: 40; opacity: 0; transform-origin: 11.5px 6.7px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+
+/* ------------------------------------------------------------ callouts on footage */
+.callout { position: absolute; z-index: 32; left: 0; top: 0; transform-origin: 0 50%; }
+.callout .co-dot { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.22), 0 2px 8px rgba(0, 0, 0, 0.5); }
+.callout .co-line { position: absolute; left: 0; top: -1px; height: 2px; background: rgba(255, 255, 255, 0.75); transform-origin: 0 50%; }
+.callout .co-pill { position: absolute; top: -34px; height: 68px; padding: 0 30px; border-radius: 34px; display: flex; align-items: center; gap: 14px; font: 600 32px/1 var(--font); letter-spacing: -0.012em; white-space: nowrap; }
+
+/* ------------------------------------------------------------ v3 (Liquid Glass film): device chrome in glass, app windows, focus, keys, stamp, tag */
+/* the device's title bar is glass over the wallpaper (not a solid strip) */
+.device { background: rgba(6, 9, 20, 0.9); }
+.dev-bar { height: 40px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), inset 0 1.5px 0 rgba(255, 255, 255, 0.22); }
+.dev-lights { left: 18px; top: 14px; gap: 8px; }
+.dev-lights i { width: 12px; height: 12px; }
+.dev-title { position: absolute; left: 0; right: 0; top: 0; height: 40px; text-align: center; font: 600 16px/40px var(--font); letter-spacing: -0.005em; color: rgba(236, 240, 255, 0.62); }
+.dev-screen { top: 40px; }
+
+/* an app window drawn for the motion-graphic beats (mail, file share, tools): glass body, glass title bar */
+.win { position: absolute; border-radius: 28px; overflow: hidden; }
+.win .wbar { position: absolute; left: 0; right: 0; top: 0; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 22px; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08); }
+.win .wbar .lights { display: flex; gap: 8px; flex: none; }
+.win .wbar .lights i { width: 13px; height: 13px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); }
+.win .wbar .lights i.r { background: #ff5f57; } .win .wbar .lights i.y { background: #febc2e; } .win .wbar .lights i.g { background: #28c840; }
+.win .wbar .wt { font: 600 24px/1 var(--font); letter-spacing: -0.012em; color: var(--ink-2); white-space: nowrap; }
+.win .wbody { position: absolute; left: 0; right: 0; top: 52px; bottom: 0; }
+
+/* a focus ring around the UI element the line names (footage coordinates, drawn inside the camera) */
+.focus { position: absolute; z-index: 30; border-radius: 14px; opacity: 0; pointer-events: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.92), 0 0 0 9px rgba(255, 255, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.35); }
+.focus.hot { box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.98), 0 0 0 9px rgba(var(--accent-rgb), 0.2), 0 10px 40px rgba(0, 0, 0, 0.35); }
+
+/* keycaps (Command-Enter): thick glass keys with a lit symbol */
+.keycap { position: absolute; width: 176px; height: 176px; border-radius: 40px; display: grid; place-items: center;
+  font: 600 92px/1 var(--font); color: #fff; letter-spacing: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.04)), rgba(22, 28, 56, 0.55);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.28), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14), 0 14px 0 -4px rgba(8, 10, 24, 0.55), 0 30px 60px -16px rgba(0, 0, 0, 0.7); }
+.keycap .kshadow { position: absolute; inset: 0; border-radius: inherit; }
+
+/* a stamp (NO MATCH, DENIED): an outlined lozenge that slams in, never a glow */
+.stamp { position: absolute; display: flex; align-items: center; gap: 18px; height: 112px; padding: 0 40px; border-radius: 26px;
+  font: 700 64px/1 var(--font); letter-spacing: 0.04em; color: #ff6a33; white-space: nowrap; text-transform: uppercase;
+  border: 6px solid #ff5a1f; background: rgba(40, 10, 4, 0.55); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+
+/* a small honest label ("Demo data", "Roadmap"): glass pill, fixed in the frame, never in the camera */
+.tag { position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 24px 0 18px; border-radius: 27px;
+  font: 600 28px/1 var(--font); letter-spacing: -0.008em; color: var(--ink-2); white-space: nowrap; }
+.tag i { width: 12px; height: 12px; border-radius: 50%; background: rgba(226, 232, 250, 0.7); flex: none; }
+.tag.hot i { background: var(--accent); }
+
+/* a signal chip (the warnings): glass pill, orange dot, one line */
+.sig { position: absolute; display: inline-flex; align-items: center; gap: 16px; height: 76px; padding: 0 32px 0 24px; border-radius: 38px; white-space: nowrap;
+  font: 600 30px/1 var(--font); letter-spacing: -0.012em; color: var(--ink); }
+.sig i { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.18); }
+.sig .k { color: #ff7a45; }
+.sig .v { color: var(--ink-2); font-weight: 500; }
+
+    #oob-net { left: 110px; top: 170px; width: 960px; height: 620px; }
+    #oob-net .hd { position: absolute; left: 40px; top: 36px; right: 40px; height: 60px; display: flex; align-items: center; gap: 22px; }
+    #oob-net .hd .t { font: 600 42px/1 var(--font); letter-spacing: -0.026em; }
+    #oob-comp { position: relative; height: 56px; }
+    #oob-stage .tile { position: absolute; width: 420px; height: 214px; border-radius: 26px; padding: 26px 28px 0; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.08); }
+    #oob-stage .tile .row { display: flex; align-items: center; gap: 18px; }
+    #oob-stage .tile .ib { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+    #oob-stage .tile .n { font: 600 32px/1 var(--font); letter-spacing: -0.02em; }
+    #oob-stage .tile .s { margin-top: 10px; font: 500 28px/1 var(--font); color: #ff7a45; }
+    #oob-agents { position: absolute; left: 26px; top: 132px; height: 58px; padding: 0 24px 0 16px; border-radius: 29px; display: inline-flex; align-items: center; gap: 12px; font: 600 28px/1 var(--font); color: var(--ink); white-space: nowrap; }
+    #oob-cmd { left: 1220px; top: 170px; width: 590px; height: 620px; }
+    #oob-cmd .hd { position: absolute; left: 150px; top: 46px; }
+    #oob-cmd .hd .t { font: 600 42px/1 var(--font); letter-spacing: -0.026em; white-space: nowrap; }
+    #oob-cmd .hd .s { margin-top: 12px; font: 500 28px/1 var(--font); color: var(--ink-2); white-space: nowrap; }
+    #oob-cmd .id { position: absolute; left: 44px; right: 40px; height: 104px; display: flex; align-items: center; gap: 22px; border-top: 1.5px solid rgba(255, 255, 255, 0.08); }
+    #oob-cmd .av { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 600 28px/1 var(--font); color: #fff; flex: none; }
+    #oob-cmd .who { font: 600 30px/1 var(--font); letter-spacing: -0.016em; white-space: nowrap; }
+    #oob-cmd .ver { margin-top: 10px; display: flex; align-items: center; gap: 8px; font: 500 28px/1 var(--font); color: var(--ink-3); white-space: nowrap; }
+    #oob-mk { position: absolute; left: 1270px; top: 214px; width: 71.6px; height: 76px; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="oob" data-width="1920" data-height="1080">
+    <div id="oob-stage" class="stage">
+      <div id="oob-wall" class="wall" aria-hidden="true" data-layout-ignore>
+  <i id="oob-wp-b1" class="wp b1"></i><i id="oob-wp-b2" class="wp b2"></i><i id="oob-wp-b3" class="wp b3"></i><i id="oob-wp-b4" class="wp b4"></i>
+  <i id="oob-wp-ember" class="wp ember"></i><i id="oob-wp-green" class="wp green"></i><i id="oob-wp-spot" class="wp spot"></i>
+  <div class="grain"></div><div class="vig"></div>
+</div>
+
+      <div id="oob-whip" class="whip"><div id="oob-settle" class="settle"><div id="oob-cam" class="cam">
+        <div id="oob-net" class="glass">
+          <div class="hd"><span class="t">Your network</span><span id="oob-comp" class="chip hot" style="position:relative">Compromised</span></div>
+          <div id="oob-t0" class="tile" style="left:40px; top:126px"><div class="row"><div class="ib"><svg class="ico "  width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.4" y="5.4" width="17.2" height="13.2" rx="3"/><path d="m4.4 7.4 7.6 5.6 7.6-5.6"/></svg>
+</div><div><div class="n">Email</div><div class="s">Read by the attacker</div></div></div></div>
+          <div id="oob-t1" class="tile" style="left:500px; top:126px"><div class="row"><div class="ib"><svg class="ico "  width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.8h2.6l1.6 4.2-2 1.4a10.6 10.6 0 0 0 5.8 5.8l1.4-2 4.2 1.6v2.6a2 2 0 0 1-2.2 2C11.4 19 5 12.6 4.6 6a2 2 0 0 1 2-2.2z"/></svg>
+</div><div><div class="n">Phones</div><div class="s">Down</div></div></div></div>
+          <div id="oob-t2" class="tile" style="left:40px; top:366px"><div class="row"><div class="ib"><svg class="ico "  width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.4 15.6V18a1.8 1.8 0 0 0 1.8 1.8h11.6a1.8 1.8 0 0 0 1.8-1.8v-2.4"/><rect x="4.4" y="4.2" width="15.2" height="8.2" rx="2.2"/><path d="M8.2 8.3h.01M11.6 8.3h4.2"/></svg>
+</div><div><div class="n">File share</div><div class="s">Encrypted</div></div></div></div>
+          <div id="oob-t3" class="tile" style="left:500px; top:366px"><div class="row"><div class="ib"><svg class="ico "  width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.8" y="4" width="16.4" height="6.6" rx="2.3"/><rect x="3.8" y="13.4" width="16.4" height="6.6" rx="2.3"/><path d="M7.6 7.3h.01M7.6 16.7h.01"/></svg>
+</div><div><div class="n">Data center</div><div class="s">Breach in Hall B</div></div></div>
+            <div id="oob-agents" class="glass clear pill"><svg viewBox="24 17 209 222" width="30" height="32" aria-hidden="true"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>Claura agents · on-prem</div>
+          </div>
+        </div>
+        <div id="oob-cmd" class="glass thick">
+          <div class="hd"><div id="oob-ct" class="t"><span class="w">Command</span> <span class="w">center</span></div><div id="oob-cs" class="s">Outside your network</div></div>
+          <div id="oob-oobl" class="chip glass clear pill" style="left:44px; top:168px"><svg class="ico "  width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h3l2.4-6 3.6 12 2.6-8 1.6 2h3.8"/></svg>
+Out-of-band · not on your network</div>
+          <div id="oob-id0" class="id" style="top:262px"><div class="av" style="background:#4f5dff">RK</div><div><div class="who">Incident Commander</div><div class="ver"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="3.6"/><path d="M11.4 12H20.4M17.4 12v3M20.4 12v2"/></svg>verified out-of-band</div></div></div>
+          <div id="oob-id1" class="id" style="top:374px"><div class="av" style="background:#14a9a4">JT</div><div><div class="who">Legal counsel</div><div class="ver"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="3.6"/><path d="M11.4 12H20.4M17.4 12v3M20.4 12v2"/></svg>verified out-of-band</div></div></div>
+          <div id="oob-id2" class="id" style="top:486px"><div class="av" style="background:#8e4ff0">AL</div><div><div class="who">CISO</div><div class="ver"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="3.6"/><path d="M11.4 12H20.4M17.4 12v3M20.4 12v2"/></svg>verified out-of-band</div></div></div>
+        </div>
+        <svg id="oob-mk" viewBox="24 17 209 222" aria-label="Claura"><path fill="#FF5A1F" d="M231.95 73.95A111 111 0 1 0 231.95 182.05A7.64 7.64 0 0 0 219.1 173.85A78 78 0 1 1 219.1 82.15A7.64 7.64 0 0 0 231.95 73.95Z" /><path fill="#FF5A1F" d="M108 128a48 48 0 1 0 96 0a48 48 0 1 0-96 0z" /></svg>
+      </div></div></div>
+      <div id="oob-fx" class="fx" aria-hidden="true" data-layout-ignore>
+  <div id="oob-fx-fill" class="fx-fill"></div>
+  <div id="oob-fx-zoom" class="fx-zoom"></div>
+  <div id="oob-fx-ghost" class="glass fx-ghost"></div>
+  <div id="oob-fx-rim" class="fx-rim"></div>
+</div>
+
+    </div>
+  </div>
+  <script>
+    (function () {
+      /* Claura film kit (K): GSAP helpers shared by every scene, inlined by tools/build.mjs at the KIT marker.
+   Every visible value is a function of timeline time: no clocks, no unseeded randomness, layout read once at build. */
+const K = (() => {
+  const $ = (s) => (typeof s === 'string' ? document.querySelector(s) : s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const INK = 'rgba(247,249,255,0.97)', INK4 = 'rgba(214,222,246,0.24)';
+  const ORANGE = '#FF5A1F', GREEN = '#2FBF71';
+  const W = 1920, H = 1080;
+
+  // ---------------------------------------------------------------- wallpaper
+  // Blob drift is linear in FILM time (px/s), so the ground is continuous across every cut and every transition.
+  const DRIFT = { b1: [2.6, 1.6], b2: [-2.2, 1.8], b3: [-2.8, -0.9], b4: [2.4, -1.5], ember: [-1.6, 1.2], green: [-1.6, 1.2] };
+  const TONE = { nominal: [0, 0], breach: [1, 0], contained: [0, 1] };
+  function wall(tl, P, S) {
+    const a = S.from, b = S.from + S.dur;
+    for (const k in DRIFT) {
+      const el = $(P + 'wp-' + k);
+      if (!el) continue;
+      const [vx, vy] = DRIFT[k];
+      tl.fromTo(el, { x: vx * a, y: vy * a }, { x: vx * b, y: vy * b, duration: S.dur, ease: 'none' }, 0);
+    }
+    const t0 = TONE[S.tone] || TONE.nominal;
+    tl.set(P + 'wp-ember', { opacity: t0[0] }, 0);
+    tl.set(P + 'wp-green', { opacity: t0[1] }, 0);
+  }
+  // colour flood of the ground: ~1 s power2.inOut (the hero stays, the light changes)
+  function tone(tl, P, from, to, at, dur = 1.0) {
+    const a = TONE[from] || TONE.nominal, b = TONE[to] || TONE.nominal;
+    tl.fromTo(P + 'wp-ember', { opacity: a[0] }, { opacity: b[0], duration: dur, ease: 'power2.inOut', immediateRender: false }, at);
+    tl.fromTo(P + 'wp-green', { opacity: a[1] }, { opacity: b[1], duration: dur, ease: 'power2.inOut', immediateRender: false }, at);
+  }
+
+  // ---------------------------------------------------------------- titles (never fade + slide-up)
+  const ws = (sel) => (Array.isArray(sel) ? sel : $$(sel + ' .w'));
+  // per word: blur 6 -> 0 and opacity 0 -> 1 in 0.13 s, 0.067 s apart, no translate
+  function blurWords(tl, sel, at, o = {}) {
+    const list = ws(sel);
+    list.forEach((w, i) => {
+      const t = o.times ? o.times[Math.min(i, o.times.length - 1)] : at + i * (o.stagger ?? 0.067);
+      tl.fromTo(w, { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: o.dur ?? 0.13, ease: 'power2.out' }, t);
+    });
+    return at + (list.length - 1) * (o.stagger ?? 0.067) + 0.13;
+  }
+  // per word from light grey to ink, 0.085 s apart, or on the voice's own word times (o.times)
+  function inkWords(tl, sel, at, o = {}) {
+    const list = ws(sel);
+    list.forEach((w, i) => {
+      const t = o.times ? o.times[Math.min(i, o.times.length - 1)] : at + i * (o.stagger ?? 0.085);
+      const to = w.classList.contains('acc') ? ORANGE : w.classList.contains('safe-c') ? GREEN : o.to ?? INK;
+      tl.fromTo(w, { color: o.from ?? INK4 }, { color: to, duration: o.dur ?? 0.14, ease: 'power1.out' }, t);
+    });
+  }
+  // the whole line blurring in: 8 px -> 0 in 0.18 s
+  function blurLine(tl, sel, at, o = {}) {
+    tl.fromTo(sel, { opacity: 0, filter: `blur(${o.blur ?? 8}px)` }, { opacity: o.opacity ?? 1, filter: 'blur(0px)', duration: o.dur ?? 0.18, ease: 'power2.out' }, at);
+  }
+  // per letter (a name): 0.06 s apart, opacity 0.25 -> 1 with a slight blur
+  function letters(tl, sel, at, o = {}) {
+    $$(sel + ' .l').forEach((l, i) => tl.fromTo(l, { opacity: 0.2, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.16, ease: 'power2.out' }, at + i * (o.stagger ?? 0.06)));
+  }
+  // exit: blur-out and fade, 0.13-0.25 s (word by word with o.stagger)
+  function out(tl, sel, at, o = {}) {
+    const list = o.words ? ws(sel) : [sel];
+    list.forEach((el, i) => tl.to(el, { opacity: 0, filter: `blur(${o.blur ?? 8}px)`, duration: o.dur ?? 0.2, ease: 'power2.in' }, at + i * (o.stagger ?? 0)));
+  }
+  // an object lands: depth, not a slide (scale 0.94 -> 1, blur 10 -> 0, expo.out)
+  function land(tl, sel, at, o = {}) {
+    tl.fromTo(sel, { opacity: 0, scale: o.from ?? 0.94, filter: `blur(${o.blur ?? 10}px)` }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: o.dur ?? 0.55, ease: o.ease ?? 'expo.out' }, at);
+    if (o.clearFilter !== false) tl.set(sel, { filter: 'none' }, at + (o.dur ?? 0.55) + 0.01);
+  }
+  // glass lands: opacity on the pane itself (never on a wrapper, which would cut its backdrop), scale settle
+  function glassIn(tl, sel, at, o = {}) {
+    tl.fromTo(sel, { opacity: 0, scale: o.from ?? 0.96 }, { opacity: 1, scale: 1, duration: o.dur ?? 0.5, ease: o.ease ?? 'expo.out' }, at);
+  }
+  // a chip / number landing: pop
+  function pop(tl, sel, at, o = {}) {
+    tl.fromTo(sel, { opacity: 0, scale: o.from ?? 0.82 }, { opacity: 1, scale: 1, duration: o.dur ?? 0.42, ease: 'back.out(1.6)' }, at);
+  }
+  // number count-up: 1.4 s expo.out, then it holds
+  function count(tl, sel, from, to, at, o = {}) {
+    const el = $(sel), dec = o.dec ?? 1, st = { v: from };
+    el.textContent = from.toFixed(dec);
+    tl.fromTo(st, { v: from }, { v: to, duration: o.dur ?? 1.4, ease: o.ease ?? 'expo.out', onUpdate: () => { el.textContent = st.v.toFixed(dec); } }, at);
+  }
+
+  // ---------------------------------------------------------------- camera on a wrapper (never on the media)
+  // key: {t, u, v, z} puts footage point (u, v) (0..1 of ctx.screen, in world px) at frame point (fx, fy) at scale z;
+  //      {t, x, y, z} the same for a world point; {t, home: true} the identity. d = move seconds (0 = hard cut).
+  function camState(k, ctx = {}) {
+    if (k.home) return { x: 0, y: 0, scale: 1 };
+    const s = k.z ?? 1;
+    let cx = k.x, cy = k.y;
+    if (k.u !== undefined) { const r = ctx.screen; cx = r.x + k.u * r.w; cy = r.y + k.v * r.h; }
+    return { x: (k.fx ?? W / 2) - cx * s, y: (k.fy ?? H / 2) - cy * s, scale: s };
+  }
+  function cam(tl, sel, keys, ctx = {}) {
+    if (!keys || !keys.length) return;
+    let prev = camState(keys[0], ctx);
+    tl.set(sel, { ...prev, transformOrigin: '0 0' }, 0);
+    for (let i = 1; i < keys.length; i++) {
+      const k = keys[i], st = camState(k, ctx), d = k.d ?? 0.6;
+      if (d <= 0) tl.set(sel, st, k.t);
+      else tl.fromTo(sel, prev, { ...st, duration: d, ease: k.ease ?? 'power2.inOut', immediateRender: false }, k.t);
+      prev = st;
+    }
+  }
+  // the scale the camera holds at time t (for callouts drawn at a constant on-screen size)
+  function camScaleAt(keys, t) {
+    let s = keys && keys.length ? keys[0].home ? 1 : keys[0].z ?? 1 : 1;
+    for (const k of keys || []) if (k.t <= t + 1e-6) s = k.home ? 1 : k.z ?? 1;
+    return s;
+  }
+
+  // ---------------------------------------------------------------- cursor (only where the footage has none)
+  // keys [{t, x, y, click}] in the cursor's own parent coordinates; a move ends at t; a click presses at t
+  function cursor(tl, sel, keys) {
+    if (!keys || !keys.length) return;
+    tl.set(sel, { x: keys[0].x, y: keys[0].y, scale: 1, opacity: 1 }, 0);
+    let px = keys[0].x, py = keys[0].y;
+    for (let i = 1; i < keys.length; i++) {
+      const k = keys[i], d = k.d ?? 0.55;
+      tl.fromTo(sel, { x: px, y: py }, { x: k.x, y: k.y, duration: d, ease: k.ease ?? 'power2.inOut', immediateRender: false }, k.t - d);
+      if (k.click) {
+        tl.to(sel, { scale: 0.84, duration: 0.07, ease: 'power2.out' }, k.t);
+        tl.to(sel, { scale: 1, duration: 0.14, ease: 'power2.out' }, k.t + 0.08);
+      }
+      px = k.x; py = k.y;
+    }
+  }
+
+  // ---------------------------------------------------------------- transitions with a cause
+  // A scene's `in` is the previous scene's `out` (film.config.mjs). Layers: #P-stage > #P-wall, #P-whip > #P-settle >
+  // #P-cam, and #P-fx (fill, zoom, ghost). Types: cut | blur | whip | zoom | iris | morph.
+  function enter(tl, P, T, o = {}) {
+    if (!T || T.type === 'cut') return;
+    const whip = P + 'whip';
+    if (T.type === 'blur' || T.type === 'whip') {
+      // blur swap: the frame sharpens in place; whip: it lands blurred from the side and sharpens (0.3 s power3.out)
+      const isWhip = T.type === 'whip', dx = isWhip ? 760 * (T.dir ?? 1) : 0;
+      tl.fromTo(whip, { opacity: isWhip ? 1 : 0, x: dx, filter: `blur(${isWhip ? 20 : 14}px)` }, { opacity: 1, x: 0, filter: 'blur(0px)', duration: T.dur, ease: isWhip ? 'power3.out' : 'power2.out' }, 0);
+      tl.set(whip, { filter: 'none' }, T.dur + 0.01);
+      if (isWhip) tl.fromTo(P + 'wall', { x: 90 * (T.dir ?? 1) }, { x: 0, duration: T.dur + 0.1, ease: 'power3.out' }, 0);
+    } else if (T.type === 'zoom') {
+      // the previous scene zoomed through a button; its fill is this frame's first frame, then the scene settles
+      tl.fromTo(P + 'fx-fill', { opacity: 1, background: T.color }, { opacity: 0, duration: T.fadeDur ?? 0.34, ease: 'power1.out' }, 0.04);
+      tl.fromTo(P + 'settle', { scale: 1.07 }, { scale: 1, duration: 0.8, ease: 'expo.out' }, 0);
+    } else if (T.type === 'iris') {
+      // clip-path circle opens from the clicked point onto this world; the previous host plays underneath
+      tl.fromTo(P + 'stage', { clipPath: `circle(0px at ${T.x}px ${T.y}px)` }, { clipPath: `circle(2300px at ${T.x}px ${T.y}px)`, duration: T.dur, ease: 'power2.in' }, 0);
+      tl.set(P + 'stage', { clipPath: 'none' }, T.dur + 0.01);
+    } else if (T.type === 'morph') {
+      morphIn(tl, P, T, o.morph || {});
+    }
+  }
+  function exit(tl, P, S, o = {}) {
+    const T = S.out, cut = S.cut;
+    if (!T || ['cut', 'end', 'iris'].includes(T.type)) return;
+    const whip = P + 'whip';
+    if (T.type === 'blur' || T.type === 'whip') {
+      const isWhip = T.type === 'whip', d = isWhip ? 0.24 : 0.18;
+      tl.to(whip, { opacity: isWhip ? 1 : 0, x: isWhip ? -760 * (T.dir ?? 1) : 0, filter: `blur(${isWhip ? 20 : 12}px)`, duration: d, ease: isWhip ? 'power3.in' : 'power2.in' }, cut - d);
+      if (isWhip) tl.to(P + 'wall', { x: -90 * (T.dir ?? 1), duration: 0.24, ease: 'power3.in' }, cut - 0.24);
+    } else if (T.type === 'zoom') {
+      zoomOut(tl, P, T, cut);
+    } else if (T.type === 'morph') {
+      morphOut(tl, P, T, cut, o.morph || {});
+    }
+  }
+  // zoom through a button: the content pushes into it while its fill grows past the frame, strong ease-in
+  function zoomOut(tl, P, T, cut) {
+    const [x, y, w, h, r] = T.rect || [W / 2 - 60, H / 2 - 60, 120, 120, 60], d = T.dur ?? 0.36;
+    const z = P + 'fx-zoom', from = cut - d;
+    tl.set(z, { background: T.color }, from);
+    tl.fromTo(z, { opacity: 0 }, { opacity: 1, duration: d * 0.75, ease: 'power2.in', immediateRender: false }, from);
+    tl.fromTo(z, { clipPath: `inset(${y}px ${W - x - w}px ${H - y - h}px ${x}px round ${r}px)` },
+      { clipPath: 'inset(-4px -4px -4px -4px round 0px)', duration: d, ease: 'power3.in', immediateRender: false }, from);
+    tl.set(P + 'settle', { transformOrigin: `${x + w / 2}px ${y + h / 2}px` }, from);
+    tl.fromTo(P + 'settle', { scale: 1 }, { scale: 2.6, duration: d, ease: 'power3.in', immediateRender: false }, from);
+  }
+  // glass pane morph, outgoing half: everything but the pane blurs out; the pane keeps its content until the last
+  // 0.1 s (the next scene's content grows out of the same rect on the cut, so the pane is never empty for long)
+  function morphOut(tl, P, T, cut, m) {
+    const d = 0.28;
+    (m.out || []).forEach((s) => tl.to(s, { opacity: 0, filter: 'blur(10px)', duration: d, ease: 'power2.in' }, cut - d - 0.04));
+    (m.inner || []).forEach((s) => tl.to(s, { opacity: 0, filter: 'blur(6px)', duration: 0.1, ease: 'power2.in' }, cut - 0.11));
+  }
+  // incoming half: a glass ghost at the old pane's rect grows into this scene's target; the target sharpens inside it
+  function morphIn(tl, P, T, m) {
+    const g = P + 'fx-ghost', d = T.dur ?? 0.55;
+    const [x0, y0, w0, h0, r0] = T.from || [W / 2 - 160, H / 2 - 40, 320, 80, 40];
+    const [x1, y1, w1, h1, r1] = m.to || [160, 120, 1600, 900, 28];
+    if (m.flip) {
+      // the target itself flies from the outgoing pane's rect to its own (laid out at m.to), content and all
+      const fb = m.blur === false ? 0 : (m.blur ?? 6);
+      tl.fromTo(m.flip, { x: x0 - x1, y: y0 - y1, scaleX: w0 / w1, scaleY: h0 / h1, transformOrigin: '0 0', filter: `blur(${fb}px)` },
+        { x: 0, y: 0, scaleX: 1, scaleY: 1, filter: 'blur(0px)', duration: d, ease: 'power3.inOut' }, 0);
+      tl.set(m.flip, { filter: 'none' }, d + 0.01);
+      (m.after || []).forEach((s, i) => tl.fromTo(s, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.22, ease: 'power2.out' }, d + 0.05 + i * 0.07));
+      return;
+    }
+    if (!m.ghost) {
+      // REVEAL (default): this scene's own content grows out of the outgoing pane's rect with a uniform scale (nothing
+      // squashed), seen through a rounded clip that opens from that rect to the frame, while a glass rim flies from the
+      // old rect to the target's. The content is visible from the first frame: no plain-glass pane, no bare wallpaper.
+      // fit 'contain' puts the whole target inside the old rect; 'cover' fills it (a screen growing out of a row).
+      const s0 = m.fit === 'cover' ? Math.max(w0 / w1, h0 / h1) : Math.min(w0 / w1, h0 / h1);
+      const tx = x0 + w0 / 2 - s0 * (x1 + w1 / 2), ty = y0 + h0 / 2 - s0 * (y1 + h1 / 2);
+      const ins = (x, y, w, h, r) => `inset(${y.toFixed(1)}px ${(W - x - w).toFixed(1)}px ${(H - y - h).toFixed(1)}px ${x.toFixed(1)}px round ${r.toFixed(1)}px)`;
+      tl.fromTo(P + 'settle', { x: tx, y: ty, scale: s0, transformOrigin: '0px 0px' }, { x: 0, y: 0, scale: 1, duration: d, ease: 'power3.inOut' }, 0);
+      // the clip follows the rim (old rect -> target rect) on the same ease; GSAP does not interpolate these inset()
+      // strings reliably, so the clip is written from a tweened progress (a pure function of timeline time)
+      const wEl = $(P + 'whip'), st = { p: 0 };
+      const clipAt = (p) => { const L = (a, b) => a + (b - a) * p; wEl.style.clipPath = ins(L(x0, x1), L(y0, y1), L(w0, w1), L(h0, h1), L(r0, r1)); };
+      tl.set(P + 'whip', { clipPath: ins(x0, y0, w0, h0, r0) }, 0);
+      tl.fromTo(st, { p: 0 }, { p: 1, duration: d, ease: 'power3.inOut', onUpdate: () => clipAt(st.p), immediateRender: false }, 0.001);
+      tl.set(P + 'whip', { clipPath: 'none' }, d + 0.01);
+      const rim = $(P + 'fx-rim');
+      if (rim) {
+        // FLIP with transforms only: laid out once at the target rect, flown from the old rect (radius pre-divided)
+        Object.assign(rim.style, { left: x1 + 'px', top: y1 + 'px', width: w1 + 'px', height: h1 + 'px' });
+        const sx = w0 / w1, sy = h0 / h1;
+        tl.fromTo(rim, { opacity: 1, x: x0 - x1, y: y0 - y1, scaleX: sx, scaleY: sy, transformOrigin: '0 0', borderRadius: `${(r0 / sx).toFixed(2)}px / ${(r0 / sy).toFixed(2)}px` },
+          { x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: `${r1}px / ${r1}px`, duration: d, ease: 'power3.inOut' }, 0);
+        tl.to(rim, { opacity: 0, duration: 0.2, ease: 'power1.out' }, d - 0.1);
+      }
+      if (m.target && m.blur !== false) {
+        tl.fromTo(m.target, { filter: 'blur(5px)' }, { filter: 'blur(0px)', duration: d * 0.7, ease: 'power2.out' }, 0);
+        tl.set(m.target, { filter: 'none' }, d * 0.7 + 0.01);
+      }
+      (m.after || []).forEach((s, i) => tl.fromTo(s, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.22, ease: 'power2.out' }, d + 0.05 + i * 0.07));
+      return;
+    }
+    // GHOST (m.ghost): the ghost is laid out at the target rect once (plain style, not a tween), then flies there with transforms;
+    // its corner radius is pre-divided by the scale so the corners stay round on the way
+    const el = $(g);
+    if (el) Object.assign(el.style, { left: x1 + 'px', top: y1 + 'px', width: w1 + 'px', height: h1 + 'px' });
+    const sx = w0 / w1, sy = h0 / h1;
+    tl.fromTo(g, { opacity: 1, x: x0 - x1, y: y0 - y1, scaleX: sx, scaleY: sy, transformOrigin: '0 0', borderRadius: `${(r0 / sx).toFixed(2)}px / ${(r0 / sy).toFixed(2)}px` },
+      { x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: `${r1}px / ${r1}px`, duration: d, ease: 'power3.inOut' }, 0);
+    tl.to(g, { opacity: 0, duration: 0.22, ease: 'power1.out' }, d - 0.06);
+    if (m.target) tl.fromTo(m.target, { opacity: 0, filter: 'blur(12px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.3, ease: 'power2.out' }, d * 0.62);
+    if (m.target) tl.set(m.target, { filter: 'none' }, d * 0.62 + 0.31);
+    (m.after || []).forEach((s, i) => tl.fromTo(s, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.22, ease: 'power2.out' }, d + 0.05 + i * 0.07));
+  }
+
+  // ---------------------------------------------------------------- scene boilerplate
+  function scene(tl, P, S, o = {}) {
+    wall(tl, P, S);
+    enter(tl, P, S.in, o);
+    exit(tl, P, S, o);
+  }
+
+  return { $, $$, ORANGE, GREEN, INK, INK4, wall, tone, blurWords, inkWords, blurLine, letters, out, land, glassIn, pop, count,
+    camState, cam, camScaleAt, cursor, enter, exit, zoomOut, morphIn, morphOut, scene };
+})();
+
+/* ---------------------------------------------------------------- v3 additions: 3D facility, focus rings, stamps, keys */
+Object.assign(K, (() => {
+  const $ = K.$;
+  const W = 1920, H = 1080;
+  // Orthographic projection of a world point (metres) with the module's camera pose: the same maths as facility.js
+  // applyPose() (target, az, el, w, h; frame W x H). Used to pin HTML overlays (cursor, labels) to a 3D point.
+  function project(pose, p) {
+    const a = (pose.az * Math.PI) / 180, e = (Math.max(6, Math.min(88, pose.el)) * Math.PI) / 180;
+    const r = [Math.cos(a), 0, -Math.sin(a)];
+    const u = [-Math.sin(a) * Math.sin(e), Math.cos(e), -Math.cos(a) * Math.sin(e)];
+    const aspect = W / H, Hh = Math.max(pose.h, pose.w / aspect);
+    const q = [p[0] - pose.target[0], p[1] - pose.target[1], p[2] - pose.target[2]];
+    const sx = q[0] * r[0] + q[1] * r[1] + q[2] * r[2], sy = q[0] * u[0] + q[1] * u[1] + q[2] * u[2];
+    return { x: W / 2 + (sx / (Hh * aspect)) * W, y: H / 2 - (sy / Hh) * H };
+  }
+  // World points the film points at (bulkhead-3d/src/layout.js: B14 x 6.49, z -2.9, faces +z; host blades 5-7).
+  const PTS = { b14: [6.49, 1.2, -2.4], host: [6.49, 1.2425, -2.365], hallB: [5.2, 1.0, -3.9], hub: [0, 1.2, 0] };
+
+  // Mount the DFW-2 facility (three.js r180, bundled in assets/vendor/facility.global.min.js) and draw it from hf-seek.
+  // Pure: the frame is f.film.renderAt(localT, track); only draws while this scene's host is on screen.
+  // cfg { el, key, from (film s), dur, track (local keys), hl: [{t, kind: 'hover'|'select', host|null}], onFrame(t, pose) }
+  function facility(cfg) {
+    const F = window.ClauraFacility;
+    if (!F) throw new Error('ClauraFacility missing: include assets/vendor/facility.global.min.js before the scene script');
+    const f = F.createFacility($(cfg.el), { look: 'lumen', background: 'transparent', controls: false, pick: false, width: W, height: H, pixelRatio: 1 });
+    window.__hf = window.__hf || {};
+    window.__hf.buildReady = window.__hf.buildReady || {};
+    window.__hf.buildReady[cfg.key] = f.ready;
+    const hlNow = { hover: null, select: null };
+    const setHl = (kind, id) => { if (hlNow[kind] !== id) { f.highlight(id, kind); hlNow[kind] = id; } };
+    function draw(rootT) {
+      const t = rootT - cfg.from;
+      if (t < -0.04 || t > cfg.dur + 0.04) return;
+      const lt = Math.max(0, Math.min(cfg.dur, t));
+      const want = { hover: null, select: null };
+      for (const h of cfg.hl || []) if (lt >= h.t) want[h.kind] = h.host;
+      setHl('hover', want.hover);
+      setHl('select', want.select);
+      f.film.renderAt(lt, cfg.track);
+      if (cfg.onFrame) cfg.onFrame(lt, f.film.evalAt(lt, cfg.track).pose);
+    }
+    window.addEventListener('hf-seek', (e) => draw(e.detail.time));
+    draw(cfg.from);
+    return { f, draw, pose: (t) => f.film.evalAt(t, cfg.track).pose };
+  }
+
+  // a focus ring lands (scale 1.08 -> 1, 0.28 s expo.out) and leaves (0.16 s)
+  function focus(tl, sel, at, until) {
+    tl.fromTo(sel, { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.28, ease: 'expo.out' }, at);
+    if (until !== undefined && until !== null) tl.to(sel, { opacity: 0, duration: 0.16, ease: 'power2.in' }, until);
+  }
+  // a stamp slams in (power4.in 0.16 s from 1.45x, rotated), then its card shakes for two frames
+  function stamp(tl, sel, at, o = {}) {
+    tl.fromTo(sel, { opacity: 0, scale: 1.45, rotation: o.rot ?? -7 }, { opacity: 1, scale: 1, rotation: o.rot ?? -7, duration: 0.16, ease: 'power4.in' }, at - 0.16);
+    if (o.shake) {
+      tl.fromTo(o.shake, { x: 0 }, { x: 7, duration: 0.033, ease: 'none', immediateRender: false }, at);
+      tl.fromTo(o.shake, { x: 7 }, { x: -5, duration: 0.033, ease: 'none', immediateRender: false }, at + 0.033);
+      tl.fromTo(o.shake, { x: -5 }, { x: 0, duration: 0.05, ease: 'power1.out', immediateRender: false }, at + 0.066);
+    }
+  }
+  // a key press: down 12 px in 0.06 s, back in 0.16 s
+  function press(tl, sel, at) {
+    tl.fromTo(sel, { y: 0 }, { y: 12, duration: 0.06, ease: 'power2.in', immediateRender: false }, at - 0.06);
+    tl.fromTo(sel, { y: 12 }, { y: 0, duration: 0.16, ease: 'power2.out', immediateRender: false }, at + 0.02);
+  }
+  // linear interpolation helper for seek-driven overlays
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+  const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+  return { project, PTS, facility, focus, stamp, press, lerp, clamp01, easeInOut };
+})());
+
+      const P = '#oob-', S = {"id":"oob","from":25.876,"to":29.665,"cut":3.789,"dur":3.789,"in":{"type":"cut"},"out":{"dur":0.36,"color":"rgba(10, 14, 32, 1)","type":"zoom","rect":[636,668,404,58,29],"next":"agents"},"tone":"breach","toneTo":"breach","prev":"reveal","next":"agents"};
+      const tl = gsap.timeline({ paused: true });
+      K.scene(tl, P, S);
+      // the pane builds around the mark that just arrived
+      tl.fromTo(P + 'cmd', { opacity: 0, scale: 0.94, transformOrigin: '86px 82px' }, { opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out' }, 0.04);
+      K.blurWords(tl, P + 'ct', 0, { times: [0.459,0.836] });
+      K.blurLine(tl, P + 'cs', 1.228);
+      K.land(tl, P + 'oobl', 1.58 + 0.05, { from: 0.9, blur: 8, dur: 0.45 });
+      // the compromised network, beside it, not around it
+      const outside = 1.58;
+      K.land(tl, P + 'net', outside - 0.18, { from: 0.95, blur: 12, dur: 0.6 });
+      for (let i = 0; i < 4; i++) K.land(tl, P + 't' + i, outside + 0.02 + i * 0.07, { from: 0.94, blur: 8, dur: 0.45 });
+      K.pop(tl, P + 'comp', 1.998);
+      K.land(tl, P + 'agents', outside + 0.5, { from: 0.9, blur: 8, dur: 0.45 });
+      // its own identities
+      const ids = 2.65;
+      for (let i = 0; i < 3; i++) K.land(tl, P + 'id' + i, ids - 0.42 + i * 0.07, { from: 0.96, blur: 8, dur: 0.4 });
+      window.__timelines['oob'] = tl;
+    })();
+  </script>
+</template>

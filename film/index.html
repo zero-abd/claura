@@ -1,49 +1,81 @@
 <!doctype html>
 <html lang="en" data-resolution="landscape" data-composition-variables='[
-  {"id":"color-ground","type":"color","label":"Steel","default":"#C8CBC6"},
-  {"id":"color-ink","type":"color","label":"Stencil ink","default":"#121417"},
-  {"id":"color-accent","type":"color","label":"Safety orange","default":"#FF5A1F"},
-  {"id":"color-sealed","type":"color","label":"Sealed green","default":"#2FBF71"}
+  {"id":"color-accent","type":"color","label":"Signal orange (brand, breach)","default":"#FF5A1F"},
+  {"id":"color-sealed","type":"color","label":"Sealed green (contained state only)","default":"#2FBF71"}
 ]'>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
+    <title>Claura: Seal the breach before it spreads</title>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <style>
-      @font-face { font-family: 'Big Shoulders Stencil'; src: url('assets/fonts/BigShouldersStencil.woff2') format('woff2'); font-weight: 100 900; }
-@font-face { font-family: 'Big Shoulders'; src: url('assets/fonts/BigShoulders.woff2') format('woff2'); font-weight: 100 900; }
-
-      :root { --color-ground: #C8CBC6; --color-ink: #121417; --color-accent: #FF5A1F; --color-sealed: #2FBF71; --panel: #0E0F12; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--color-ground); }
-      #root { width: 100%; height: 100%; position: relative; font-family: 'Big Shoulders', sans-serif; }
-      #steel { position: absolute; inset: 0; background: var(--color-ground); }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #05070d; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      /* under every scene: the wallpaper's base, so no frame is ever a flat black void */
+      #ground { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% -10%, #0e1531 0%, #080b19 55%, #04060b 100%); }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="87.96" data-width="1920" data-height="1080">
-      <div id="steel"></div>
-      <div id="fleet" data-composition-id="fleet" data-composition-src="compositions/fleet.html" data-start="0" data-duration="6.41" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:2"></div>
-      <div id="breach" data-composition-id="breach" data-composition-src="compositions/breach.html" data-start="6.41" data-duration="5.58" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:3"></div>
-      <div id="oldway" data-composition-id="oldway" data-composition-src="compositions/oldway.html" data-start="11.99" data-duration="4.98" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:4"></div>
-      <div id="reveal" data-composition-id="reveal" data-composition-src="compositions/reveal.html" data-start="16.97" data-duration="3.56" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:5"></div>
-      <div id="sentry" data-composition-id="sentry" data-composition-src="compositions/sentry.html" data-start="20.53" data-duration="7.96" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:6"></div>
-      <div id="triage" data-composition-id="triage" data-composition-src="compositions/triage.html" data-start="28.49" data-duration="8.5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:7"></div>
-      <div id="warden" data-composition-id="warden" data-composition-src="compositions/warden.html" data-start="36.99" data-duration="6.54" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:8"></div>
-      <div id="evidence" data-composition-id="evidence" data-composition-src="compositions/evidence.html" data-start="43.53" data-duration="6.1" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:9"></div>
-      <div id="approve" data-composition-id="approve" data-composition-src="compositions/approve.html" data-start="49.63" data-duration="6.54" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:10"></div>
-      <div id="sealed" data-composition-id="sealed" data-composition-src="compositions/sealed.html" data-start="56.17" data-duration="4.58" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:11"></div>
-      <div id="scribe" data-composition-id="scribe" data-composition-src="compositions/scribe.html" data-start="60.75" data-duration="5.64" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:12"></div>
-      <div id="nemotron" data-composition-id="nemotron" data-composition-src="compositions/nemotron.html" data-start="66.39" data-duration="6.7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:13"></div>
-      <div id="spacetime" data-composition-id="spacetime" data-composition-src="compositions/spacetime.html" data-start="73.09" data-duration="8.88" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:14"></div>
-      <div id="endcard" data-composition-id="endcard" data-composition-src="compositions/endcard.html" data-start="81.97" data-duration="5.99" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:15"></div>
+    <!-- Generated by tools/build.mjs from src/index.html + film.config.mjs: edit those, then `node tools/build.mjs`. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="118" data-width="1920" data-height="1080">
+      <div id="ground"></div>
+      <div id="email" data-composition-id="email" data-composition-src="compositions/email.html" data-start="0" data-duration="1.683" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:2"></div>
+      <div id="outage" data-composition-id="outage" data-composition-src="compositions/outage.html" data-start="1.683" data-duration="3.539" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:3"></div>
+      <div id="breach" data-composition-id="breach" data-composition-src="compositions/breach.html" data-start="5.222" data-duration="10.574" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:4"></div>
+      <div id="tools" data-composition-id="tools" data-composition-src="compositions/tools.html" data-start="15.796" data-duration="6.685" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:5"></div>
+      <div id="reveal" data-composition-id="reveal" data-composition-src="compositions/reveal.html" data-start="22.481" data-duration="3.395" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:6"></div>
+      <div id="oob" data-composition-id="oob" data-composition-src="compositions/oob.html" data-start="25.876" data-duration="3.789" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:7"></div>
+      <div id="agents" data-composition-id="agents" data-composition-src="compositions/agents.html" data-start="29.665" data-duration="4.649" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:8"></div>
+      <div id="sentry" data-composition-id="sentry" data-composition-src="compositions/sentry.html" data-start="34.314" data-duration="3.225" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:9"></div>
+      <div id="triage" data-composition-id="triage" data-composition-src="compositions/triage.html" data-start="37.539" data-duration="4.833" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:10"></div>
+      <div id="warden" data-composition-id="warden" data-composition-src="compositions/warden.html" data-start="42.372" data-duration="3.685" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:11"></div>
+      <div id="policy" data-composition-id="policy" data-composition-src="compositions/policy.html" data-start="46.057" data-duration="5.075" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:12"></div>
+      <div id="probe" data-composition-id="probe" data-composition-src="compositions/probe.html" data-start="51.132" data-duration="3.588" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:13"></div>
+      <div id="approve" data-composition-id="approve" data-composition-src="compositions/approve.html" data-start="54.72" data-duration="6.187" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:14"></div>
+      <div id="contained" data-composition-id="contained" data-composition-src="compositions/contained.html" data-start="60.487" data-duration="4.299" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:15"></div>
+      <div id="warroom" data-composition-id="warroom" data-composition-src="compositions/warroom.html" data-start="64.786" data-duration="9.546" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:16"></div>
+      <div id="access" data-composition-id="access" data-composition-src="compositions/access.html" data-start="74.332" data-duration="5.639" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:17"></div>
+      <div id="scope" data-composition-id="scope" data-composition-src="compositions/scope.html" data-start="79.971" data-duration="5.685" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:18"></div>
+      <div id="reports" data-composition-id="reports" data-composition-src="compositions/reports.html" data-start="85.656" data-duration="5.5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:19"></div>
+      <div id="pick" data-composition-id="pick" data-composition-src="compositions/pick.html" data-start="91.156" data-duration="2.532" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:20"></div>
+      <div id="shell" data-composition-id="shell" data-composition-src="compositions/shell.html" data-start="93.268" data-duration="5.37" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:21"></div>
+      <div id="sync" data-composition-id="sync" data-composition-src="compositions/sync.html" data-start="98.638" data-duration="4.756" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:22"></div>
+      <div id="vision" data-composition-id="vision" data-composition-src="compositions/vision.html" data-start="103.394" data-duration="6.577" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:23"></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="compositions/endcard.html" data-start="109.971" data-duration="8.029" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:24"></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="118" data-track-index="5" data-track-kind="captions" data-width="1920" data-height="1080" style="z-index:900"></div>
       <audio id="vo" class="clip" data-start="0" data-track-index="10" data-volume="1" src="assets/audio/vo.mp3"></audio>
-      <audio id="music" class="clip" data-start="0" data-duration="87.96" data-track-index="11" data-volume="0.5" src="assets/audio/music.mp3"></audio>
-<!--SFX-->
+      <audio id="music" class="clip" data-start="0" data-duration="118" data-track-index="11" data-volume="0.5" data-fade-in="0" data-fade-out="0.6" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.6588},{&quot;t&quot;:0.04,&quot;v&quot;:0.4743},{&quot;t&quot;:0.06,&quot;v&quot;:0.4467},{&quot;t&quot;:22.44,&quot;v&quot;:0.4467},{&quot;t&quot;:22.46,&quot;v&quot;:0.7079},{&quot;t&quot;:23.38,&quot;v&quot;:0.7079},{&quot;t&quot;:23.4,&quot;v&quot;:0.6967},{&quot;t&quot;:23.72,&quot;v&quot;:0.4579},{&quot;t&quot;:23.74,&quot;v&quot;:0.4467},{&quot;t&quot;:60.44,&quot;v&quot;:0.4467},{&quot;t&quot;:60.46,&quot;v&quot;:0.7079},{&quot;t&quot;:61.38,&quot;v&quot;:0.7079},{&quot;t&quot;:61.4,&quot;v&quot;:0.6967},{&quot;t&quot;:61.72,&quot;v&quot;:0.4579},{&quot;t&quot;:61.74,&quot;v&quot;:0.4467},{&quot;t&quot;:76.44,&quot;v&quot;:0.4467},{&quot;t&quot;:76.46,&quot;v&quot;:0.7079},{&quot;t&quot;:77.38,&quot;v&quot;:0.7079},{&quot;t&quot;:77.4,&quot;v&quot;:0.6967},{&quot;t&quot;:77.72,&quot;v&quot;:0.4579},{&quot;t&quot;:77.74,&quot;v&quot;:0.4467},{&quot;t&quot;:109.62,&quot;v&quot;:0.4467},{&quot;t&quot;:109.64,&quot;v&quot;:0.4619},{&quot;t&quot;:110.02,&quot;v&quot;:0.9876},{&quot;t&quot;:110.04,&quot;v&quot;:1},{&quot;t&quot;:110.1,&quot;v&quot;:1},{&quot;t&quot;:110.12,&quot;v&quot;:0.9124},{&quot;t&quot;:110.22,&quot;v&quot;:0.4513},{&quot;t&quot;:110.24,&quot;v&quot;:0.4467},{&quot;t&quot;:110.44,&quot;v&quot;:0.4467},{&quot;t&quot;:110.46,&quot;v&quot;:0.7079},{&quot;t&quot;:111.38,&quot;v&quot;:0.7079},{&quot;t&quot;:111.4,&quot;v&quot;:0.6967},{&quot;t&quot;:111.72,&quot;v&quot;:0.4579},{&quot;t&quot;:111.74,&quot;v&quot;:0.4467},{&quot;t&quot;:113.94,&quot;v&quot;:0.4467},{&quot;t&quot;:113.96,&quot;v&quot;:0.4605},{&quot;t&quot;:114.34,&quot;v&quot;:0.9862},{&quot;t&quot;:114.36,&quot;v&quot;:1},{&quot;t&quot;:118,&quot;v&quot;:1}]}]}" src="assets/audio/music.mp3"></audio>
+      <audio id="sfx-01" class="clip" data-start="0.748" data-duration="0.48" data-track-index="20" data-volume="0.35" src="assets/sfx/tick.mp3"></audio>
+      <audio id="sfx-02" class="clip" data-start="3.996" data-duration="0.48" data-track-index="21" data-volume="0.35" src="assets/sfx/thunk.mp3"></audio>
+      <audio id="sfx-03" class="clip" data-start="9.943" data-duration="0.48" data-track-index="22" data-volume="0.2" src="assets/sfx/pop.mp3"></audio>
+      <audio id="sfx-04" class="clip" data-start="11.782" data-duration="0.48" data-track-index="23" data-volume="0.2" src="assets/sfx/pop.mp3"></audio>
+      <audio id="sfx-05" class="clip" data-start="13.694" data-duration="0.48" data-track-index="20" data-volume="0.22" src="assets/sfx/pop.mp3"></audio>
+      <audio id="sfx-06" class="clip" data-start="18.678" data-duration="0.48" data-track-index="21" data-volume="0.5" src="assets/sfx/thunk.mp3"></audio>
+      <audio id="sfx-07" class="clip" data-start="54.129" data-duration="0.48" data-track-index="22" data-volume="0.55" src="assets/sfx/thunk.mp3"></audio>
+      <audio id="sfx-08" class="clip" data-start="60.475" data-duration="0.48" data-track-index="23" data-volume="0.7" src="assets/sfx/click.mp3"></audio>
+      <audio id="sfx-09" class="clip" data-start="76.475" data-duration="0.48" data-track-index="20" data-volume="0.5" src="assets/sfx/click.mp3"></audio>
+      <audio id="sfx-10" class="clip" data-start="92.86" data-duration="0.48" data-track-index="21" data-volume="0.55" src="assets/sfx/click.mp3"></audio>
+      <audio id="sfx-11" class="clip" data-start="1.633" data-duration="0.68" data-track-index="22" data-volume="0.22" src="assets/sfx/whoosh.mp3"></audio> <!-- morph into outage -->
+      <audio id="sfx-12" class="clip" data-start="5.102" data-duration="0.6" data-track-index="23" data-volume="0.32" src="assets/sfx/zoom.mp3"></audio> <!-- zoom into breach -->
+      <audio id="sfx-13" class="clip" data-start="29.545" data-duration="0.6" data-track-index="20" data-volume="0.32" src="assets/sfx/zoom.mp3"></audio> <!-- zoom into agents -->
+      <audio id="sfx-14" class="clip" data-start="34.194" data-duration="0.48" data-track-index="21" data-volume="0.26" src="assets/sfx/whip.mp3"></audio> <!-- whip into sentry -->
+      <audio id="sfx-15" class="clip" data-start="45.937" data-duration="0.48" data-track-index="22" data-volume="0.3" src="assets/sfx/swipe.mp3"></audio> <!-- whip into policy -->
+      <audio id="sfx-16" class="clip" data-start="51.012" data-duration="0.6" data-track-index="23" data-volume="0.32" src="assets/sfx/zoom.mp3"></audio> <!-- zoom into probe -->
+      <audio id="sfx-17" class="clip" data-start="54.67" data-duration="0.68" data-track-index="20" data-volume="0.22" src="assets/sfx/whoosh.mp3"></audio> <!-- morph into approve -->
+      <audio id="sfx-18" class="clip" data-start="60.487" data-duration="0.8" data-track-index="21" data-volume="0.3" src="assets/sfx/swell.mp3"></audio> <!-- iris into contained -->
+      <audio id="sfx-19" class="clip" data-start="64.666" data-duration="0.48" data-track-index="22" data-volume="0.26" src="assets/sfx/whip.mp3"></audio> <!-- whip into warroom -->
+      <audio id="sfx-20" class="clip" data-start="74.212" data-duration="0.48" data-track-index="23" data-volume="0.3" src="assets/sfx/swipe.mp3"></audio> <!-- whip into access -->
+      <audio id="sfx-21" class="clip" data-start="85.536" data-duration="0.48" data-track-index="20" data-volume="0.26" src="assets/sfx/whip.mp3"></audio> <!-- whip into reports -->
+      <audio id="sfx-22" class="clip" data-start="91.036" data-duration="0.48" data-track-index="21" data-volume="0.3" src="assets/sfx/swipe.mp3"></audio> <!-- whip into pick -->
+      <audio id="sfx-23" class="clip" data-start="93.268" data-duration="0.8" data-track-index="22" data-volume="0.3" src="assets/sfx/swell.mp3"></audio> <!-- iris into shell -->
+      <audio id="sfx-24" class="clip" data-start="98.588" data-duration="0.68" data-track-index="23" data-volume="0.22" src="assets/sfx/whoosh.mp3"></audio> <!-- morph into sync -->
+      <audio id="sfx-25" class="clip" data-start="103.274" data-duration="0.6" data-track-index="20" data-volume="0.32" src="assets/sfx/zoom.mp3"></audio> <!-- zoom into vision -->
+      <audio id="sfx-26" class="clip" data-start="109.921" data-duration="0.68" data-track-index="21" data-volume="0.22" src="assets/sfx/whoosh.mp3"></audio> <!-- morph into endcard -->
     </div>
     <script>
-      const tl = gsap.timeline({ paused: true });
-      window.__timelines["main"] = tl;
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
     </script>
   </body>
 </html>
