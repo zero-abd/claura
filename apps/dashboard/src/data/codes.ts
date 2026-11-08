@@ -29,5 +29,5 @@ export const normalizeCode = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g
 export const looksLikeCode = (s: string) => /^[2-9A-HJKMNP-Z]{12}$/.test(normalizeCode(s));
 /** What the QR carries: a deep link the enrolling device opens (or types in by hand). 28 bytes: fits QR version 2-L. */
 export const enrollLink = (code: string) => `claura://join/${code}`;
-/** First group visible, the rest hidden: how a pending code is listed until an admin chooses to reveal it. */
-export const maskCode = (code: string) => `${code.slice(0, 4)}-····-····`;
+/** Fully hidden: a pending code is listed without a single character of it until an admin chooses to reveal it. */
+export const maskCode = (_code: string) => "····-····-····";

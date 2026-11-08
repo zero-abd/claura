@@ -152,3 +152,10 @@ export function roster(d: DataSource): Person[] {
 export function agentIdentities(d: DataSource) {
   return d.operators().filter((o) => o.role === "agent");
 }
+
+/** Who approved the quarantine (proposal.decided_by), with their display title from the roster. Null until approved. */
+export function approverOf(d: DataSource): { name: string; title: string } | null {
+  const p = d.proposals().find((x) => x.policyMode === "approval" && x.decidedBy && x.decidedBy !== "policy");
+  if (!p) return null;
+  return { name: p.decidedBy, title: roster(d).find((r) => r.name === p.decidedBy)?.title ?? "" };
+}

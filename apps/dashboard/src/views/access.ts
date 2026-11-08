@@ -23,6 +23,7 @@ import { AGENT_ICON, icon } from "../icons";
 import { $, disc, setAttr, setHTML, setText } from "../dom";
 import { esc } from "../hosts";
 import { S } from "../engine";
+import { hash } from "../util";
 
 // People & Access (admin): who can sign in, what each role may do, and the break-glass codes that add people
 // without email or phones. The Add person sheet issues a single-use code and shows it as text and as a QR.
@@ -36,6 +37,9 @@ export const ac = {
 };
 
 const isAdmin = () => data().me().role === "admin";
+/** An opaque handle for a pending code, so the secret itself never sits in a DOM attribute or a click-target name. */
+const refOf = (code: string) => hash(...Array.from(code, (c) => c.charCodeAt(0))).toString(36).slice(2, 8);
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // ------------------------------------------------------------------ the page
 const tile = (id: string, label: string, sub = "") => `<div class="tile"><b id="${id}">–</b><span>${label}</span>${sub ? `<em id="${id}s">${sub}</em>` : ""}</div>`;
@@ -149,13 +153,13 @@ function personRow(p: Person, now: number): string {
         : p.online
           ? `<span class="seen on"><i></i>Online now</span>`
           : `<span class="seen">${p.lastSeen ? `Last seen ${ago(now, p.lastSeen)}` : "Never signed in"}</span>`;
-  const id = p.kind === "pending" ? `p-${p.code}` : p.identity ? p.identity.slice(0, 8) : `d-${p.name}`;
+  const id = p.kind === "pending" ? `p-${refOf(p.code)}` : p.identity ? p.identity.slice(0, 8) : `d-${p.name}`;
   const confirming = ac.confirm?.key === p.key;
   const lastAdmin = p.admin && p.kind === "operator" && roster(data()).filter((x) => x.admin && x.active && x.kind === "operator").length <= 1;
   let actions = "";
   if (p.kind === "pending") {
-    actions = `<button type="button" class="row-act" data-act="show-code" data-code="${p.code}" data-target="show-code:${p.code}">Show code</button>${
-      data().can.cancelEnrollment ? `<button type="button" class="row-act danger" data-act="cancel-code" data-code="${p.code}" data-target="cancel-code:${p.code}">Cancel</button>` : ""
+    actions = `<button type="button" class="row-act" data-act="show-code" data-ref="${refOf(p.code)}" data-target="show-code:${slug(p.name)}">Show code</button>${
+      data().can.cancelEnrollment ? `<button type="button" class="row-act danger" data-act="cancel-code" data-ref="${refOf(p.code)}" data-target="cancel-code:${slug(p.name)}">Cancel</button>` : ""
     }`;
   } else if (p.kind === "operator" && p.active && !p.self && !lastAdmin) {
     actions = `<button type="button" class="row-act danger${confirming ? " armed" : ""}" data-act="revoke" data-key="${p.key}" data-target="revoke:${p.name}">${confirming ? "Confirm revoke" : "Revoke"}</button>`;
@@ -165,7 +169,7 @@ function personRow(p: Person, now: number): string {
     <dl class="ac-facts">
       <div><dt>Can</dt><dd>${p.role ? esc(ROLE_CAN[p.role]) : "Nothing yet. Issue a break-glass code to enroll this person."}</dd></div>
       ${p.kind === "operator" ? `<div><dt>Identity</dt><dd><code>${esc(shortId(p.identity))}</code> · one passkey or hardware key</dd></div>` : ""}
-      ${p.kind === "pending" ? `<div><dt>Code</dt><dd><code>${esc(maskCode(p.code))}</code> · single use</dd></div>` : ""}
+      ${p.kind === "pending" ? `<div><dt>Code</dt><dd><code>${esc(maskCode(p.code))}</code> · single use, shown only to admins</dd></div>` : ""}
       ${p.addedBy ? `<div><dt>${p.kind === "pending" ? "Issued by" : "Added by"}</dt><dd>${esc(p.addedBy)}${p.addedAt ? ` · ${esc(fmtDayTime(p.addedAt))}` : ""}</dd></div>` : ""}
       <div><dt>Sign-in</dt><dd>Passkey or hardware key. No password, no corporate SSO.</dd></div>
     </dl>
@@ -269,15 +273,16 @@ export function issueCode(): boolean {
   ac.err = "";
   return true;
 }
-/** Show an existing pending code again (from its row). */
-export function showCode(code: string): boolean {
-  const e = data().enrollments().find((x) => x.code === code && !x.usedBy);
+/** Show an existing pending code again (from its row). `ref` is the row's opaque handle, not the code. */
+export function showCode(ref: string): boolean {
+  const e = data().enrollments().find((x) => !x.usedBy && refOf(x.code) === ref);
   if (!e || !isAdmin()) return false;
   ac.sheet = { stage: "code", name: e.nameHint, role: e.role, code: e.code, issued: false };
   return true;
 }
-export function cancelCode(code: string): boolean {
-  return data().cancelEnrollment?.(code).ok ?? false;
+export function cancelCode(ref: string): boolean {
+  const e = data().enrollments().find((x) => !x.usedBy && refOf(x.code) === ref);
+  return e ? (data().cancelEnrollment?.(e.code).ok ?? false) : false;
 }
 export async function copyCode(): Promise<boolean> {
   const code = ac.sheet?.code;

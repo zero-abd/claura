@@ -507,6 +507,11 @@ export const set_policy = spacetimedb.reducer(
     if (!isIn(POLICY_MODES, m)) throw new SenderError(`mode must be one of ${POLICY_MODES.join(', ')}`);
     const existing = ctx.db.policyStore.action.find(act);
     const before = existing ? existing.mode : '(none)';
+    // Relaxing a denial (an explicit `deny`, or an action the policy does not know, which is denied by default) is the
+    // one change that can let an agent destroy evidence. A commander alone cannot do it; an admin can.
+    if ((!existing || existing.mode === 'deny') && m !== 'deny' && actor.role !== 'admin') {
+      throw new SenderError(`only an admin can relax a denied action (${act} is ${existing ? 'deny' : 'unknown, so denied by default'})`);
+    }
     if (existing) {
       ctx.db.policyStore.action.update({ ...existing, mode: m });
     } else {

@@ -169,3 +169,52 @@
 .callout .co-dot { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.22), 0 2px 8px rgba(0, 0, 0, 0.5); }
 .callout .co-line { position: absolute; left: 0; top: -1px; height: 2px; background: rgba(255, 255, 255, 0.75); transform-origin: 0 50%; }
 .callout .co-pill { position: absolute; top: -34px; height: 68px; padding: 0 30px; border-radius: 34px; display: flex; align-items: center; gap: 14px; font: 600 32px/1 var(--font); letter-spacing: -0.012em; white-space: nowrap; }
+
+/* ------------------------------------------------------------ v3 (Liquid Glass film): device chrome in glass, app windows, focus, keys, stamp, tag */
+/* the device's title bar is glass over the wallpaper (not a solid strip) */
+.device { background: rgba(6, 9, 20, 0.9); }
+.dev-bar { height: 40px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), inset 0 1.5px 0 rgba(255, 255, 255, 0.22); }
+.dev-lights { left: 18px; top: 14px; gap: 8px; }
+.dev-lights i { width: 12px; height: 12px; }
+.dev-title { position: absolute; left: 0; right: 0; top: 0; height: 40px; text-align: center; font: 600 15px/40px var(--font); letter-spacing: -0.005em; color: rgba(236, 240, 255, 0.62); }
+.dev-screen { top: 40px; }
+
+/* an app window drawn for the motion-graphic beats (mail, file share, tools): glass body, glass title bar */
+.win { position: absolute; border-radius: 28px; overflow: hidden; }
+.win .wbar { position: absolute; left: 0; right: 0; top: 0; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 22px; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08); }
+.win .wbar .lights { display: flex; gap: 8px; flex: none; }
+.win .wbar .lights i { width: 13px; height: 13px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); }
+.win .wbar .lights i.r { background: #ff5f57; } .win .wbar .lights i.y { background: #febc2e; } .win .wbar .lights i.g { background: #28c840; }
+.win .wbar .wt { font: 600 24px/1 var(--font); letter-spacing: -0.012em; color: var(--ink-2); white-space: nowrap; }
+.win .wbody { position: absolute; left: 0; right: 0; top: 52px; bottom: 0; }
+
+/* a focus ring around the UI element the line names (footage coordinates, drawn inside the camera) */
+.focus { position: absolute; border-radius: 14px; opacity: 0; pointer-events: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.92), 0 0 0 9px rgba(255, 255, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.35); }
+.focus.hot { box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.98), 0 0 0 9px rgba(var(--accent-rgb), 0.2), 0 10px 40px rgba(0, 0, 0, 0.35); }
+
+/* keycaps (Command-Enter): thick glass keys with a lit symbol */
+.keycap { position: absolute; width: 176px; height: 176px; border-radius: 40px; display: grid; place-items: center;
+  font: 600 92px/1 var(--font); color: #fff; letter-spacing: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.04)), rgba(22, 28, 56, 0.55);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.28), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14), 0 14px 0 -4px rgba(8, 10, 24, 0.55), 0 30px 60px -16px rgba(0, 0, 0, 0.7); }
+.keycap .kshadow { position: absolute; inset: 0; border-radius: inherit; }
+
+/* a stamp (NO MATCH, DENIED): an outlined lozenge that slams in, never a glow */
+.stamp { position: absolute; display: flex; align-items: center; gap: 18px; height: 112px; padding: 0 40px; border-radius: 26px;
+  font: 700 64px/1 var(--font); letter-spacing: 0.04em; color: #ff6a33; white-space: nowrap; text-transform: uppercase;
+  border: 6px solid #ff5a1f; background: rgba(40, 10, 4, 0.55); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+
+/* a small honest label ("Demo data", "Roadmap"): glass pill, fixed in the frame, never in the camera */
+.tag { position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 24px 0 18px; border-radius: 27px;
+  font: 600 26px/1 var(--font); letter-spacing: -0.006em; color: var(--ink-2); white-space: nowrap; }
+.tag i { width: 12px; height: 12px; border-radius: 50%; background: rgba(226, 232, 250, 0.7); flex: none; }
+.tag.hot i { background: var(--accent); }
+
+/* a signal chip (the warnings): glass pill, orange dot, one line */
+.sig { position: absolute; display: inline-flex; align-items: center; gap: 16px; height: 76px; padding: 0 32px 0 24px; border-radius: 38px; white-space: nowrap;
+  font: 600 30px/1 var(--font); letter-spacing: -0.012em; color: var(--ink); }
+.sig i { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.18); }
+.sig .k { color: #ff7a45; }
+.sig .v { color: var(--ink-2); font-weight: 500; }

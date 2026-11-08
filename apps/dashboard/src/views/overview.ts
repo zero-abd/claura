@@ -3,6 +3,8 @@ import { icon, chev } from "../icons";
 import { $, setAttr, setHTML, setText } from "../dom";
 import { hostLink } from "../hosts";
 import { S, ttc, type Phase } from "../engine";
+import { data, roster, summarize } from "../data";
+import { scopeSummaryText } from "./scope";
 
 // Overview: calm state. One status, fleet health in one line, the facility stage, the last incident.
 export const overview = {
@@ -40,6 +42,21 @@ export const overview = {
         <span class="when" id="lastWhen"></span>
         ${chev()}
       </button>
+
+      <div class="ready" id="ready">
+        <button type="button" class="glass ready-tile" data-act="isolation" data-target="ready-isolation">
+          <span class="r-ico">${icon("shieldLock")}</span>
+          <span class="ready-main"><b>Isolated · out-of-band</b><span>No corporate email, phones or SSO</span></span>
+        </button>
+        <button type="button" class="glass ready-tile" data-go="access" data-target="ready-people" id="readyPeople">
+          <span class="r-ico">${icon("users")}</span>
+          <span class="ready-main"><b id="rdPeople"></b><span>Break-glass codes, issued in person</span></span>
+        </button>
+        <button type="button" class="glass ready-tile" data-go="scope" data-target="ready-scope">
+          <span class="r-ico">${icon("database")}</span>
+          <span class="ready-main"><b id="rdScope"></b><span id="rdScopeSub"></span></span>
+        </button>
+      </div>
     </section>`;
   },
   render(ph: Phase) {
@@ -82,5 +99,15 @@ export const overview = {
       setText($("#lastWhen"), done ? "just now" : "live");
     }
     setAttr($("#lastRow"), "data-tone", inc ? "live" : "ok");
+
+    // readiness: the three Winstead questions at a glance (isolated? who has access? what is in scope?)
+    const d = data();
+    const ppl = roster(d);
+    const sum = summarize(ppl);
+    ($("#readyPeople") as HTMLElement).hidden = d.me().role !== "admin";
+    setText($("#rdPeople"), `${sum.verified} of ${sum.people} people verified`);
+    const assets = d.assets();
+    setText($("#rdScope"), assets.length ? scopeSummaryText(assets, 2) : "Nothing in scope");
+    setText($("#rdScopeSub"), assets.length ? `${assets.length} assets tracked · open the data scope` : "Fills in when an incident opens");
   },
 };

@@ -187,7 +187,7 @@ function ownerView(key: string): View | null {
 function reveal(key: string, smooth: boolean) {
   const el = document.querySelector(`.disc[data-key="${key}"]`) as HTMLElement | null;
   if (!el) return;
-  const target = (el.closest(".agent-card, .rep") as HTMLElement | null) ?? el;
+  const target = key.startsWith("rs:") ? el : ((el.closest(".agent-card, .rep") as HTMLElement | null) ?? el); // report sections scroll to themselves
   const sc = $("#scroll");
   const run = () => {
     const sr = sc.getBoundingClientRect();
@@ -378,6 +378,7 @@ const api = {
   },
   /** Print INC-0419 as a clean PDF (window.print with the print stylesheet). */
   exportReport() {
+    if (S.view !== "reports") api.go("reports"); // the document is only drawn while its view is on screen
     return exportReport();
   },
   /** Sign in as someone else in the scripted data to see the console with their role: 'JT', 'legal', 'AL'... */
@@ -592,8 +593,8 @@ document.addEventListener("click", (e) => {
       api.play();
     } else if (a === "reset") api.reset();
     else if (a === "add-person") api.addPerson();
-    else if (a === "show-code") void showCode(act.dataset.code!);
-    else if (a === "cancel-code") void cancelCode(act.dataset.code!);
+    else if (a === "show-code") void showCode(act.dataset.ref!);
+    else if (a === "cancel-code") void cancelCode(act.dataset.ref!);
     else if (a === "revoke") void revoke(act.dataset.key!);
     else if (a === "sim-enroll") api.simulateEnroll();
     else if (a === "export") void exportReport();

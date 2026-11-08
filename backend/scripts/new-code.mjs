@@ -1,5 +1,5 @@
 // Print one high-entropy enrollment code (about 78 bits) to stdout. Nothing else is printed.
-//   node scripts/new-code.mjs            ->  CLA-7QK2-M9XR-4TVD-HW3E
+//   node scripts/new-code.mjs            ->  CLA-XXXX-XXXX-XXXX-XXXX
 // Alphabet skips 0/O/1/I/L so a code can be read aloud or copied by hand without mistakes.
 import { randomInt } from 'node:crypto';
 

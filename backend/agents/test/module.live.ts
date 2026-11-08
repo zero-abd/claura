@@ -149,6 +149,14 @@ async function main() {
   check('stranger still reads 0 rows after the failed attempts', stranger.total() === 0);
   if (SMOKE) return finish(keep);
 
+  // The rest assumes a freshly seeded database (7 unassigned assets, no incident). Wipes incident data, keeps operators.
+  const fresh = admin('reset_demo');
+  if (!fresh.ok) throw new Error(`cannot reset the database before the full suite (run it on a throwaway database): ${fresh.out}`);
+  // A crashed earlier run may have left its personas active; their names would block this run's. Revoke them first.
+  for (const m of sql('SELECT identity, name, active FROM operator').matchAll(/0x([0-9a-f]{64})\s*\|\s*"((?:Test |Added By Hex)[^"]*)"\s*\|\s*true/g)) {
+    admin('revoke_operator', m[1]!);
+  }
+
   // ---------------------------------------------------------------- enrollment + single use
   group('enrollment codes are single-use; the admin-chosen name wins');
   const c1 = code('cmdr');
@@ -220,6 +228,12 @@ async function main() {
   const cmdrPolicy = await cmdr.call('setPolicy', { action: 'cordon_host', mode: 'approval' });
   check('a commander can change policy', cmdrPolicy.ok, cmdrPolicy.err);
   await cmdr.call('setPolicy', { action: 'cordon_host', mode: 'auto' });
+  const relax = await cmdr.call('setPolicy', { action: 'reimage_host', mode: 'auto' });
+  check('a commander alone cannot relax a denied action (reimage_host stays deny)', !relax.ok && /only an admin can relax/.test(relax.err), relax.err);
+  const relaxNew = await cmdr.call('setPolicy', { action: 'wipe_everything', mode: 'auto' });
+  check('nor allow an action the policy does not know (denied by default)', !relaxNew.ok && /only an admin can relax/.test(relaxNew.err), relaxNew.err);
+  check('a commander can tighten: a new action may be set to deny', (await cmdr.call('setPolicy', { action: 'wipe_everything', mode: 'deny' })).ok);
+  check('an admin can relax a denied action, and restore it', admin('set_policy', 'reimage_host', 'approval').ok && admin('set_policy', 'reimage_host', 'deny').ok);
 
   group('channel rules');
   check('vendor cannot post in #command', !(await vendor.call('postMessage', { incidentId: 0n, channel: '#command', text: 'hi' })).ok);

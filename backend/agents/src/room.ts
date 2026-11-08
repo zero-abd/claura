@@ -48,20 +48,48 @@ const NO_DATA_CLAIMS: RegExp[] = [
  * A text for people must not reassure when the scope board says data may have been touched. Returns an error the
  * model can act on, or null. This is the check a hurried human reader would never run on a model's sentence.
  */
+/** The first false-reassurance phrase in `text`, or ''. "no data has been CONFIRMED exfiltrated" is the careful wording we want. */
+function falseReassurance(text: string): string {
+  for (const re of NO_DATA_CLAIMS) {
+    const m = re.exec(text);
+    if (m && !/\b(confirmed|proven|established|verified)\b/i.test(m[0])) return m[0];
+  }
+  return '';
+}
+
 export function claimProblems(text: string, assets: AssetRow[]): string | null {
   const touched = assets.filter(a => AFFECTED.includes(a.status));
   if (touched.length === 0) return null;
-  // "no data has been CONFIRMED exfiltrated" is the careful wording we want, not a false reassurance.
-  let phrase = '';
-  for (const re of NO_DATA_CLAIMS) {
-    const m = re.exec(text);
-    if (m && !/\b(confirmed|proven|established|verified)\b/i.test(m[0])) { phrase = m[0]; break; }
-  }
+  const phrase = falseReassurance(text);
   if (!phrase) return null;
   return (
     `you wrote "${phrase}", but the scope board shows: ${touched.map(a => `${a.name} (${a.status.replace(/_/g, ' ')})`).join('; ')}. ` +
     'Do not claim that no data was read, exfiltrated or intact. Replace that sentence with "We have not confirmed whether any data was read" and name what is under investigation. Do not resend the same text.'
   );
+}
+
+export const CAREFUL_SENTENCE = 'We have not confirmed whether any data was read.';
+
+/**
+ * Instead of bouncing a text back (a small model tends to resend it unchanged until the loop gives up), replace every
+ * sentence that claims "no data was affected" with the careful wording, once. It can only make a text more cautious.
+ * Returns how many sentences were replaced; 0 when the scope board has nothing touched or the text makes no such claim.
+ */
+export function softenClaims(text: string, assets: AssetRow[]): { text: string; softened: number } {
+  if (!assets.some(a => AFFECTED.includes(a.status))) return { text, softened: 0 };
+  let softened = 0;
+  let inserted = false;
+  const lines = text.split('\n').map(line => {
+    const out: string[] = [];
+    for (const sentence of line.split(/(?<=[.!?])\s+/)) {
+      if (falseReassurance(sentence)) {
+        softened++;
+        if (!inserted) { out.push(CAREFUL_SENTENCE); inserted = true; }
+      } else out.push(sentence);
+    }
+    return out.join(' ').trim();
+  });
+  return { text: lines.filter(l => l.length > 0).join('\n'), softened };
 }
 
 /**

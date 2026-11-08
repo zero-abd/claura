@@ -3,6 +3,7 @@ import { CHANNELS } from "../warroom-data";
 import {
   CLASS_LABEL,
   PHASE,
+  approverOf,
   data,
   fmtClock,
   fmtDayTime,
@@ -127,9 +128,10 @@ export const reports = {
     const people = roster(d);
     const commander = people.find((p) => p.role === "admin" && p.kind === "operator") ?? people[0];
     const filed = S.A !== null && U() >= SCRIBE_FILED_U;
+    const ap = approverOf(d);
 
     // ---- card head
-    setText($("#r419sub"), S.A === null ? "In progress" : filed ? `Filed · approved by ${commander?.name ?? "RK"} · ${commander?.title ?? "Incident Commander"}` : "Scribe is writing");
+    setText($("#r419sub"), S.A === null ? "In progress" : filed ? `Filed · approved by ${ap?.name ?? commander?.name ?? "RK"} · ${ap?.title ?? commander?.title ?? "Incident Commander"}` : "Scribe is writing");
     const done = S.A !== null && U() >= ISOLATE_DUR;
     setHTML($("#r419ttc"), done ? "t" : "n", () => (done ? `9.4 s<small>to contain</small>` : `<small>open</small>`));
     const chip = $("#r419chip");

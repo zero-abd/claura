@@ -59,12 +59,15 @@ export function setPickHandler(fn: (hostId: string) => void) {
 // out (the module fades them by view height), leaving the B14 state tag and the failover destinations C05 / C12.
 const HERO_BREACH: F3DPose = { preset: "rack14", w: 9, h: 6.9 };
 const HERO_APPROVAL: F3DPose = { preset: "rack14", w: 8.4, h: 6.9 };
+// Calm and contained: the whole campus, a little tighter than the stock frame so the labels have room (and the
+// "DFW-2 · 2,048 hosts" title, which the module only draws when zoomed far out, stays off).
+const HERO_FACILITY: F3DPose = { preset: "facility", w: 15, h: 11 };
 
 /** compact = the Incident hero (small). The Overview stage is large and uses the stock presets. */
 export function facilityTarget(ph: Phase, r: number, compact = false): { state: F3DState; cam: F3DCam } {
   switch (ph) {
     case "nominal":
-      return { state: "nominal", cam: "facility" };
+      return { state: "nominal", cam: compact ? HERO_FACILITY : "facility" };
     case "breach":
       return { state: r < STEPS[0].start ? "breach" : "containing", cam: compact ? HERO_BREACH : "hallB" };
     case "approval":
@@ -72,7 +75,7 @@ export function facilityTarget(ph: Phase, r: number, compact = false): { state: 
     case "isolating":
       return { state: "containing", cam: compact ? HERO_APPROVAL : "rack14" };
     default:
-      return { state: "contained", cam: "facility" };
+      return { state: "contained", cam: compact ? HERO_FACILITY : "facility" };
   }
 }
 

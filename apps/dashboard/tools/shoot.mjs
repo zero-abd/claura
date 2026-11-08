@@ -34,15 +34,23 @@ export const SHOTS = [
   { name: "incident-breach", q: "view=incident&phase=breach", settle: 3600 },
   { name: "incident-approval", q: "view=incident&phase=approval", settle: 3600 },
   { name: "incident-contained", q: "view=incident&phase=contained", settle: 3600 },
+  { name: "incident-scroll", q: "view=incident&phase=contained", settle: 3600, run: "document.querySelector('#scroll').scrollTop = 560" },
   { name: "scope", q: "view=scope&phase=contained" },
-  { name: "scope-expanded", q: "view=scope&phase=contained&expand=asset:5,asset:6" },
+  { name: "scope-live", q: "view=scope&t=4.0&approveAt=7.4" },
+  { name: "scope-expanded", q: "view=scope&phase=contained&expand=asset:6,asset:3" },
+  { name: "scope-empty", q: "view=scope" },
+  { name: "access-nominal", q: "view=access" },
   { name: "access", q: "view=access&phase=contained" },
   { name: "access-add-person", q: "view=access&phase=contained&sheet=person" },
   { name: "access-code", q: "view=access&phase=contained&sheet=person-code" },
+  { name: "access-expanded", q: "view=access&phase=contained&expand=identities,enroll-how" },
+  { name: "access-nonadmin", q: "view=access&phase=contained&as=JT" },
+  { name: "approval-nonadmin", q: "view=incident&phase=approval&as=JT", settle: 3000 },
   { name: "warroom", q: "view=warroom&phase=contained" },
   { name: "warroom-exec", q: "view=warroom&t=5.2&channel=exec&expand=tasks,decisions" },
   { name: "report", q: "phase=report" },
-  { name: "report-evidence", q: "phase=report&expand=evidence-custody" },
+  { name: "report-actions", q: "phase=report&expand=rs:actions,rs:scope" },
+  { name: "report-evidence", q: "phase=report&expand=rs:evidence,rs:comms" },
   { name: "isolation", q: "view=incident&phase=contained&pop=isolation" },
   { name: "agents", q: "view=agents&phase=breach" },
   { name: "agents-expanded", q: "view=agents&phase=breach&expand=agent:warden" },
@@ -54,7 +62,12 @@ export const SHOTS = [
 const EVALS = [];
 args.forEach((a, i) => a === "--eval" && EVALS.push(args[i + 1]));
 const URL_ARG = opt("url", "");
+const CLICKS = [];
+args.forEach((a, i) => a === "--click" && CLICKS.push(args[i + 1])); // --click x,y : a real mouse click (CSS px) after load
 const SNAP = opt("snap", "");
+const PDF = opt("pdf", "");
+const PRINT = opt("print", "report");
+const PAGES = opt("pages", ""); // printToPDF pageRanges, e.g. "2" or "2-3"
 const CLIP = opt("clip", "");
 const WAIT = parseInt(opt("wait", "1500"), 10);
 
@@ -162,12 +175,28 @@ async function main() {
         } catch {}
       }
       await sleep(600);
+      for (const c of CLICKS) {
+        const [x, y] = c.split(",").map(Number);
+        await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+        await sleep(250);
+        await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+        await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+        await sleep(700);
+      }
       for (const e of EVALS) {
         try {
           console.log(JSON.stringify(await cdp.eval(e)));
         } catch (err) {
           console.log("ERR " + err.message);
         }
+      }
+      if (PDF) {
+        await sleep(WAIT);
+        await cdp.eval(`document.body.dataset.print = ${JSON.stringify(PRINT)}`);
+        await sleep(300);
+        const pdf = await cdp.send("Page.printToPDF", { printBackground: true, preferCSSPageSize: true, ...(PAGES ? { pageRanges: PAGES } : {}) });
+        writeFileSync(resolve(PDF), Buffer.from(pdf.data, "base64"));
+        console.log(resolve(PDF));
       }
       if (SNAP) {
         await sleep(WAIT);

@@ -913,6 +913,18 @@ body[data-tone="breach"] .pill-mark {
   transform: scale(0.972);
   filter: brightness(0.95);
 }
+/* a role that may not do this (backend: approve() needs admin or commander) sees the button off, with the reason below */
+.btn-primary:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.85) brightness(0.62);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transform: none;
+}
+.btn-primary:disabled kbd {
+  display: none;
+}
 .btn-primary kbd {
   font: 500 16px/1 var(--font);
   padding: 7px 11px;
@@ -1189,6 +1201,15 @@ body[data-tone="breach"] .pill-mark {
   gap: 10px;
   font-size: 17px;
   letter-spacing: -0.014em;
+  text-shadow: 0 1px 14px rgba(4, 6, 12, 0.9);
+}
+.stage-top::before {
+  content: "";
+  position: absolute;
+  inset: -22px -22px -30px -30px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 8, 18, 0.55), transparent);
 }
 .stage-title b {
   font-weight: 600;
@@ -1300,10 +1321,10 @@ body[data-tone="breach"] .pill-mark {
 }
 /* with the real 3D stage the scene gets its own zone between the text and the clock, so labels never sit under type */
 .stage-slot[data-slot="incident"]:has(#facility3d.has-3d) {
-  inset: 6px 258px 64px 430px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 15%, #000 82%, transparent 100%), linear-gradient(180deg, transparent 0, #000 9%, #000 84%, transparent 100%);
+  inset: 6px 282px 64px 430px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16%, #000 82%, transparent 100%), linear-gradient(180deg, transparent 0, #000 17%, #000 84%, transparent 100%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(90deg, transparent 0, #000 15%, #000 82%, transparent 100%), linear-gradient(180deg, transparent 0, #000 9%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 16%, #000 82%, transparent 100%), linear-gradient(180deg, transparent 0, #000 17%, #000 84%, transparent 100%);
   mask-composite: intersect;
 }
 .hero:has(#facility3d.has-3d) .hero-veil {
@@ -2835,7 +2856,7 @@ html[data-demo="1"] .devdock {
   border-radius: 40px;
   padding: 22px 32px 24px;
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: 1.7fr 1fr;
   gap: 36px;
 }
 .wr-brief .card-head {
@@ -2848,7 +2869,7 @@ html[data-demo="1"] .devdock {
 }
 .bl {
   display: grid;
-  grid-template-columns: 172px 1fr;
+  grid-template-columns: 150px 1fr;
   gap: 16px;
   align-items: baseline;
 }
@@ -3704,10 +3725,20 @@ html[data-demo="1"] .devdock {
 .nav-item span {
   white-space: nowrap;
 }
+.nav-item[hidden] {
+  display: none;
+}
+.nav[data-lens="off"] .nav-lens {
+  opacity: 0;
+}
 
 /* ------------------------------------------------------------ toolbar: people on shift, isolation pill */
 .av {
   background: linear-gradient(160deg, #6d7cff, #3a46c8);
+}
+.av.long {
+  font-size: 10.5px;
+  letter-spacing: -0.02em;
 }
 .av.more {
   background: rgba(60, 68, 100, 0.9);
@@ -5626,4 +5657,572 @@ button.chip {
 }
 .rep.past .disc-head {
   cursor: pointer;
+}
+
+/* ============================================================ print: incident report (NIST SP 800-61) and break-glass card
+   window.claura.exportReport() sets body[data-print="report"] and calls window.print(); the Add person sheet's
+   "Print card" sets body[data-print="card"]. Dark glass becomes plain black on white; every section opens. */
+@page card {
+  margin: 15mm 14mm;
+  @bottom-left {
+    content: none;
+  }
+  @bottom-right {
+    content: none;
+  }
+}
+@page {
+  size: letter;
+  margin: 15mm 14mm 18mm;
+  @bottom-left {
+    content: "Claura · incident response record · Confidential";
+    font: 8pt/1 -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #6b7280;
+  }
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font: 8pt/1 -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #6b7280;
+  }
+}
+@media print {
+  :root {
+    color-scheme: light;
+    --ink: #101318;
+    --ink-2: #2a2f3a;
+    --ink-3: #565d6c;
+    --ink-4: #8a90a0;
+    --hair: rgba(16, 19, 24, 0.18);
+    --fill-1: rgba(16, 19, 24, 0.035);
+    --fill-2: rgba(16, 19, 24, 0.07);
+    --fill-3: rgba(16, 19, 24, 0.1);
+    --accent: #b8400b;
+    --accent-rgb: 184, 64, 11;
+    --safe: #13774a;
+    --safe-rgb: 19, 119, 74;
+    --tone: #13774a;
+    --tone-rgb: 19, 119, 74;
+    --st-intact: 19, 119, 74;
+    --st-restored: 14, 128, 118;
+    --st-evidence: 52, 82, 190;
+    --st-accessed: 160, 104, 0;
+    --st-suspected: 190, 76, 8;
+    --st-locked: 192, 28, 56;
+    --st-confirmed: 160, 8, 36;
+  }
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #101318 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    font-size: 10pt;
+    line-height: 1.4;
+  }
+  .wallpaper,
+  .sidebar,
+  .toolbar,
+  .edge-top,
+  .scrim,
+  .devdock,
+  .iso-pop,
+  .sheet,
+  .stage-frame {
+    display: none !important;
+  }
+  .app,
+  .main,
+  .scroll,
+  .page {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    overflow: visible !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transition: none !important;
+  }
+  .view {
+    display: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    text-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* ---- the report */
+  body[data-print="report"] #v-reports {
+    display: block !important;
+  }
+  body[data-print="report"] #v-reports > .hero-head,
+  body[data-print="report"] #repList > .rep:not(#rep419) {
+    display: none !important;
+  }
+  body[data-print="report"] #rep419 {
+    display: block !important;
+    border-radius: 0;
+    background: none !important;
+    box-shadow: none !important;
+    overflow: visible;
+  }
+  body[data-print="report"] #rep419::before,
+  body[data-print="report"] #rep419::after {
+    display: none !important;
+  }
+  body[data-print="report"] #rep419 > .disc > .disc-head {
+    display: none !important;
+  }
+  body[data-print="report"] #rep419 .disc-body {
+    display: block !important;
+  }
+  body[data-print="report"] #rep419 .disc-inner {
+    overflow: visible !important;
+  }
+  body[data-print="report"] #rep419 .disc-inner > * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  body[data-print="report"] #rep419 .glass,
+  body[data-print="report"] #rep419 .group,
+  body[data-print="report"] #rep419 .doc-rows {
+    background: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  body[data-print="report"] #rep419 .group::before,
+  body[data-print="report"] #rep419 .group::after {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  body[data-print="report"] .doc {
+    padding: 0;
+    box-shadow: none;
+    color: #101318;
+  }
+  .doc-letterhead {
+    display: flex !important;
+    align-items: baseline;
+    gap: 14pt;
+    padding-bottom: 7pt;
+    margin-bottom: 14pt;
+    border-bottom: 2pt solid #101318;
+    font-size: 8.5pt;
+    color: #565d6c;
+  }
+  .doc-letterhead b {
+    font-size: 17pt;
+    letter-spacing: -0.02em;
+    color: #101318;
+  }
+  .doc-letterhead span:last-child {
+    margin-left: auto;
+  }
+  .doc-tools {
+    display: none !important;
+  }
+  .doc-head h2 {
+    font-size: 17pt;
+  }
+  .doc-kicker {
+    color: #565d6c;
+  }
+  .doc-meta,
+  .doc-note,
+  .doc-foot {
+    color: #2a2f3a;
+    font-size: 9.5pt;
+  }
+  .doc-sec,
+  .ev-card,
+  .phase-full li,
+  .dec-list li,
+  .custody li {
+    break-inside: avoid;
+  }
+  .doc-sec h3 {
+    break-after: avoid;
+    font-size: 12pt;
+  }
+  .sec-n {
+    color: #101318;
+    background: none;
+    box-shadow: inset 0 0 0 1pt #101318;
+  }
+  .id-grid div {
+    font-size: 9.5pt;
+    padding: 5pt 0;
+    box-shadow: inset 0 -0.5pt 0 var(--hair);
+  }
+  .phase-full {
+    gap: 6pt;
+  }
+  .phase-full li {
+    padding: 8pt 8pt 7pt;
+    border-radius: 6pt;
+    background: none;
+    box-shadow: inset 0 0 0 0.75pt #b4b9c4;
+  }
+  .phase-full li[data-s="current"] {
+    box-shadow: inset 0 0 0 1.75pt var(--tone);
+    background: rgba(var(--tone-rgb), 0.07);
+  }
+  .phase-full li[data-s="next"] {
+    opacity: 1;
+    color: #565d6c;
+  }
+  .phase-full b {
+    font-size: 9.5pt;
+  }
+  .phase-full p,
+  .phase-full em,
+  .phase-full small {
+    font-size: 7.5pt;
+  }
+  .pf-i {
+    width: 16pt;
+    height: 16pt;
+    font-size: 8pt;
+    margin-bottom: 4pt;
+    color: #101318;
+    background: none;
+    box-shadow: inset 0 0 0 0.75pt #101318;
+  }
+  .phase-full li[data-s="done"] .pf-i,
+  .phase-full li[data-s="current"] .pf-i {
+    color: #fff;
+    background: var(--tone);
+    box-shadow: none;
+  }
+  .phase-full li[data-s="done"] .pf-i {
+    background: var(--safe);
+  }
+  .doc-rows {
+    margin-top: 14pt;
+  }
+  .doc-rows .row {
+    break-inside: auto;
+  }
+  .doc-rows .row .disc-head {
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 14pt 0 6pt;
+    padding-bottom: 4pt !important;
+    box-shadow: inset 0 -1pt 0 #101318;
+    break-after: avoid;
+    cursor: default;
+  }
+  .doc-rows .row .disc-head .chev,
+  .doc-rows .row .disc-head .r-val {
+    display: none;
+  }
+  .doc-rows .row .disc-head .r-title {
+    font-size: 12pt;
+  }
+  .row-body.doc-pad {
+    padding: 0 !important;
+  }
+  .tl::before {
+    display: none;
+  }
+  .doc-tl li,
+  .tl li {
+    padding: 2.5pt 0;
+    font-size: 9pt;
+    break-inside: avoid;
+  }
+  .tl .t,
+  .doc-tl .t small {
+    color: #565d6c;
+  }
+  .tl .dot {
+    box-shadow: none !important;
+    background: #565d6c !important;
+  }
+  .tl li.human .dot {
+    background: var(--accent) !important;
+  }
+  .tl li.win .dot {
+    background: var(--safe) !important;
+  }
+  .tl .what,
+  .tl li.human .what {
+    color: #101318;
+  }
+  .tl li.win .what {
+    color: var(--safe);
+  }
+  .doc-table {
+    font-size: 8.5pt;
+  }
+  .doc-table thead {
+    display: table-header-group;
+  }
+  .doc-table tr {
+    break-inside: avoid;
+  }
+  .doc-table th {
+    color: #565d6c;
+    box-shadow: inset 0 -0.75pt 0 #101318;
+  }
+  .doc-table td {
+    box-shadow: inset 0 -0.5pt 0 var(--hair);
+    padding: 4pt 8pt 4pt 0;
+  }
+  .doc-table small {
+    color: #565d6c;
+    font-size: 7.5pt;
+  }
+  .doc-table tr.gate td {
+    background: rgba(var(--accent-rgb), 0.06);
+  }
+  .st-pill,
+  .chip,
+  .role-chip {
+    background: none !important;
+    box-shadow: inset 0 0 0 0.75pt rgb(var(--c, var(--accent-rgb))) !important;
+    color: rgb(var(--c, var(--accent-rgb))) !important;
+    height: auto;
+    padding: 2pt 7pt 2pt 5pt;
+    font-size: 8pt;
+  }
+  .st-pill .ico {
+    width: 9pt;
+    height: 9pt;
+  }
+  .chip[data-tone="hot"] {
+    --c: var(--accent-rgb);
+  }
+  .st-pill[data-st="exfil_confirmed"] {
+    background: rgb(var(--c)) !important;
+    color: #fff !important;
+  }
+  .v-badge {
+    color: var(--safe);
+    font-size: 8.5pt;
+  }
+  .auth .ico {
+    width: 11pt;
+    height: 11pt;
+  }
+  .ev-card {
+    padding: 8pt 10pt;
+    border-radius: 6pt;
+    box-shadow: inset 0 0 0 0.75pt #b4b9c4;
+    background: none;
+  }
+  .ev-card header .r-ico {
+    display: none;
+  }
+  .ev-card header b {
+    font-size: 10pt;
+  }
+  .hash {
+    font-size: 7.5pt;
+    color: #101318;
+  }
+  .ev-facts div {
+    font-size: 8.5pt;
+    padding: 2pt 0;
+  }
+  .custody {
+    grid-template-columns: repeat(4, 1fr);
+    box-shadow: inset 0 0.5pt 0 var(--hair);
+  }
+  .custody li {
+    font-size: 8pt;
+  }
+  .custody li::before {
+    box-shadow: none;
+  }
+  .dec-list li {
+    font-size: 9pt;
+    padding: 4pt 0;
+  }
+  .ch-counts {
+    font-size: 8.5pt;
+  }
+  .prompts li {
+    font-size: 9.5pt;
+  }
+  .prompts i {
+    box-shadow: inset 0 0 0 1pt #565d6c;
+  }
+  .blank-lines i {
+    border-bottom-color: #8a90a0;
+  }
+  .host {
+    box-shadow: none !important;
+    background: none !important;
+    color: inherit;
+  }
+  #rep419 .sec-n,
+  #rep419 .r-title {
+    color: #101318;
+  }
+  /* soft glows have no place on paper (the PDF backend draws a blurred shadow as a solid block) */
+  .chip i,
+  .doc-live i,
+  .sc-live i,
+  .seen.on i,
+  .custody li::before,
+  .sc-seg i,
+  .v-badge .ico {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* ---- the break-glass card */
+  body[data-print="card"] .app,
+  body[data-print="card"] .scrim,
+  body[data-print="card"] .sheet:not(#personSheet) {
+    display: none !important;
+  }
+  body[data-print="card"] #personSheet {
+    page: card;
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    pointer-events: auto;
+  }
+  body[data-print="card"] #personSheet::before,
+  body[data-print="card"] #personSheet::after {
+    display: none !important;
+  }
+  body[data-print="card"] #personSheet > .sheet-pane {
+    display: none !important;
+  }
+  body[data-print="card"] #personSheet > .print-card {
+    display: block !important;
+    position: static;
+    width: 118mm;
+    margin: 6mm 0 0;
+    padding: 8mm 8mm 7mm;
+    border: 1.2pt solid #101318;
+    border-radius: 5mm;
+    color: #101318;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .pcard-brand {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    border-bottom: 0.75pt solid #101318;
+  }
+  .pcard-brand b {
+    font-size: 15pt;
+    letter-spacing: -0.02em;
+  }
+  .pcard-brand span {
+    font-size: 8pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #565d6c;
+  }
+  .pcard-code {
+    margin: 5mm 0 4mm;
+    font: 600 21pt/1 ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  .pcard-grid {
+    display: grid;
+    grid-template-columns: 34mm 1fr;
+    gap: 6mm;
+    align-items: center;
+  }
+  .pcard-grid > div:first-child {
+    width: 34mm;
+    height: 34mm;
+    border: 0.75pt solid #101318;
+  }
+  .pcard-grid p {
+    margin: 0 0 2mm;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .pcard-grid p:first-child {
+    font-weight: 700;
+    font-size: 9.5pt;
+  }
+  .pcard-grid p.small {
+    color: #565d6c;
+    font-size: 7.5pt;
+  }
+}
+
+/* ------------------------------------------------------------ overview: readiness strip */
+.ready {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+.ready-tile {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px 18px 18px;
+  border-radius: 30px;
+  transition: transform 0.14s ease;
+}
+.ready-tile:active {
+  transform: scale(0.985);
+}
+.ready-tile[hidden] {
+  display: none;
+}
+.ready-tile .r-ico {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+}
+.ready-tile .r-ico .ico {
+  width: 22px;
+  height: 22px;
+}
+.ready-main {
+  min-width: 0;
+}
+.ready-main b {
+  display: block;
+  font: 600 17px/1.25 var(--font);
+  letter-spacing: -0.016em;
+}
+.ready-main span {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-3);
+  font-size: 14.5px;
+  line-height: 1.35;
+}
+@media print {
+  .ready {
+    display: none !important;
+  }
 }

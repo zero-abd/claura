@@ -5,7 +5,7 @@ import { $, $$, disc, setAttr, setHTML, setText } from "./dom";
 import { S, U, VIEWS, tone, type Phase, type View } from "./engine";
 import { esc, hostInfo } from "./hosts";
 import { fmtT } from "./util";
-import { avatarStyle, canApprove, data, roleLabel, roster, summarize } from "./data";
+import { approverOf, avatarStyle, canApprove, data, roleLabel, roster, summarize } from "./data";
 import { closePerson, personSheetHTML, personSheetOpen, renderPersonSheet } from "./views/access";
 import { scopeBadge } from "./views/scope";
 
@@ -197,7 +197,7 @@ export function renderShell(ph: Phase) {
   const online = people.filter((p) => p.online);
   const shown = online.slice(0, 3);
   setHTML($("#avatars"), `av:${d.version()}`, () =>
-    shown.map((p, i) => `<span class="av" id="av${i}" style="${avatarStyle(p.initials)}" title="${esc(p.name)} · ${esc(p.title)}${p.admin ? " · admin" : ""}">${esc(p.initials.slice(0, 2))}</span>`).join("") +
+    shown.map((p, i) => `<span class="av${p.initials.length > 2 ? " long" : ""}" id="av${i}" style="${avatarStyle(p.initials)}" title="${esc(p.name)} · ${esc(p.title)}${p.admin ? " · admin" : ""}">${esc(p.initials)}</span>`).join("") +
     (online.length > 3 ? `<span class="av more" title="${online.length - 3} more online">+${online.length - 3}</span>` : ""),
   );
   setAttr(document.getElementById("av0"), "data-s", ph === "approval" ? "looking" : ph === "isolating" ? "approved" : "");
@@ -213,6 +213,7 @@ export function renderShell(ph: Phase) {
   const me = d.me();
   const accessBtn = $('.nav-item[data-view="access"]');
   accessBtn.hidden = me.role !== "admin";
+  $("#nav").dataset.lens = accessBtn.hidden && S.view === "access" ? "off" : "on"; // no highlight on a hidden item
 
   // the isolation popover
   const popOpen = S.popover === "isolation";
@@ -296,6 +297,8 @@ export function renderSheet(ph: Phase) {
   const approved = S.A !== null;
   setAttr(sheet, "data-s", approved ? "approved" : "request");
   if (approved) {
+    const ap = approverOf(data());
+    setText($("#doneTitle"), `Approved by ${ap ? `${ap.name} · ${ap.title}` : `${APPROVER.initials} · ${APPROVER.role}`}`);
     const u = U();
     setText($("#doneSum"), u >= ISOLATE_DUR ? "Host quarantined. The escape stopped at the hypervisor boundary." : `Taking ${INCIDENT.host} off the fabric and pruning its BMC VLAN.`);
     setText($("#doneNote"), `${fmtT(S.A ?? CANON_APPROVE)} · ⌘↵`);

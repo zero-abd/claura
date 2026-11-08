@@ -6,7 +6,7 @@
 export * from "./types";
 export * from "./format";
 export * from "./source";
-export { agentIdentities, buildRoster, roster, summarize, type Person, type RosterSummary } from "./roster";
+export { agentIdentities, approverOf, buildRoster, roster, summarize, type Person, type RosterSummary } from "./roster";
 export { ScriptedSource, EPOCH } from "./scripted";
 
 import { ScriptedSource } from "./scripted";

@@ -208,3 +208,75 @@ const K = (() => {
   return { $, $$, ORANGE, GREEN, INK, INK4, wall, tone, blurWords, inkWords, blurLine, letters, out, land, glassIn, pop, count,
     camState, cam, camScaleAt, cursor, enter, exit, zoomOut, morphIn, morphOut, scene };
 })();
+
+/* ---------------------------------------------------------------- v3 additions: 3D facility, focus rings, stamps, keys */
+Object.assign(K, (() => {
+  const $ = K.$;
+  const W = 1920, H = 1080;
+  // Orthographic projection of a world point (metres) with the module's camera pose: the same maths as facility.js
+  // applyPose() (target, az, el, w, h; frame W x H). Used to pin HTML overlays (cursor, labels) to a 3D point.
+  function project(pose, p) {
+    const a = (pose.az * Math.PI) / 180, e = (Math.max(6, Math.min(88, pose.el)) * Math.PI) / 180;
+    const r = [Math.cos(a), 0, -Math.sin(a)];
+    const u = [-Math.sin(a) * Math.sin(e), Math.cos(e), -Math.cos(a) * Math.sin(e)];
+    const aspect = W / H, Hh = Math.max(pose.h, pose.w / aspect);
+    const q = [p[0] - pose.target[0], p[1] - pose.target[1], p[2] - pose.target[2]];
+    const sx = q[0] * r[0] + q[1] * r[1] + q[2] * r[2], sy = q[0] * u[0] + q[1] * u[1] + q[2] * u[2];
+    return { x: W / 2 + (sx / (Hh * aspect)) * W, y: H / 2 - (sy / Hh) * H };
+  }
+  // World points the film points at (bulkhead-3d/src/layout.js: B14 x 6.49, z -2.9, faces +z; host blades 5-7).
+  const PTS = { b14: [6.49, 1.2, -2.4], host: [6.49, 1.2425, -2.365], hallB: [5.2, 1.0, -3.9], hub: [0, 1.2, 0] };
+
+  // Mount the DFW-2 facility (three.js r180, bundled in assets/vendor/facility.global.min.js) and draw it from hf-seek.
+  // Pure: the frame is f.film.renderAt(localT, track); only draws while this scene's host is on screen.
+  // cfg { el, key, from (film s), dur, track (local keys), hl: [{t, kind: 'hover'|'select', host|null}], onFrame(t, pose) }
+  function facility(cfg) {
+    const F = window.ClauraFacility;
+    if (!F) throw new Error('ClauraFacility missing: include assets/vendor/facility.global.min.js before the scene script');
+    const f = F.createFacility($(cfg.el), { look: 'lumen', background: 'transparent', controls: false, pick: false, width: W, height: H, pixelRatio: 1 });
+    window.__hf = window.__hf || {};
+    window.__hf.buildReady = window.__hf.buildReady || {};
+    window.__hf.buildReady[cfg.key] = f.ready;
+    const hlNow = { hover: null, select: null };
+    const setHl = (kind, id) => { if (hlNow[kind] !== id) { f.highlight(id, kind); hlNow[kind] = id; } };
+    function draw(rootT) {
+      const t = rootT - cfg.from;
+      if (t < -0.04 || t > cfg.dur + 0.04) return;
+      const lt = Math.max(0, Math.min(cfg.dur, t));
+      const want = { hover: null, select: null };
+      for (const h of cfg.hl || []) if (lt >= h.t) want[h.kind] = h.host;
+      setHl('hover', want.hover);
+      setHl('select', want.select);
+      f.film.renderAt(lt, cfg.track);
+      if (cfg.onFrame) cfg.onFrame(lt, f.film.evalAt(lt, cfg.track).pose);
+    }
+    window.addEventListener('hf-seek', (e) => draw(e.detail.time));
+    draw(cfg.from);
+    return { f, draw, pose: (t) => f.film.evalAt(t, cfg.track).pose };
+  }
+
+  // a focus ring lands (scale 1.08 -> 1, 0.28 s expo.out) and leaves (0.16 s)
+  function focus(tl, sel, at, until) {
+    tl.fromTo(sel, { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.28, ease: 'expo.out' }, at);
+    if (until !== undefined && until !== null) tl.to(sel, { opacity: 0, duration: 0.16, ease: 'power2.in' }, until);
+  }
+  // a stamp slams in (power4.in 0.16 s from 1.45x, rotated), then its card shakes for two frames
+  function stamp(tl, sel, at, o = {}) {
+    tl.fromTo(sel, { opacity: 0, scale: 1.45, rotation: o.rot ?? -7 }, { opacity: 1, scale: 1, rotation: o.rot ?? -7, duration: 0.16, ease: 'power4.in' }, at - 0.16);
+    if (o.shake) {
+      tl.fromTo(o.shake, { x: 0 }, { x: 7, duration: 0.033, ease: 'none', immediateRender: false }, at);
+      tl.fromTo(o.shake, { x: 7 }, { x: -5, duration: 0.033, ease: 'none', immediateRender: false }, at + 0.033);
+      tl.fromTo(o.shake, { x: -5 }, { x: 0, duration: 0.05, ease: 'power1.out', immediateRender: false }, at + 0.066);
+    }
+  }
+  // a key press: down 12 px in 0.06 s, back in 0.16 s
+  function press(tl, sel, at) {
+    tl.fromTo(sel, { y: 0 }, { y: 12, duration: 0.06, ease: 'power2.in', immediateRender: false }, at - 0.06);
+    tl.fromTo(sel, { y: 12 }, { y: 0, duration: 0.16, ease: 'power2.out', immediateRender: false }, at + 0.02);
+  }
+  // linear interpolation helper for seek-driven overlays
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+  const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+  return { project, PTS, facility, focus, stamp, press, lerp, clamp01, easeInOut };
+})());

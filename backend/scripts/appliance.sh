@@ -38,7 +38,7 @@ issue() { # role, name_hint -> prints nothing, returns the code via $CODE
 mkdir -p "$(dirname "$ENVF")"; chmod 700 "$(dirname "$ENVF")" 2>/dev/null || true
 umask 077
 issue agent "Claura agent runner";            AGENT=$CODE
-issue commander "Demo console";               CONSOLE=$CODE
+issue commander "Riya Kapoor";                CONSOLE=$CODE
 issue commander "TEST HARNESS (auto-approve)"; APPROVER=$CODE
 {
   echo "# Claura LOCAL appliance profile. One-time codes: each works once. Generated $(date '+%Y-%m-%d %H:%M')."

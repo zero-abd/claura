@@ -4,6 +4,7 @@ import {
   TASK_TONE,
   avatarStyle,
   data,
+  isAlertStatus,
   fmtClock,
   initialsOf,
   nextTaskStatus,
@@ -18,7 +19,7 @@ import { AGENT_ICON, icon } from "../icons";
 import { $, disc, setAttr, setHTML, setText } from "../dom";
 import { type Phase } from "../engine";
 import { esc, linkHosts } from "../hosts";
-import { scopeSummaryText } from "./scope";
+
 
 // War Room: the out-of-band coordination channel. A plain-language brief, channels and people, the live thread,
 // and (collapsed) tasks, decisions and notification clocks. Everything is read through the data layer.
@@ -228,7 +229,8 @@ export const warroom = {
 
     // ---- data scope link
     const assets = d.assets();
-    setText($("#scVal"), assets.length ? scopeSummaryText(assets, 2) : "none open");
+    const flagged = assets.filter((a) => isAlertStatus(a.status)).length;
+    setText($("#scVal"), assets.length ? `${flagged} flagged` : "none open");
 
     // ---- tasks
     const tasks = d.tasks();

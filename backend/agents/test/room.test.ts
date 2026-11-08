@@ -100,7 +100,7 @@ test('the facts block carries scope, tasks and decisions so Scribe cannot invent
   assert.match(f, /Decisions of record:/);
 });
 
-import { claimProblems, plainify } from '../src/room.ts';
+import { claimProblems, plainify, softenClaims } from '../src/room.ts';
 
 test('a text may not reassure when the scope board says data may be touched', async () => {
   const { env, inc } = await fixture();
@@ -131,17 +131,39 @@ test('engineer jargon is replaced with plain words in the brief (not rejected: s
   assert.equal(plainify('A virtual machine tried to reach the server underneath it.'), 'A virtual machine tried to reach the server underneath it.');
 });
 
-test('set_brief / file_report / post_handoff push back on false reassurance and the model can fix it', async () => {
+test('softenClaims replaces a false "nothing was affected" sentence with the careful wording, once', async () => {
+  const { env, inc } = await fixture();
+  const assets = env.db.assets(inc.id);
+  const r = softenClaims('The server is out of service. No data has been exfiltrated. Data assets intact. Customers keep running.', assets);
+  assert.equal(r.softened, 2);
+  assert.equal(r.text, 'The server is out of service. We have not confirmed whether any data was read. Customers keep running.');
+  assert.equal(claimProblems(r.text, assets), null);
+  const lines = softenClaims('It started on one server\nNo customer data accessed\nEvidence is captured', assets);
+  assert.equal(lines.text, 'It started on one server\nWe have not confirmed whether any data was read.\nEvidence is captured');
+  const clean = env.db.assets(inc.id).map(a => ({ ...a, status: 'intact' }));
+  assert.deepEqual(softenClaims('No data has been exfiltrated.', clean), { text: 'No data has been exfiltrated.', softened: 0 });
+});
+
+test('set_brief / file_report / post_handoff rewrite a false reassurance (and say so) instead of publishing it', async () => {
   const { db, env, inc } = await fixture();
   const tools = scribeTools(env, inc.id);
-  const text = 'The incident is contained and no data has been exfiltrated. Customers are not affected at all by this event.';
-  await assert.rejects(callTool(tools, 'set_brief', { text, known: 'a fact that is fine here', unknown: 'one open question' }), /scope board shows/);
-  await assert.rejects(callTool(tools, 'file_report', { summary: `${text} ${text}` }), /scope board shows/);
-  await assert.rejects(callTool(tools, 'post_handoff', { text: `${text} ${text} ${text}` }), /scope board shows/);
-  assert.equal(db.briefs().find(b => b.incidentId === inc.id)!.author, 'system', 'nothing was published');
-  // jargon does not block publishing: it is rewritten
-  await callTool(tools, 'set_brief', { text: 'It escaped via the IOMMU and the vGPU and then the server was fenced off completely. We have not confirmed whether any data was read.', known: 'a fact that is fine here', unknown: 'one open question' });
-  assert.match(db.briefs().find(b => b.incidentId === inc.id)!.text, /memory protection and the virtual GPU/);
-  await callTool(tools, 'set_brief', { text: 'The server was fenced off and the workloads that shared it moved. We have not confirmed whether any data was read.', known: 'a fact that is fine here', unknown: 'one open question' });
+  const claim = 'The incident is contained and no data has been exfiltrated. Customers are not affected at all by this event.';
+  const r1 = (await callTool(tools, 'set_brief', { text: claim, known: 'a fact that is fine here', unknown: 'one open question' })) as { published: boolean; note?: string };
+  assert.equal(r1.published, true);
+  assert.match(r1.note ?? '', /^GUARD: 1 sentence/);
+  const b = db.briefs().find(x => x.incidentId === inc.id)!;
+  assert.match(b.text, /We have not confirmed whether any data was read\./);
+  assert.doesNotMatch(b.text, /no data has been exfiltrated/i);
   assert.equal(env.final.brief, true);
+
+  await callTool(tools, 'file_report', { summary: `${claim} ${claim}` });
+  assert.doesNotMatch(db.reports()[0]!.summary, /no data has been exfiltrated/i);
+  await callTool(tools, 'post_handoff', { text: `Scope: data assets intact, no exfiltration seen. ${claim} The first task for the next shift is the legal assessment.` });
+  const h = db.messages(inc.id).find(m => m.text.startsWith('SHIFT HANDOFF'))!;
+  assert.doesNotMatch(h.text, /intact|no exfiltration|no data has been/i);
+  assert.match(h.text, /first task for the next shift/);
+
+  // jargon is rewritten, not refused
+  await callTool(tools, 'set_brief', { text: 'It escaped via the IOMMU and the vGPU and then the server was fenced off completely. We have not confirmed whether any data was read.', known: 'a fact that is fine here', unknown: 'one open question' });
+  assert.match(db.briefs().find(x => x.incidentId === inc.id)!.text, /memory protection and the virtual GPU/);
 });

@@ -38,7 +38,7 @@ import { fmtT } from "../util";
 import { onlineCount } from "./warroom";
 import { scopeCard } from "./scope";
 import { phaseRailHTML, phaseSteps } from "./phases";
-import { data, roster } from "../data";
+import { approverOf, data, roster } from "../data";
 
 const rowHead = (ico: string, title: string, valId: string, val = "") =>
   `<span class="r-ico">${icon(ico)}</span><span class="r-title">${title}</span><span class="r-val" id="${valId}">${val}</span>`;
@@ -244,7 +244,8 @@ export const incident = {
     const fel = $(`[data-key="step:${STEPS.length + 1}"]`);
     setAttr(fel, "data-s", fs);
     setText($("#srf"), fs === "request" ? "Needs approval" : fs === "approved" ? "Running" : fs === "done" ? fmtT((S.A ?? CANON_APPROVE) + ISOLATE_DUR) : fs === "pending" ? "Queued" : "");
-    setText($("#fApproved"), `Approved by ${APPROVER.initials} · ${APPROVER.role} · ${fmtT(S.A ?? CANON_APPROVE)} · ⌘↵`);
+    const ap = approverOf(dd);
+    setText($("#fApproved"), `Approved by ${ap ? `${ap.name} · ${ap.title}` : `${APPROVER.initials} · ${APPROVER.role}`} · ${fmtT(S.A ?? CANON_APPROVE)} · ⌘↵`);
     setText($("#fDetail"), fs === "done" ? "Host quarantined. Escape stopped at the hypervisor boundary." : FINAL_STEP.scope);
     $("#sbf").style.transform = `scaleX(${(fs === "approved" ? Math.min(1, U() / ISOLATE_DUR) : fs === "done" ? 1 : 0).toFixed(4)})`;
     const done7 = stepsDone();

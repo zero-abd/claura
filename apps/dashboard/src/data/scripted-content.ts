@@ -131,10 +131,10 @@ export interface BriefDef {
   unknown: string[];
 }
 const WHAT = "An AI workload inside a virtual machine tried to break out and reach the server underneath it.";
-const WHAT_RW = `${WHAT} Separately, ransomware is locking a corporate file share.`;
+const WHAT_RW = "An AI workload tried to break out of its virtual machine. Separately, ransomware is locking a corporate file share.";
 const KNOW_BASE = ["It started on one server, b14-gpu-07", "It was stopped before the management network", "2 exposed passwords are revoked"];
 const KNOW_RW = [...KNOW_BASE, "File share FIN-02 is locked by ransomware"];
-const DONT_RW = ["Whether billing records left the network", "Whether the escape and the ransomware are one attacker", "How the attacker found the flaw"];
+const DONT_RW = ["Whether billing records left the network", "Whether the two events are one attacker", "How the attacker found the flaw"];
 export const BRIEFS: Record<BriefStage, BriefDef> = {
   quiet: {
     text: [
@@ -169,9 +169,9 @@ export const BRIEFS: Record<BriefStage, BriefDef> = {
   scope: {
     text: [
       ["What happened", WHAT_RW],
-      ["What is contained", "The escape is being contained: network and passwords cut off, server fenced off. The ransomware is on a different network and IT is isolating it."],
-      ["Impact", "File share FIN-02 is locked. The billing database shows access in the window. No data confirmed taken."],
-      ["What we need from you", "Legal: start the notification assessment. IT: isolate corporate file servers. PR: have a holding statement ready."],
+      ["What is contained", "The escape: network and passwords cut off, server fenced off. The ransomware is on another network and IT is isolating it."],
+      ["Impact", "FIN-02 is locked. The billing database shows access in the window. Nothing confirmed taken."],
+      ["What we need from you", "Legal: start the notification assessment. IT: isolate file servers. PR: holding statement ready."],
     ],
     known: KNOW_RW,
     unknown: DONT_RW,
@@ -180,7 +180,7 @@ export const BRIEFS: Record<BriefStage, BriefDef> = {
     text: [
       ["What happened", WHAT_RW],
       ["What is contained", "Everything that can be undone is done. One step is left and needs a person."],
-      ["Impact", "File share FIN-02 is locked. The billing database shows access that is under review. No data confirmed taken."],
+      ["Impact", "FIN-02 is locked. Billing database access is under review. Nothing confirmed taken."],
       ["What we need from you", "Incident Commander: approve taking the server out of service."],
     ],
     known: ["11 other workloads moved to safe servers", ...KNOW_RW.slice(1)],
@@ -190,7 +190,7 @@ export const BRIEFS: Record<BriefStage, BriefDef> = {
     text: [
       ["What happened", WHAT_RW],
       ["What is contained", "The Incident Commander approved. The server is being taken out of service now."],
-      ["Impact", "File share FIN-02 is locked. The billing database shows access that is under review. No data confirmed taken."],
+      ["Impact", "FIN-02 is locked. Billing database access is under review. Nothing confirmed taken."],
       ["What we need from you", "Nothing right now. This will take a couple of seconds."],
     ],
     known: ["Approved by RK", ...KNOW_RW.slice(1)],
@@ -198,13 +198,13 @@ export const BRIEFS: Record<BriefStage, BriefDef> = {
   },
   contained: {
     text: [
-      ["What happened", "A suspected escape from an AI workload was stopped at the edge of its virtual machine. A separate ransomware event is locking a corporate file share."],
-      ["What is contained", "The escape was contained in 9.4 seconds. The server is out of service and its workloads run elsewhere. The ransomware is not contained yet."],
-      ["Impact", "0 other workloads affected. FIN-02 is locked. The billing database shows access that is still being investigated."],
-      ["What we need from you", "Legal: decide on notification. IT: restore FIN-02 from offline backup. Vendor: confirm the hypervisor patch."],
+      ["What happened", "A suspected AI-workload escape was stopped at the edge of its virtual machine. Separately, ransomware is locking a corporate file share."],
+      ["What is contained", "The escape, in 9.4 seconds. The server is out of service and its workloads run elsewhere. The ransomware is not contained yet."],
+      ["Impact", "0 other workloads affected. FIN-02 is locked. Billing database access is still being investigated."],
+      ["What we need from you", "Legal: decide on notification. IT: restore FIN-02 from backup. Vendor: confirm the patch."],
     ],
-    known: ["The escape stopped at the hypervisor boundary", "Evidence is captured and hashed", "Approved by RK", "FIN-02 is locked and a restore from offline backup is under way"],
-    unknown: ["Whether billing records left the network", "Whether the two events are connected", "The root cause. The vendor is checking"],
+    known: ["The escape stopped at the hypervisor boundary", "Evidence is captured and hashed", "Approved by RK", "FIN-02 is locked, restore is under way"],
+    unknown: ["Whether billing records left the network", "Whether the two events are connected", "The root cause (vendor is checking)"],
   },
 };
 /** When each stage begins (for the "updated" stamp). detect starts at the alert. */

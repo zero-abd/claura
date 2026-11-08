@@ -4,7 +4,7 @@
 
 import type { Env } from './agents/common.ts';
 import { reachabilityFixture } from './fixtures.ts';
-import { claimProblems, plainify } from './room.ts';
+import { claimProblems, plainify, softenClaims } from './room.ts';
 import { validateArgs } from './schema.ts';
 import type { Tool } from './toolLoop.ts';
 import { clip, waitFor } from './util.ts';
@@ -24,6 +24,21 @@ export const TRIAGE_ASSETS = ['Workload tokens', 'Tenant model weights', 'Manage
 /** Statuses an agent may set on a data asset, and the ones it must never overwrite (a human set them). */
 export const AGENT_SCOPE_STATUSES = ['intact', 'accessed', 'exfil_suspected'] as const;
 const HUMAN_SET = ['exfil_confirmed', 'restored', 'locked_ransomware'];
+
+/**
+ * The guard on every text for stakeholders: sentences that claim no data was affected, while the scope board says
+ * otherwise, are replaced by the careful wording. Anything that still reads as a false claim afterwards is refused.
+ */
+function guarded(env: Env, incidentId: bigint, label: string, text: string): { text: string; note?: string } {
+  const assets = env.db.assets(incidentId);
+  const r = softenClaims(text, assets);
+  const left = claimProblems(r.text, assets);
+  if (left) throw new Error(left);
+  if (r.softened === 0) return { text: r.text };
+  const note = `GUARD: ${r.softened} sentence(s) of the ${label} claimed no data was affected, but the scope board shows data accessed, suspected or locked; they were replaced by "We have not confirmed whether any data was read."`;
+  env.log.warn('scribe', note);
+  return { text: r.text, note };
+}
 
 /** Run a tool the way the loop does (validate, then run). Used by deterministic routines. */
 export async function callTool(tools: Tool[], name: string, args: Record<string, unknown>): Promise<unknown> {
@@ -313,11 +328,10 @@ export function scribeTools(env: Env, incidentId: bigint): Tool[] {
       },
       thought: () => 'Writing the incident report.',
       async run(args) {
-        const bad = claimProblems(String(args.summary), env.db.assets(incidentId));
-        if (bad) throw new Error(bad);
-        await env.db.fileReport(incidentId, String(args.summary));
+        const g = guarded(env, incidentId, 'report', String(args.summary));
+        await env.db.fileReport(incidentId, g.text);
         env.marks.markOnce('report_filed');
-        return { filed: true, length: String(args.summary).length };
+        return { filed: true, length: g.text.length, ...(g.note ? { note: g.note } : {}) };
       },
     },
     {
@@ -335,15 +349,14 @@ export function scribeTools(env: Env, incidentId: bigint): Tool[] {
       },
       thought: () => 'Writing the plain-language brief for stakeholders.',
       async run(args) {
-        const text = plainify(String(args.text));
-        const known = plainify(String(args.known));
-        const unknown = plainify(String(args.unknown));
-        const bad = claimProblems(`${text}\n${known}\n${unknown}`, env.db.assets(incidentId));
-        if (bad) throw new Error(bad);
-        await env.db.setBrief(incidentId, text, known, unknown);
+        const text = guarded(env, incidentId, 'brief', plainify(String(args.text)));
+        const known = guarded(env, incidentId, 'brief', plainify(String(args.known)));
+        const unknown = guarded(env, incidentId, 'brief', plainify(String(args.unknown)));
+        await env.db.setBrief(incidentId, text.text, known.text, unknown.text);
         env.final.brief = true;
         env.marks.markOnce('brief_filed');
-        return { published: true };
+        const note = text.note ?? known.note ?? unknown.note;
+        return { published: true, ...(note ? { note } : {}) };
       },
     },
     {
@@ -357,11 +370,10 @@ export function scribeTools(env: Env, incidentId: bigint): Tool[] {
       },
       thought: () => 'Writing the shift handoff.',
       async run(args) {
-        const bad = claimProblems(String(args.text), env.db.assets(incidentId));
-        if (bad) throw new Error(bad);
-        await env.db.postAgentMessage(incidentId, '#command', 'scribe', `${HANDOFF_PREFIX}\n${String(args.text)}`);
+        const g = guarded(env, incidentId, 'handoff', String(args.text));
+        await env.db.postAgentMessage(incidentId, '#command', 'scribe', `${HANDOFF_PREFIX}\n${g.text}`);
         env.marks.markOnce('handoff_posted');
-        return { posted: true };
+        return { posted: true, ...(g.note ? { note: g.note } : {}) };
       },
     },
   ];

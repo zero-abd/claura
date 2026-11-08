@@ -44,7 +44,7 @@ export class SpacetimeClauraDb implements ClauraDb {
   private conn: DbConnection | undefined;
   private connected = false;
   private identity: Identity | undefined;
-  private approver: SpacetimeClauraDb | undefined;
+  private approverReady: Promise<SpacetimeClauraDb> | undefined;
 
   constructor(
     private readonly uri: string,
@@ -100,6 +100,19 @@ export class SpacetimeClauraDb implements ClauraDb {
     });
 
     await this.ensureEnrolled();
+    this.warmApprover();
+  }
+
+  /**
+   * Open the labelled approver identity in the background (only when --auto-approve-after configured one), so its
+   * connect and first-time enrollment happen while the model works, not while the incident waits for approval.
+   * A failure is kept and thrown by approve(), where it can be explained.
+   */
+  private warmApprover(): void {
+    if (!this.approverAuth || this.approverReady) return;
+    const a = new SpacetimeClauraDb(this.uri, this.dbName, this.approverAuth);
+    this.approverReady = a.connect().then(() => a);
+    this.approverReady.catch(() => undefined);
   }
 
   private myOperator() {
@@ -140,7 +153,7 @@ export class SpacetimeClauraDb implements ClauraDb {
   }
 
   close(): void {
-    this.approver?.close();
+    void this.approverReady?.then(a => a.close(), () => undefined);
     this.conn?.disconnect();
     this.connected = false;
   }
@@ -185,15 +198,12 @@ export class SpacetimeClauraDb implements ClauraDb {
     if (!this.approverAuth) {
       throw new Error(
         `this runner is role "${role ?? 'unknown'}" and cannot approve. Approval must come from a commander or admin identity ` +
-          `(the dashboard). For --auto-approve-after, set ${'CLAURA_APPROVER_CODE'} (see DEMO.md).`,
+          `(the dashboard). For --auto-approve-after, set CLAURA_APPROVER_CODE (see DEMO.md).`,
       );
     }
-    if (!this.approver) {
-      const a = new SpacetimeClauraDb(this.uri, this.dbName, this.approverAuth);
-      await a.connect();
-      this.approver = a;
-    }
-    return this.approver.call('approve', () => this.approver!.c().reducers.approve({ proposalId, operator }));
+    this.warmApprover();
+    const approver = await this.approverReady!;
+    return approver.call('approve', () => approver.c().reducers.approve({ proposalId, operator }));
   }
   setPolicy(action: string, mode: string) {
     return this.call('set_policy', () => this.c().reducers.setPolicy({ action, mode }));
