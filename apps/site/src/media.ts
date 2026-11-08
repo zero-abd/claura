@@ -43,7 +43,7 @@ export function initApprove(): void {
     btn.setAttribute("aria-pressed", String(value));
     label.textContent = value ? "Approved" : "Approve quarantine";
     badge.textContent = value ? "Approved" : "Needs approval";
-    state.textContent = value ? "Approved by you · rollback: un-quarantine" : "Proposed by Warden · policy-bounded";
+    state.textContent = value ? "Approved by you. Rollback: un-quarantine" : "Proposed by Warden, within policy";
     key.hidden = value;
     if (value) {
       const undo = document.createElement("button");

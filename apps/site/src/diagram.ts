@@ -51,7 +51,7 @@ function wide(): string {
     box(312, colTop, 262, colH, 24) +
     text(336, 96, "Defender agents", "t-title") +
     text(336, 120, "NVIDIA Nemotron", "t-sub") +
-    pill(336, 134, 156, 26, "self-hosted · on-prem") +
+    pill(336, 134, 156, 26, "self-hosted, on-prem") +
     AGENTS.map((a, i) => pill(336 + (i % 2) * 112, 196 + Math.floor(i / 2) * 48, 104, 38, a, "t-chip")).join("") +
     text(336, 312, "Reason over the telemetry and", "t-mut") +
     text(336, 330, "propose bounded actions.", "t-mut") +
@@ -123,7 +123,7 @@ function tall(): string {
     box(0, 238, W, 168, 24) +
     text(20, 276, "Defender agents", "t-title") +
     text(20, 298, "NVIDIA Nemotron", "t-sub") +
-    pill(20, 310, 156, 26, "self-hosted · on-prem") +
+    pill(20, 310, 156, 26, "self-hosted, on-prem") +
     AGENTS.map((a, i) => pill(20 + i * 77.3, 354, 68, 36, a, "t-chip")).join("") +
     flow(`M170 408 V452`) +
     text(182, 436, "proposes", "t-mut");
@@ -177,14 +177,8 @@ function tall(): string {
   </svg>`;
 }
 
-/* Shared defs live in one zero-size SVG that always renders (gradients inside a display:none SVG fail). */
+/* Shared defs live in one zero-size SVG that always renders (defs inside a display:none SVG fail). */
 const DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-  <linearGradient id="gl" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity=".11"/>
-  </linearGradient>
-  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#fff" stop-opacity=".62"/><stop offset=".35" stop-color="#fff" stop-opacity=".1"/><stop offset=".7" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity=".36"/>
-  </linearGradient>
   <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
     <path class="arrow-fill" d="M0 0 L10 5 L0 10 z"/>
   </marker>
